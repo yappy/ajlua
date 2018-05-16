@@ -2,6 +2,11 @@
 #include <LuaEngine.h>
 #include <lua.hpp>
 
+/* Lua - Java type assert */
+static_assert(sizeof(lua_Number) == sizeof(jdouble), "lua_Number");
+static_assert(sizeof(lua_Integer) == sizeof(jlong), "lua_Integer");
+
+
 class Lua {
 public:
 	Lua() = default;
