@@ -1,2 +1,2 @@
-#include <jni.h>
+#include <LuaNative.h>
 
