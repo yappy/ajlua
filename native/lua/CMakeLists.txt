@@ -7,4 +7,4 @@ file(GLOB SRCS "${SRCDIR}/*.c")
 list(REMOVE_ITEM SRCS "${SRCDIR}/lua.c" "${SRCDIR}/luac.c")
 
 add_library(${PROJECT_NAME} STATIC ${SRCS})
-target_include_directories(${PROJECT_NAME} PUBLIC "src")
+target_include_directories(${PROJECT_NAME} PUBLIC "${SRCDIR}")

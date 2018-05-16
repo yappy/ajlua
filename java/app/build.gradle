@@ -31,3 +31,7 @@ repositories {
     // You can declare any Maven/Ivy/file repository here.
     jcenter()
 }
+
+run {
+    systemProperty 'java.library.path', file('build/natives/')
+}
