@@ -9,6 +9,16 @@ public class App {
 	public static void main(String[] args) {
 		System.out.println(new App().getGreeting());
 		System.out.println(new Library().someLibraryMethod());
-		System.out.println(LuaNative.testMethod());
+
+		String[] info = new String[4];
+		int numinfo = LuaEngine.getVersionInfo(info);
+		System.out.println(numinfo);
+		for (String ver : info) {
+			System.out.println(ver);
+		}
+
+		try (LuaEngine lua = new LuaEngine()) {
+			System.out.println(lua.getPeerForDebug());
+		}
 	}
 }
