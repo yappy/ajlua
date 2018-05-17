@@ -1,6 +1,7 @@
 #include <memory>
 #include <LuaEngine.h>
 #include <lua.hpp>
+#include "jniutil.h"
 
 /* Lua - Java type assert */
 static_assert(sizeof(lua_Number) == sizeof(jdouble), "lua_Number");
@@ -19,6 +20,10 @@ public:
 			return false;
 		}
 		return true;
+	}
+	lua_State *L()
+	{
+		return m_lua.get();
 	}
 private:
 	struct LuaDeleter {
@@ -88,6 +93,39 @@ JNIEXPORT void JNICALL Java_LuaEngine_deletePeer
   (JNIEnv *, jclass, jlong peer)
 {
 	delete reinterpret_cast<Lua *>(peer);
+}
+
+/*
+ * Class:     LuaEngine
+ * Method:    loadString
+ * Signature: (JLjava/lang/String;Ljava/lang/String;)I
+ */
+JNIEXPORT jint JNICALL Java_LuaEngine_loadString
+  (JNIEnv *env, jclass, jlong peer, jstring buf, jstring chunkName)
+{
+	if (buf == nullptr || chunkName == nullptr) {
+		jniutil::ThrowNullPointerException(env, "buf and chunkName");
+		return 0;
+	}
+
+	jsize buflen = 0;
+	auto cBuf = jniutil::JstrToChars(env, buf, &buflen);
+	if (cBuf == nullptr) {
+		jniutil::ThrowOutOfMemoryError(env, "Native heap");
+		return 0;
+	}
+	jsize chunklen = 0;
+	auto cChunkName = jniutil::JstrToChars(env, chunkName, &chunklen);
+	if (cChunkName == nullptr) {
+		jniutil::ThrowOutOfMemoryError(env, "Native heap");
+		return 0;
+	}
+
+	auto lua = reinterpret_cast<Lua *>(peer);
+	auto L = lua->L();
+
+	// text only
+	return luaL_loadbufferx(L, cBuf.get(), buflen, cChunkName.get(), "t");
 }
 
 #ifdef __cplusplus

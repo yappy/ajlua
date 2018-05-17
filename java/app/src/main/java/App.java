@@ -19,6 +19,16 @@ public class App {
 
 		try (LuaEngine lua = new LuaEngine()) {
 			System.out.println(lua.getPeerForDebug());
+
+			String[] testCode = { "x = 1", "function function" };
+			for (String str : testCode) {
+				try {
+					lua.loadString(str, "testchunk.lua");
+					System.out.println("OK");
+				} catch(Exception e) {
+					e.printStackTrace();
+				}
+			}
 		}
 	}
 }
