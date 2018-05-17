@@ -5,10 +5,44 @@
 
 namespace jniutil {
 
+	enum ClassId {
+		Boolean,
+		Long,
+		Double,
+	};
+	enum MethodId {
+		Boolean_valueOf,
+		Long_valueOf,
+		Double_valueOf,
+	};
+
+	jclass FindClass(JNIEnv *env, ClassId id);
+	jmethodID GetMethodId(JNIEnv *env, MethodId id);
+
+
+	inline jobject BoxingBoolean(JNIEnv *env, jbyte jb)
+	{
+		jclass cls = FindClass(env, ClassId::Boolean);
+		jmethodID method = GetMethodId(env, MethodId::Boolean_valueOf);
+		env->CallStaticObjectMethod(cls, method, jb);
+	}
+	inline jobject BoxingLong(JNIEnv *env, jlong jl)
+	{
+		jclass cls = FindClass(env, ClassId::Long);
+		jmethodID method = GetMethodId(env, MethodId::Long_valueOf);
+		env->CallStaticObjectMethod(cls, method, jl);
+	}
+	inline jobject BoxingDouble(JNIEnv *env, jdouble jd)
+	{
+		jclass cls = FindClass(env, ClassId::Double);
+		jmethodID method = GetMethodId(env, MethodId::Double_valueOf);
+		env->CallStaticObjectMethod(cls, method, jd);
+	}
+
 	/*
-	* jstring -> const char *
-	* Return nullptr if failed.
-	*/
+	 * jstring -> const char *
+	 * Return nullptr if failed.
+	 */
 	inline std::unique_ptr<char[]>
 	JstrToChars(JNIEnv *env, jstring jstr, jsize *len)
 	{
@@ -38,6 +72,11 @@ namespace jniutil {
 		}
 	}
 
+	inline void ThrowInternalError(JNIEnv *env, const char *msg)
+	{
+		Throw(env, "java/lang/InternalError", msg);
+	}
+
 	inline void ThrowOutOfMemoryError(JNIEnv *env, const char *msg)
 	{
 		Throw(env, "java/lang/OutOfMemoryError", msg);
@@ -46,6 +85,11 @@ namespace jniutil {
 	inline void ThrowNullPointerException(JNIEnv *env, const char *msg)
 	{
 		Throw(env, "java/lang/NullPointerException", msg);
+	}
+
+	inline void ThrowIllegalArgumentException(JNIEnv *env, const char *msg)
+	{
+		Throw(env, "java/lang/IllegalArgumentException", msg);
 	}
 
 } // namespace jniutil

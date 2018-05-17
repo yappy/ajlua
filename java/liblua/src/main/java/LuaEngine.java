@@ -14,11 +14,30 @@ public class LuaEngine implements AutoCloseable {
 	private static final int LUA_ERRGCMM	= 5;
 	private static final int LUA_ERRERR		= 6;
 
+	public static final int MIN_STACK = 20;
+
+	private static final int LUA_TNIL			= 0;
+	private static final int LUA_TBOOLEAN		= 1;
+	private static final int LUA_TLIGHTUSERDATA	= 2;
+	private static final int LUA_TNUMBER		= 3;
+	private static final int LUA_TSTRING		= 4;
+	private static final int LUA_TTABLE			= 5;
+	private static final int LUA_TFUNCTION		= 6;
+	private static final int LUA_TUSERDATA		= 7;
+	private static final int LUA_TTHREAD		= 8;
+
+
 	public static native int getVersionInfo(String[] info);
 	private static native long newPeer();
 	private static native void deletePeer(long peer);
 	private static native int loadString(
 		long peer, String buf, String chunkName);
+	public static native int getTop(long peer);
+	public static native void setTop(long peer, int index);
+	public static native int pushValues(long peer, Object[] values);
+	public static native int getValues(
+		long peer, byte[] types, Object[] values);
+	public static native int pcall(long peer, int nargs, int nresults);
 
 
 	private long peer = 0;

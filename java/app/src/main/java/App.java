@@ -20,7 +20,7 @@ public class App {
 		try (LuaEngine lua = new LuaEngine()) {
 			System.out.println(lua.getPeerForDebug());
 
-			String[] testCode = { "x = 1", "function function" };
+			String[] testCode = { "return 1, 2, 3", "function function" };
 			for (String str : testCode) {
 				try {
 					lua.loadString(str, "testchunk.lua");
@@ -28,6 +28,15 @@ public class App {
 				} catch(Exception e) {
 					e.printStackTrace();
 				}
+				System.out.println("top=" + lua.getTop(lua.getPeerForDebug()));
+
+				byte[] types = new byte[LuaEngine.MIN_STACK];
+				Object[] vals = new Object[LuaEngine.MIN_STACK];
+				lua.getValues(lua.getPeerForDebug(), types, vals);
+				System.out.println(java.util.Arrays.toString(types));
+				System.out.println(java.util.Arrays.toString(vals));
+
+				lua.setTop(lua.getPeerForDebug(), 0);
 			}
 		}
 	}
