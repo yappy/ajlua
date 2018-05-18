@@ -24,6 +24,7 @@ public class App {
 			for (String str : testCode) {
 				try {
 					lua.loadString(str, "testchunk.lua");
+					lua.pcall(0, LuaEngine.LUA_MULTRET);
 					System.out.println("OK");
 				} catch(Exception e) {
 					e.printStackTrace();

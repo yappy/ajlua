@@ -9,6 +9,7 @@ static_assert(sizeof(lua_Integer) == sizeof(jlong), "lua_Integer");
 
 /* Lua C define - Java constant assert */
 static_assert(LUA_MINSTACK == LuaEngine_MIN_STACK, "LUA_MINSTACK");
+static_assert(LUA_MULTRET == LuaEngine_LUA_MULTRET, "LUA_MULTRET");
 
 class Lua {
 public:
@@ -244,7 +245,12 @@ JNIEXPORT jint JNICALL Java_LuaEngine_getValues
  * Signature: (JII)I
  */
 JNIEXPORT jint JNICALL Java_LuaEngine_pcall
-  (JNIEnv *, jclass, jlong, jint, jint);
+  (JNIEnv *env, jclass, jlong peer, jint nargs, jint nresults, jint msgh)
+{
+	auto L = reinterpret_cast<Lua *>(peer)->L();
+
+	return lua_pcall(L, nargs, nresults, 0);
+}
 
 
 const jint USE_VNI_VERSION = JNI_VERSION_1_2;

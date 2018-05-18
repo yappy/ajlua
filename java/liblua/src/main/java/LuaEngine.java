@@ -14,8 +14,6 @@ public class LuaEngine implements AutoCloseable {
 	private static final int LUA_ERRGCMM	= 5;
 	private static final int LUA_ERRERR		= 6;
 
-	public static final int MIN_STACK = 20;
-
 	private static final int LUA_TNIL			= 0;
 	private static final int LUA_TBOOLEAN		= 1;
 	private static final int LUA_TLIGHTUSERDATA	= 2;
@@ -25,6 +23,9 @@ public class LuaEngine implements AutoCloseable {
 	private static final int LUA_TFUNCTION		= 6;
 	private static final int LUA_TUSERDATA		= 7;
 	private static final int LUA_TTHREAD		= 8;
+
+	public static final int MIN_STACK = 20;
+	public static final int LUA_MULTRET = -1;
 
 
 	public static native int getVersionInfo(String[] info);
@@ -37,7 +38,8 @@ public class LuaEngine implements AutoCloseable {
 	public static native int pushValues(long peer, Object[] values);
 	public static native int getValues(
 		long peer, byte[] types, Object[] values);
-	public static native int pcall(long peer, int nargs, int nresults);
+	private static native int pcall(
+		long peer, int nargs, int nresults, int msgh);
 
 
 	private long peer = 0;
@@ -69,6 +71,25 @@ public class LuaEngine implements AutoCloseable {
 			throw new Exception("syntax error");
 		case LUA_ERRMEM:
 			throw new OutOfMemoryError();
+		case LUA_ERRGCMM:
+			throw new Exception("error in gc");
+		default:
+			throw new Error();
+		}
+	}
+
+	public void pcall(int nargs, int nresults) throws Exception {
+		int ret = pcall(peer, nargs, nresults, 0);
+		// TODO: define exception
+		switch (ret) {
+		case LUA_OK:
+			return;
+		case LUA_ERRRUN:
+			throw new Exception("runtime error");
+		case LUA_ERRMEM:
+			throw new OutOfMemoryError();
+		case LUA_ERRERR:
+			throw new Exception("error in msgh");
 		case LUA_ERRGCMM:
 			throw new Exception("error in gc");
 		default:
