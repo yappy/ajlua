@@ -97,4 +97,9 @@ namespace jniutil {
 		Throw(env, "java/lang/IllegalArgumentException", msg);
 	}
 
+	inline void ThrowIllegalStateException(JNIEnv *env, const char *msg)
+	{
+		Throw(env, "IllegalStateException", msg);
+	}
+
 } // namespace jniutil

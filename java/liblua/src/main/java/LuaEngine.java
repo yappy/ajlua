@@ -40,6 +40,8 @@ public class LuaEngine implements AutoCloseable {
 		long peer, byte[] types, Object[] values);
 	private static native int pcall(
 		long peer, int nargs, int nresults, int msgh);
+	public static native void getGlobal(long peer, String name);
+	public static native void setGlobal(long peer, String name);
 
 
 	private long peer = 0;

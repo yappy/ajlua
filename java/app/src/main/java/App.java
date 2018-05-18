@@ -6,7 +6,7 @@ public class App {
 		return "Hello world.";
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		System.out.println(new App().getGreeting());
 		System.out.println(new Library().someLibraryMethod());
 
@@ -39,6 +39,18 @@ public class App {
 
 				lua.setTop(lua.getPeerForDebug(), 0);
 			}
+		}
+
+		try (LuaEngine lua = new LuaEngine()) {
+			lua.loadString("function func() return 3.14 end", "test.lua");
+			lua.pcall(0, 0);
+			lua.getGlobal(lua.getPeerForDebug(), "func");
+			lua.pcall(0, LuaEngine.LUA_MULTRET);
+			byte[] types = new byte[LuaEngine.MIN_STACK];
+			Object[] vals = new Object[LuaEngine.MIN_STACK];
+			lua.getValues(lua.getPeerForDebug(), types, vals);
+			System.out.println(java.util.Arrays.toString(types));
+			System.out.println(java.util.Arrays.toString(vals));
 		}
 	}
 }

@@ -252,6 +252,56 @@ JNIEXPORT jint JNICALL Java_LuaEngine_pcall
 	return lua_pcall(L, nargs, nresults, 0);
 }
 
+/*
+ * Class:     LuaEngine
+ * Method:    getGlobal
+ * Signature: (JLjava/lang/String;)V
+ */
+JNIEXPORT void JNICALL Java_LuaEngine_getGlobal
+  (JNIEnv *env, jclass, jlong peer, jstring name)
+{
+	auto L = reinterpret_cast<Lua *>(peer)->L();
+
+	if (lua_gettop(L) >= LUA_MINSTACK) {
+		jniutil::ThrowIllegalStateException(env, "Stack full");
+		return;
+	}
+
+	jsize len = 0;
+	auto cName = jniutil::JstrToChars(env, name, &len);
+	if (cName == nullptr) {
+		jniutil::ThrowOutOfMemoryError(env, "Native heap");
+		return;
+	}
+
+	lua_getglobal(L, cName.get());
+}
+
+/*
+ * Class:     LuaEngine
+ * Method:    setGlobal
+ * Signature: (JLjava/lang/String;)V
+ */
+JNIEXPORT void JNICALL Java_LuaEngine_setGlobal
+  (JNIEnv *env, jclass, jlong peer, jstring name)
+{
+	auto L = reinterpret_cast<Lua *>(peer)->L();
+
+	if (lua_gettop(L) <= 0) {
+		jniutil::ThrowIllegalStateException(env, "Stack empty");
+		return;
+	}
+
+	jsize len = 0;
+	auto cName = jniutil::JstrToChars(env, name, &len);
+	if (cName == nullptr) {
+		jniutil::ThrowOutOfMemoryError(env, "Native heap");
+		return;
+	}
+
+	lua_setglobal(L, cName.get());
+}
+
 
 const jint USE_VNI_VERSION = JNI_VERSION_1_2;
 
