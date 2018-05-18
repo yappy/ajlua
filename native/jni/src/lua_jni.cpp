@@ -38,6 +38,9 @@ private:
 };
 
 
+/*
+ * Export Functions
+ */
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -222,7 +225,7 @@ JNIEXPORT jint JNICALL Java_LuaEngine_getValues
 			{
 				jlong jl = reinterpret_cast<jlong>(lua_topointer(L, lind));
 				jobject box = jniutil::BoxingLong(env, jl);
-				//env->SetObjectArrayElement(values, i, box);
+				env->SetObjectArrayElement(values, i, box);
 			}
 			break;
 		default:
@@ -242,6 +245,33 @@ JNIEXPORT jint JNICALL Java_LuaEngine_getValues
  */
 JNIEXPORT jint JNICALL Java_LuaEngine_pcall
   (JNIEnv *, jclass, jlong, jint, jint);
+
+
+const jint USE_VNI_VERSION = JNI_VERSION_1_2;
+
+JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved)
+{
+	JNIEnv *env;
+	if (vm->GetEnv(reinterpret_cast<void **>(&env), USE_VNI_VERSION) < 0) {
+		return JNI_ERR;
+	}
+	if (!jniutil::CacheAllClass(env)) {
+		return JNI_ERR;
+	}
+	if (!jniutil::CacheAllMethod(env)) {
+		return JNI_ERR;
+	}
+	return USE_VNI_VERSION;
+}
+
+JNIEXPORT void JNICALL JNI_OnUnload(JavaVM *vm, void *reserved)
+{	JNIEnv *env;
+	if (vm->GetEnv(reinterpret_cast<void **>(&env), USE_VNI_VERSION) < 0) {
+		// give up
+		return;
+	}
+	jniutil::ClearAllCache(env);
+}
 
 #ifdef __cplusplus
 }

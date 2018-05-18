@@ -12,48 +12,88 @@ namespace {
 
 	struct MethodCacheEntry {
 		jmethodID methodCache;
+		bool isStatic;
 		ClassId classId;
 		const char *methodName;
 		const char *methodSig;
 	};
 
 	ClassCacheEntry s_classCache[] = {
-		[ClassId::Boolean]	= { nullptr, "Boolean" },
-		[ClassId::Long]		= { nullptr, "Long" },
-		[ClassId::Double]	= { nullptr, "Double" },
+		{ nullptr, "java/lang/Boolean" },
+		{ nullptr, "java/lang/Long" },
+		{ nullptr, "java/lang/Double" },
 	};
+	static_assert(
+		sizeof(s_classCache) / sizeof(s_classCache[0]) ==
+			static_cast<size_t>(ClassId::ClassCacheNum),
+		"ClassCache num");
 
 	MethodCacheEntry s_methodCache[] = {
-		[MethodId::Boolean_valueOf]	=
-		{ nullptr, ClassId::Boolean,	"valueOf", "(Z)Ljava/lang/Boolean;"},
-		[MethodId::Long_valueOf]	=
-		{ nullptr, ClassId::Long,		"valueOf", "(J)Ljava/lang/Long;"},
-		[MethodId::Double_valueOf]	=
-		{ nullptr, ClassId::Double,		"valueOf", "(D)Ljava/lang/Double;"},
+		{ nullptr, true,	ClassId::Boolean,
+			"valueOf", "(Z)Ljava/lang/Boolean;"	},
+		{ nullptr, true,	ClassId::Long,
+			"valueOf", "(J)Ljava/lang/Long;"	},
+		{ nullptr, true,	ClassId::Double,
+			"valueOf", "(D)Ljava/lang/Double;"	},
 	};
+	static_assert(
+		sizeof(s_methodCache) / sizeof(s_methodCache[0]) ==
+			static_cast<size_t>(MethodId::MethodCacheNum),
+		"MethodCache num");
 }
 #include <stdio.h>
 namespace jniutil {
 
+	bool CacheAllClass(JNIEnv *env)
+	{
+		for (auto &entry : s_classCache) {
+			jobject local = env->FindClass(entry.className);
+			if (local == nullptr) {
+				return false;
+			}
+			jobject global = env->NewGlobalRef(local);
+			if (global == nullptr) {
+				return false;
+			}
+			env->DeleteLocalRef(local);
+			entry.classCache = static_cast<jclass>(global);
+		}
+		return true;
+	}
+
+	bool CacheAllMethod(JNIEnv *env)
+	{
+		for (auto &entry : s_methodCache) {
+			jmethodID method = entry.isStatic ?
+				env->GetStaticMethodID(
+					FindClass(env, entry.classId),
+					entry.methodName, entry.methodSig) :
+				env->GetMethodID(
+					FindClass(env, entry.classId),
+					entry.methodName, entry.methodSig);
+			if (method == nullptr) {
+				return false;
+			}
+			entry.methodCache = method;
+		}
+		return true;
+	}
+
+	void ClearAllCache(JNIEnv *env)
+	{
+		for (auto &entry : s_classCache) {
+			env->DeleteGlobalRef(entry.classCache);
+		}
+	}
+
 	jclass FindClass(JNIEnv *env, ClassId id)
 	{
-		if (s_classCache[id].classCache == nullptr) {
-			s_classCache[id].classCache = env->FindClass(
-				s_classCache[id].className);
-		}
-		return s_classCache[id].classCache;
+		return s_classCache[static_cast<int>(id)].classCache;
 	}
 
 	jmethodID GetMethodId(JNIEnv *env, MethodId id)
 	{
-		if (s_methodCache[id].methodCache == nullptr) {
-			s_methodCache[id].methodCache = env->GetMethodID(
-				FindClass(env, s_methodCache[id].classId),
-				s_methodCache[id].methodName,
-				s_methodCache[id].methodSig);
-		}
-		fprintf(stderr, "mid=%d %d %s %s\n", id, s_methodCache[id].classId, s_methodCache[id].methodName, s_methodCache[id].methodSig);
-		return s_methodCache[id].methodCache;
+		return s_methodCache[static_cast<int>(id)].methodCache;
 	}
 
 }

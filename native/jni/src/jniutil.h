@@ -5,17 +5,22 @@
 
 namespace jniutil {
 
-	enum ClassId {
+	enum class ClassId {
 		Boolean,
 		Long,
 		Double,
+		ClassCacheNum,
 	};
-	enum MethodId {
+	enum class MethodId {
 		Boolean_valueOf,
 		Long_valueOf,
 		Double_valueOf,
+		MethodCacheNum,
 	};
 
+	bool CacheAllClass(JNIEnv *env);
+	bool CacheAllMethod(JNIEnv *env);
+	void ClearAllCache(JNIEnv *env);
 	jclass FindClass(JNIEnv *env, ClassId id);
 	jmethodID GetMethodId(JNIEnv *env, MethodId id);
 
