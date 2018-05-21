@@ -66,14 +66,38 @@ namespace {
 			// exception check
 			jthrowable ex = lua->m_env->ExceptionOccurred();
 			if (ex == nullptr) {
-				// OK
+				// no exception
 				return ret;
 			}
 			else {
-				// catch and clear
-				lua->m_env->ExceptionClear();
-				// TODO: convert to lua error
-				return 0;
+				jmethodID method = jniutil::GetMethodId(
+					jniutil::MethodId::Throwable_getMessage);
+				jstring jmsg = static_cast<jstring>(
+					lua->m_env->CallObjectMethod(ex, method));
+				auto cmsg = jniutil::JstrToChars(lua->m_env, jmsg);
+				if (cmsg == nullptr) {
+					jniutil::ThrowOutOfMemoryError(lua->m_env, "Native heap");
+					// longjmp
+					return lua_error(L);
+				}
+
+				jclass clsRE = jniutil::FindClass(
+					jniutil::ClassId::RuntimeException);
+				jclass clsError = jniutil::FindClass(jniutil::ClassId::Error);
+				if (lua->m_env->IsInstanceOf(ex, clsRE) ||
+					lua->m_env->IsInstanceOf(ex, clsError)) {
+					// RuntimeException or Error
+					// Do not clear exception status
+					// longjmp to pcall point
+					return luaL_error(L, "%s", cmsg.get());
+				}
+				else {
+					// other Exceptions
+					// catch exception
+					lua->m_env->ExceptionClear();
+					// longjmp to pcall point
+					return luaL_error(L, "%s", cmsg.get());
+				}
 			}
 		}
 

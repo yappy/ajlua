@@ -19,11 +19,14 @@ namespace {
 	};
 
 	ClassCacheEntry s_classCache[] = {
-		{ nullptr, "FunctionCall" },
-		{ nullptr, "java/lang/Number" },
-		{ nullptr, "java/lang/Boolean" },
-		{ nullptr, "java/lang/Long" },
-		{ nullptr, "java/lang/Double" },
+		{ nullptr, "FunctionCall"				},
+		{ nullptr, "java/lang/Number"			},
+		{ nullptr, "java/lang/Boolean"			},
+		{ nullptr, "java/lang/Long"				},
+		{ nullptr, "java/lang/Double"			},
+		{ nullptr, "java/lang/Throwable"		},
+		{ nullptr, "java/lang/RuntimeException"	},
+		{ nullptr, "java/lang/Error"			},
 	};
 	static_assert(
 		sizeof(s_classCache) / sizeof(s_classCache[0]) ==
@@ -43,6 +46,8 @@ namespace {
 			"valueOf",		"(J)Ljava/lang/Long;"	},
 		{ nullptr, true,	ClassId::Double,
 			"valueOf",		"(D)Ljava/lang/Double;"	},
+		{ nullptr, false,	ClassId::Throwable,
+			"getMessage",	"()Ljava/lang/String;"	},
 	};
 	static_assert(
 		sizeof(s_methodCache) / sizeof(s_methodCache[0]) ==

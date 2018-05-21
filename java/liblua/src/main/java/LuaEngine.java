@@ -67,9 +67,9 @@ public class LuaEngine implements AutoCloseable, FunctionCall {
 	}
 
 	@Override
-	public int call(int id) {
+	public int call(int id) throws Exception {
 		System.out.println("callback! " + id);
-		return 0;
+		throw new Exception("TEST EXCEPTION");
 	}
 
 	public long getPeerForDebug() {

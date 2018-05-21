@@ -11,6 +11,9 @@ namespace jniutil {
 		Boolean,
 		Long,
 		Double,
+		Throwable,
+		RuntimeException,
+		Error,
 		ClassCacheNum,
 	};
 	enum class MethodId {
@@ -20,6 +23,7 @@ namespace jniutil {
 		Boolean_booleanValue,
 		Long_valueOf,
 		Double_valueOf,
+		Throwable_getMessage,
 		MethodCacheNum,
 	};
 
@@ -68,20 +72,23 @@ namespace jniutil {
 	 * Return nullptr if failed.
 	 */
 	inline std::unique_ptr<char[]>
-	JstrToChars(JNIEnv *env, jstring jstr, jsize *len)
+	JstrToChars(JNIEnv *env, jstring jstr, jsize *outlen = nullptr)
 	{
 		if (jstr == nullptr) {
-			*len = 0;
 			return std::unique_ptr<char[]>(nullptr);
 		}
-		*len = env->GetStringUTFLength(jstr);
-		char *p = new(std::nothrow) char[*len];
+		jsize len = env->GetStringUTFLength(jstr);
+		char *p = new(std::nothrow) char[len + 1];
 		if (p == nullptr) {
-			*len = 0;
 			return std::unique_ptr<char[]>(nullptr);
 		}
 		std::unique_ptr<char[]> buf(p);
-		env->GetStringUTFRegion(jstr, 0, *len, buf.get());
+		env->GetStringUTFRegion(jstr, 0, len, buf.get());
+		buf[len] = '\0';
+
+		if (outlen != nullptr) {
+			*outlen = len;
+		}
 		return buf;
 	}
 
