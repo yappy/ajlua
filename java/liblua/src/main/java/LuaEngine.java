@@ -40,8 +40,8 @@ public class LuaEngine implements AutoCloseable {
 		long peer, byte[] types, Object[] values);
 	private static native int pcall(
 		long peer, int nargs, int nresults, int msgh);
-	public static native void getGlobal(long peer, String name);
-	public static native void setGlobal(long peer, String name);
+	public static native int getGlobal(long peer, String name);
+	public static native int setGlobal(long peer, String name);
 
 
 	private long peer = 0;
@@ -70,7 +70,7 @@ public class LuaEngine implements AutoCloseable {
 		case LUA_OK:
 			return;
 		case LUA_ERRSYNTAX:
-			throw new Exception("syntax error");
+			throw new Exception("syntax error: " + getErrorMessage());
 		case LUA_ERRMEM:
 			throw new OutOfMemoryError();
 		case LUA_ERRGCMM:
@@ -87,7 +87,7 @@ public class LuaEngine implements AutoCloseable {
 		case LUA_OK:
 			return;
 		case LUA_ERRRUN:
-			throw new Exception("runtime error");
+			throw new Exception("runtime error: " + getErrorMessage());
 		case LUA_ERRMEM:
 			throw new OutOfMemoryError();
 		case LUA_ERRERR:
@@ -96,6 +96,22 @@ public class LuaEngine implements AutoCloseable {
 			throw new Exception("error in gc");
 		default:
 			throw new Error();
+		}
+	}
+
+	private String getErrorMessage()
+	{
+		byte[] types = new byte[MIN_STACK];
+		Object[] values = new Object[MIN_STACK];
+		int num = getValues(peer, types, values);
+		if (num <= 0) {
+			return "";
+		}
+		else if (values[num - 1] == null) {
+			return "";
+		}
+		else {
+			return values[num - 1].toString();
 		}
 	}
 

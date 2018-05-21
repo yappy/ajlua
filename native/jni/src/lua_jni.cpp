@@ -11,33 +11,48 @@ static_assert(sizeof(lua_Integer) == sizeof(jlong), "lua_Integer");
 static_assert(LUA_MINSTACK == LuaEngine_MIN_STACK, "LUA_MINSTACK");
 static_assert(LUA_MULTRET == LuaEngine_LUA_MULTRET, "LUA_MULTRET");
 
-class Lua {
-public:
-	Lua() = default;
-	~Lua() = default;
+namespace {
 
-	bool Initialize()
-	{
-		m_lua.reset(luaL_newstate());
-		if (m_lua == nullptr) {
-			return false;
-		}
-		return true;
-	}
-	lua_State *L()
-	{
-		return m_lua.get();
-	}
-private:
-	struct LuaDeleter {
-		void operator()(lua_State *L)
+	class Lua {
+	public:
+		Lua() = default;
+		~Lua() = default;
+
+		bool Initialize()
 		{
-			lua_close(L);
+			m_lua.reset(luaL_newstate());
+			if (m_lua == nullptr) {
+				return false;
+			}
+			return true;
 		}
-	};
-	std::unique_ptr<lua_State, LuaDeleter> m_lua;
-};
 
+		lua_State *L()
+		{
+			return m_lua.get();
+		}
+
+	private:
+		struct LuaDeleter {
+			void operator()(lua_State *L)
+			{
+				lua_close(L);
+			}
+		};
+		std::unique_ptr<lua_State, LuaDeleter> m_lua;
+	};
+
+	inline bool HasStack(lua_State *L, int n)
+	{
+		return lua_gettop(L) >= n;
+	}
+
+	inline bool HasFreeStack(lua_State *L, int n)
+	{
+		return LUA_MINSTACK - lua_gettop(L) >= n;
+	}
+
+}
 
 /*
  * Export Functions
@@ -255,51 +270,82 @@ JNIEXPORT jint JNICALL Java_LuaEngine_pcall
 /*
  * Class:     LuaEngine
  * Method:    getGlobal
- * Signature: (JLjava/lang/String;)V
+ * Signature: (JLjava/lang/String;)I
  */
-JNIEXPORT void JNICALL Java_LuaEngine_getGlobal
+JNIEXPORT jint JNICALL Java_LuaEngine_getGlobal
   (JNIEnv *env, jclass, jlong peer, jstring name)
 {
 	auto L = reinterpret_cast<Lua *>(peer)->L();
 
-	if (lua_gettop(L) >= LUA_MINSTACK) {
-		jniutil::ThrowIllegalStateException(env, "Stack full");
-		return;
+	if (!HasFreeStack(L, 2)) {
+		jniutil::ThrowIllegalStateException(env, "Stack overflow");
+		return 0;
 	}
 
 	jsize len = 0;
 	auto cName = jniutil::JstrToChars(env, name, &len);
 	if (cName == nullptr) {
 		jniutil::ThrowOutOfMemoryError(env, "Native heap");
-		return;
+		return 0;
 	}
 
-	lua_getglobal(L, cName.get());
+	// arg1: const char *name
+	// ret: getglobal result
+	auto f = [](lua_State *L) -> int
+	{
+		// push ret
+		lua_getglobal(L, static_cast<const char *>(lua_touserdata(L, 1)));
+		// remove arg1
+		lua_remove(L, 1);
+		return 1;
+	};
+	// cfunc
+	lua_pushcfunction(L, f);
+	// arg1: const char *name
+	lua_pushlightuserdata(L, cName.get());
+	// longjmp_safe call (args=1, ret=1)
+	return lua_pcall(L, 1, 1, 0);
 }
 
 /*
  * Class:     LuaEngine
  * Method:    setGlobal
- * Signature: (JLjava/lang/String;)V
+ * Signature: (JLjava/lang/String;)I
  */
-JNIEXPORT void JNICALL Java_LuaEngine_setGlobal
+JNIEXPORT jint JNICALL Java_LuaEngine_setGlobal
   (JNIEnv *env, jclass, jlong peer, jstring name)
 {
 	auto L = reinterpret_cast<Lua *>(peer)->L();
 
-	if (lua_gettop(L) <= 0) {
-		jniutil::ThrowIllegalStateException(env, "Stack empty");
-		return;
+	if (!HasStack(L, 1)) {
+		jniutil::ThrowIllegalStateException(env, "Stack underflow");
+		return 0;
 	}
 
 	jsize len = 0;
 	auto cName = jniutil::JstrToChars(env, name, &len);
 	if (cName == nullptr) {
 		jniutil::ThrowOutOfMemoryError(env, "Native heap");
-		return;
+		return 0;
 	}
 
-	lua_setglobal(L, cName.get());
+	// arg1: const char *name
+	// arg2: value
+	// ret: none
+	auto f = [](lua_State *L) -> int
+	{
+		lua_setglobal(L, static_cast<const char *>(lua_touserdata(L, 1)));
+		lua_pop(L, 1);
+		return 0;
+	};
+	// cfunc
+	lua_pushcfunction(L, f);
+	// arg1: const char *name
+	lua_pushlightuserdata(L, cName.get());
+	// arg2: value (original top)
+	lua_rotate(L, lua_absindex(L, -3), -1);
+	// longjmp_safe call (args=2, ret=0)
+	return lua_pcall(L, 2, 0, 0);
 }
 
 
