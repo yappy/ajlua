@@ -6,13 +6,16 @@
 namespace jniutil {
 
 	enum class ClassId {
+		Number,
 		Boolean,
 		Long,
 		Double,
 		ClassCacheNum,
 	};
 	enum class MethodId {
+		Number_doubleValue,
 		Boolean_valueOf,
+		Boolean_booleanValue,
 		Long_valueOf,
 		Double_valueOf,
 		MethodCacheNum,

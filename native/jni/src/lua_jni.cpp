@@ -192,7 +192,72 @@ JNIEXPORT void JNICALL Java_LuaEngine_setTop
  * Signature: (J[Ljava/lang/Object;)I
  */
 JNIEXPORT jint JNICALL Java_LuaEngine_pushValues
-  (JNIEnv *, jclass, jlong, jobjectArray);
+  (JNIEnv *env, jclass, jlong peer, jobjectArray values)
+{
+	auto L = reinterpret_cast<Lua *>(peer)->L();
+
+	if (values == nullptr) {
+		jniutil::ThrowNullPointerException(env, "values");
+		return 0;
+	}
+	int length = env->GetArrayLength(values);
+	if (!HasFreeStack(L, length) || !HasFreeStack(L, 4)) {
+		jniutil::ThrowIllegalArgumentException(env, "values length too large");
+		return 0;
+	}
+
+	// arg1: JNIEnv *env
+	// arg2: jobjectArray values
+	// arg3: length
+	// ret: lua values (multiret)
+	auto f = [](lua_State *L) -> int
+	{
+		auto env = static_cast<JNIEnv *>(lua_touserdata(L, 1));
+		auto values = static_cast<jobjectArray>(lua_touserdata(L, 2));
+		auto length = static_cast<int>(lua_tonumber(L, 3));
+		lua_settop(L, 0);
+
+		jclass clsBoolean = jniutil::FindClass(jniutil::ClassId::Boolean);
+		jclass clsNumber = jniutil::FindClass(jniutil::ClassId::Number);
+
+		for (int i = 0; i < length; i++) {
+			jobject jobj = env->GetObjectArrayElement(values, i);
+
+			if (jobj == nullptr) {
+				lua_pushnil(L);
+			}
+			else if (env->IsInstanceOf(jobj, clsBoolean)) {
+				jmethodID method = jniutil::GetMethodId(
+					jniutil::MethodId::Boolean_booleanValue);
+				jboolean b = env->CallBooleanMethod(jobj, method);
+				lua_pushboolean(L, b);
+			}
+			else if (env->IsInstanceOf(jobj, clsNumber)) {
+				jmethodID method = jniutil::GetMethodId(
+					jniutil::MethodId::Number_doubleValue);
+				jdouble d = env->CallDoubleMethod(jobj, method);
+				lua_pushnumber(L, d);
+			}
+			else {
+				jniutil::ThrowIllegalArgumentException(env, "Invalid type");
+			}
+
+			env->DeleteLocalRef(jobj);
+		}
+
+		return length;
+	};
+	// cfunc
+	lua_pushcfunction(L, f);
+	// arg1: JNIEnv *env
+	lua_pushlightuserdata(L, env);
+	// arg2: jobjectArray values
+	lua_pushlightuserdata(L, values);
+	// arg3: length
+	lua_pushinteger(L, length);
+	// longjmp_safe call (args=3, ret=length)
+	return lua_pcall(L, 3, length, 0);
+}
 
 /*
  * Class:     LuaEngine

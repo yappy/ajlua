@@ -42,10 +42,11 @@ public class App {
 		}
 
 		try (LuaEngine lua = new LuaEngine()) {
-			lua.loadString("function func() return 3.14 end", "test.lua");
+			lua.loadString("function func(a, b, c) return a, b, c end", "test.lua");
 			lua.pcall(0, 0);
 			lua.getGlobal(lua.getPeerForDebug(), "func");
-			lua.pcall(0, LuaEngine.LUA_MULTRET);
+			lua.pushValues(lua.getPeerForDebug(), new Object[]{ null, true, 3.14 });
+			lua.pcall(3, LuaEngine.LUA_MULTRET);
 			byte[] types = new byte[LuaEngine.MIN_STACK];
 			Object[] vals = new Object[LuaEngine.MIN_STACK];
 			lua.getValues(lua.getPeerForDebug(), types, vals);

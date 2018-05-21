@@ -19,6 +19,7 @@ namespace {
 	};
 
 	ClassCacheEntry s_classCache[] = {
+		{ nullptr, "java/lang/Number" },
 		{ nullptr, "java/lang/Boolean" },
 		{ nullptr, "java/lang/Long" },
 		{ nullptr, "java/lang/Double" },
@@ -29,12 +30,16 @@ namespace {
 		"ClassCache num");
 
 	MethodCacheEntry s_methodCache[] = {
+		{ nullptr, false,	ClassId::Number,
+			"doubleValue",	"()D"					},
 		{ nullptr, true,	ClassId::Boolean,
-			"valueOf", "(Z)Ljava/lang/Boolean;"	},
+			"valueOf",		"(Z)Ljava/lang/Boolean;"},
+		{ nullptr, false,	ClassId::Boolean,
+			"booleanValue",	"()Z"					},
 		{ nullptr, true,	ClassId::Long,
-			"valueOf", "(J)Ljava/lang/Long;"	},
+			"valueOf",		"(J)Ljava/lang/Long;"	},
 		{ nullptr, true,	ClassId::Double,
-			"valueOf", "(D)Ljava/lang/Double;"	},
+			"valueOf",		"(D)Ljava/lang/Double;"	},
 	};
 	static_assert(
 		sizeof(s_methodCache) / sizeof(s_methodCache[0]) ==
