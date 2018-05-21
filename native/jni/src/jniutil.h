@@ -102,7 +102,7 @@ namespace jniutil {
 
 	inline void ThrowIllegalStateException(JNIEnv *env, const char *msg)
 	{
-		Throw(env, "IllegalStateException", msg);
+		Throw(env, "java/lang/IllegalStateException", msg);
 	}
 
 } // namespace jniutil

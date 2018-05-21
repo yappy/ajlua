@@ -53,5 +53,12 @@ public class App {
 			System.out.println(java.util.Arrays.toString(types));
 			System.out.println(java.util.Arrays.toString(vals));
 		}
+
+		try (LuaEngine lua = new LuaEngine()) {
+			lua.pushProxyFunction(lua.getPeerForDebug(), 123);
+			lua.setGlobal(lua.getPeerForDebug(), "javafunc");
+			lua.loadString("javafunc()", "test.lua");
+			lua.pcall(0, 0);
+		}
 	}
 }

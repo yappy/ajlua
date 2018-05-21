@@ -32,6 +32,11 @@ namespace {
 			return m_lua.get();
 		}
 
+		static int proxy(lua_State *L)
+		{
+			puts("proxy call!!");
+		}
+
 	private:
 		struct LuaDeleter {
 			void operator()(lua_State *L)
@@ -360,7 +365,7 @@ JNIEXPORT jint JNICALL Java_LuaEngine_getGlobal
 
 	// arg1: const char *name
 	// ret: getglobal result
-	auto f = [](lua_State *L) -> int
+	lua_CFunction f = [](lua_State *L) -> int
 	{
 		// push ret
 		lua_getglobal(L, static_cast<const char *>(lua_touserdata(L, 1)));
@@ -401,7 +406,7 @@ JNIEXPORT jint JNICALL Java_LuaEngine_setGlobal
 	// arg1: const char *name
 	// arg2: value
 	// ret: none
-	auto f = [](lua_State *L) -> int
+	lua_CFunction f = [](lua_State *L) -> int
 	{
 		lua_setglobal(L, static_cast<const char *>(lua_touserdata(L, 1)));
 		lua_pop(L, 1);
@@ -415,6 +420,42 @@ JNIEXPORT jint JNICALL Java_LuaEngine_setGlobal
 	lua_rotate(L, lua_absindex(L, -3), -1);
 	// longjmp_safe call (args=2, ret=0)
 	return lua_pcall(L, 2, 0, 0);
+}
+
+/*
+ * Class:     LuaEngine
+ * Method:    setProxy
+ * Signature: (JLLuaEngine/FunctionCall;)V
+ */
+JNIEXPORT void JNICALL Java_LuaEngine_setProxy
+  (JNIEnv *, jclass, jlong, jobject);
+
+/*
+ * Class:     LuaEngine
+ * Method:    pushProxyFunction
+ * Signature: (JI)I
+ */
+JNIEXPORT jint JNICALL Java_LuaEngine_pushProxyFunction
+  (JNIEnv *env, jclass, jlong peer, jint id)
+{
+	auto lua = reinterpret_cast<Lua *>(peer);
+	auto L = lua->L();
+
+	lua_CFunction f = [](lua_State *L) -> int
+	{
+		// pop arg1, arg2
+		// push Lua::proxy with arg1, arg2 as upvalue
+		lua_pushcclosure(L, Lua::proxy, 2);
+		return 1;
+	};
+	// cfunc
+	lua_pushcfunction(L, f);
+	// arg1: Lua *
+	lua_pushlightuserdata(L, lua);
+	// arg2: id
+	lua_pushinteger(L, id);
+	// longjmp_safe call (args=2, ret=1)
+	return lua_pcall(L, 2, 1, 0);
 }
 
 

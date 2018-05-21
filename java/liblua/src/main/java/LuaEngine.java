@@ -5,6 +5,12 @@ public class LuaEngine implements AutoCloseable {
 		System.loadLibrary("jlua");
 	}
 
+	/** Lua max stack size. */
+	public static final int MAX_STACK = 20;
+	/** Function returns multiple values (for pcall nresults) */
+	public static final int LUA_MULTRET = -1;
+
+
 	// lua.h
 	private static final int LUA_OK			= 0;
 	private static final int LUA_YIELD		= 1;
@@ -24,11 +30,11 @@ public class LuaEngine implements AutoCloseable {
 	private static final int LUA_TUSERDATA		= 7;
 	private static final int LUA_TTHREAD		= 8;
 
-	/** Lua max stack size. */
-	public static final int MAX_STACK = 20;
-	/** Function returns multiple values (for pcall nresults) */
-	public static final int LUA_MULTRET = -1;
 
+	private static interface FunctionCall {
+		// @returns results count on the stack
+		int call(int id);
+	}
 
 	public static native int getVersionInfo(String[] info);
 	private static native long newPeer();
@@ -44,6 +50,8 @@ public class LuaEngine implements AutoCloseable {
 		long peer, int nargs, int nresults, int msgh);
 	public static native int getGlobal(long peer, String name);
 	public static native int setGlobal(long peer, String name);
+	public static native void setProxy(long peer, FunctionCall callback);
+	public static native int pushProxyFunction(long peer, int id);
 
 
 	private long peer = 0;
