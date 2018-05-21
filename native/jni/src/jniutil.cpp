@@ -66,10 +66,10 @@ namespace jniutil {
 		for (auto &entry : s_methodCache) {
 			jmethodID method = entry.isStatic ?
 				env->GetStaticMethodID(
-					FindClass(env, entry.classId),
+					FindClass(entry.classId),
 					entry.methodName, entry.methodSig) :
 				env->GetMethodID(
-					FindClass(env, entry.classId),
+					FindClass(entry.classId),
 					entry.methodName, entry.methodSig);
 			if (method == nullptr) {
 				return false;
@@ -86,12 +86,12 @@ namespace jniutil {
 		}
 	}
 
-	jclass FindClass(JNIEnv *env, ClassId id)
+	jclass FindClass(ClassId id)
 	{
 		return s_classCache[static_cast<int>(id)].classCache;
 	}
 
-	jmethodID GetMethodId(JNIEnv *env, MethodId id)
+	jmethodID GetMethodId(MethodId id)
 	{
 		return s_methodCache[static_cast<int>(id)].methodCache;
 	}

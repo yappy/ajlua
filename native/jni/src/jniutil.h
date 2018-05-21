@@ -21,26 +21,26 @@ namespace jniutil {
 	bool CacheAllClass(JNIEnv *env);
 	bool CacheAllMethod(JNIEnv *env);
 	void ClearAllCache(JNIEnv *env);
-	jclass FindClass(JNIEnv *env, ClassId id);
-	jmethodID GetMethodId(JNIEnv *env, MethodId id);
+	jclass FindClass(ClassId id);
+	jmethodID GetMethodId(MethodId id);
 
 
 	inline jobject BoxingBoolean(JNIEnv *env, jbyte jb)
 	{
-		jclass cls = FindClass(env, ClassId::Boolean);
-		jmethodID method = GetMethodId(env, MethodId::Boolean_valueOf);
+		jclass cls = FindClass(ClassId::Boolean);
+		jmethodID method = GetMethodId(MethodId::Boolean_valueOf);
 		env->CallStaticObjectMethod(cls, method, jb);
 	}
 	inline jobject BoxingLong(JNIEnv *env, jlong jl)
 	{
-		jclass cls = FindClass(env, ClassId::Long);
-		jmethodID method = GetMethodId(env, MethodId::Long_valueOf);
+		jclass cls = FindClass(ClassId::Long);
+		jmethodID method = GetMethodId(MethodId::Long_valueOf);
 		env->CallStaticObjectMethod(cls, method, jl);
 	}
 	inline jobject BoxingDouble(JNIEnv *env, jdouble jd)
 	{
-		jclass cls = FindClass(env, ClassId::Double);
-		jmethodID method = GetMethodId(env, MethodId::Double_valueOf);
+		jclass cls = FindClass(ClassId::Double);
+		jmethodID method = GetMethodId(MethodId::Double_valueOf);
 		env->CallStaticObjectMethod(cls, method, jd);
 	}
 
