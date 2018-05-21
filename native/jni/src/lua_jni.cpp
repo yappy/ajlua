@@ -218,6 +218,7 @@ JNIEXPORT jint JNICALL Java_LuaEngine_getValues
 				jboolean jb = static_cast<jboolean>(lua_toboolean(L, lind));
 				jobject box = jniutil::BoxingBoolean(env, jb);
 				env->SetObjectArrayElement(values, i, box);
+				env->DeleteLocalRef(box);
 			}
 			break;
 		case LUA_TNUMBER:
@@ -225,12 +226,14 @@ JNIEXPORT jint JNICALL Java_LuaEngine_getValues
 				jdouble jd = lua_tonumber(L, lind);
 				jobject box = jniutil::BoxingDouble(env, jd);
 				env->SetObjectArrayElement(values, i, box);
+				env->DeleteLocalRef(box);
 			}
 			break;
 		case LUA_TSTRING:
 			{
 				jstring jstr = env->NewStringUTF(lua_tostring(L, lind));
 				env->SetObjectArrayElement(values, i, jstr);
+				env->DeleteLocalRef(jstr);
 			}
 			break;
 		case LUA_TTABLE:
@@ -242,6 +245,7 @@ JNIEXPORT jint JNICALL Java_LuaEngine_getValues
 				jlong jl = reinterpret_cast<jlong>(lua_topointer(L, lind));
 				jobject box = jniutil::BoxingLong(env, jl);
 				env->SetObjectArrayElement(values, i, box);
+				env->DeleteLocalRef(box);
 			}
 			break;
 		default:
