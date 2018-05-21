@@ -1,5 +1,5 @@
 
-public class LuaEngine implements AutoCloseable {
+public class LuaEngine implements AutoCloseable, FunctionCall {
 
 	static {
 		System.loadLibrary("jlua");
@@ -31,11 +31,6 @@ public class LuaEngine implements AutoCloseable {
 	private static final int LUA_TTHREAD		= 8;
 
 
-	private static interface FunctionCall {
-		// @returns results count on the stack
-		int call(int id);
-	}
-
 	public static native int getVersionInfo(String[] info);
 	private static native long newPeer();
 	private static native void deletePeer(long peer);
@@ -50,7 +45,8 @@ public class LuaEngine implements AutoCloseable {
 		long peer, int nargs, int nresults, int msgh);
 	public static native int getGlobal(long peer, String name);
 	public static native int setGlobal(long peer, String name);
-	public static native void setProxy(long peer, FunctionCall callback);
+	public static native void setProxyCallback(
+		long peer, FunctionCall callback);
 	public static native int pushProxyFunction(long peer, int id);
 
 
@@ -62,11 +58,18 @@ public class LuaEngine implements AutoCloseable {
 			// probably cannot allocate in native heap
 			throw new OutOfMemoryError();
 		}
+		setProxyCallback(peer, this);
 	}
 
 	@Override
 	public void close() {
 		deletePeer(peer);
+	}
+
+	@Override
+	public int call(int id) {
+		System.out.println("callback! " + id);
+		return 0;
 	}
 
 	public long getPeerForDebug() {
@@ -125,4 +128,10 @@ public class LuaEngine implements AutoCloseable {
 		}
 	}
 
+}
+
+// package private
+interface FunctionCall {
+	// @returns results count on the stack
+	int call(int id) throws Exception;
 }

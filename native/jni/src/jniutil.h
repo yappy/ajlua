@@ -6,6 +6,7 @@
 namespace jniutil {
 
 	enum class ClassId {
+		FunctionCall,
 		Number,
 		Boolean,
 		Long,
@@ -13,6 +14,7 @@ namespace jniutil {
 		ClassCacheNum,
 	};
 	enum class MethodId {
+		FunctionCall_call,
 		Number_doubleValue,
 		Boolean_valueOf,
 		Boolean_booleanValue,
@@ -26,6 +28,20 @@ namespace jniutil {
 	void ClearAllCache(JNIEnv *env);
 	jclass FindClass(ClassId id);
 	jmethodID GetMethodId(MethodId id);
+
+
+	struct GlobalRefDeleter {
+		explicit GlobalRefDeleter(JNIEnv *env) : m_env(env) {}
+		void operator()(jobject p)
+		{
+			m_env->DeleteGlobalRef(p);
+		}
+	private:
+		JNIEnv *m_env;
+	};
+
+	using GlobalRef = std::unique_ptr<
+		std::remove_pointer<jobject>::type, GlobalRefDeleter>;
 
 
 	inline jobject BoxingBoolean(JNIEnv *env, jbyte jb)

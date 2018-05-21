@@ -19,6 +19,7 @@ namespace {
 	};
 
 	ClassCacheEntry s_classCache[] = {
+		{ nullptr, "FunctionCall" },
 		{ nullptr, "java/lang/Number" },
 		{ nullptr, "java/lang/Boolean" },
 		{ nullptr, "java/lang/Long" },
@@ -30,6 +31,8 @@ namespace {
 		"ClassCache num");
 
 	MethodCacheEntry s_methodCache[] = {
+		{ nullptr, false,	ClassId::FunctionCall,
+			"call",			"(I)I"					},
 		{ nullptr, false,	ClassId::Number,
 			"doubleValue",	"()D"					},
 		{ nullptr, true,	ClassId::Boolean,

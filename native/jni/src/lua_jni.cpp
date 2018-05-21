@@ -15,7 +15,14 @@ namespace {
 
 	class Lua {
 	public:
-		Lua() = default;
+		static const int PROXY_UPVALUE_COUNT = 2;
+		static const int PROXY_UPVALUE_IND_LUA = 1;
+		static const int PROXY_UPVALUE_IND_ID = 2;
+
+		Lua(JNIEnv *env) :
+			m_env(env),
+			m_callback(nullptr, jniutil::GlobalRefDeleter(env))
+		{}
 		~Lua() = default;
 
 		bool Initialize()
@@ -32,9 +39,42 @@ namespace {
 			return m_lua.get();
 		}
 
-		static int proxy(lua_State *L)
+		void SetProxyCallback(JNIEnv *env, jobject callback)
 		{
-			puts("proxy call!!");
+			// Create global ref to callback
+			// It will be deleted when overwritten or delete Lua
+			jobject global = env->NewGlobalRef(callback);
+			if (global == nullptr) {
+				jniutil::ThrowOutOfMemoryError(env, "NewGlobalRef");
+				return;
+			}
+			m_callback.reset(global);
+		}
+
+		static int ProxyFunction(lua_State *L)
+		{
+			// get from upvalue
+			auto lua = static_cast<Lua *>(
+				lua_touserdata(L, lua_upvalueindex(PROXY_UPVALUE_IND_LUA)));
+			auto id = static_cast<jint>(
+				lua_tointeger(L, lua_upvalueindex(PROXY_UPVALUE_IND_ID)));
+			// Java interface call
+			jmethodID method = jniutil::GetMethodId(
+				jniutil::MethodId::FunctionCall_call);
+			int ret = lua->m_env->CallIntMethod(
+				lua->m_callback.get(), method, id);
+			// exception check
+			jthrowable ex = lua->m_env->ExceptionOccurred();
+			if (ex == nullptr) {
+				// OK
+				return ret;
+			}
+			else {
+				// catch and clear
+				lua->m_env->ExceptionClear();
+				// TODO: convert to lua error
+				return 0;
+			}
 		}
 
 	private:
@@ -45,7 +85,11 @@ namespace {
 			}
 		};
 		std::unique_ptr<lua_State, LuaDeleter> m_lua;
+
+		JNIEnv *m_env;
+		jniutil::GlobalRef m_callback;
 	};
+
 
 	inline bool HasStack(lua_State *L, int n)
 	{
@@ -95,9 +139,9 @@ JNIEXPORT jint JNICALL Java_LuaEngine_getVersionInfo
  * Signature: ()J
  */
 JNIEXPORT jlong JNICALL Java_LuaEngine_newPeer
-  (JNIEnv *, jclass)
+  (JNIEnv *env, jclass)
 {
-	Lua *lua = new(std::nothrow) Lua();
+	Lua *lua = new(std::nothrow) Lua(env);
 	if (lua == nullptr) {
 		// new failed; out of memory
 		return 0;
@@ -424,11 +468,15 @@ JNIEXPORT jint JNICALL Java_LuaEngine_setGlobal
 
 /*
  * Class:     LuaEngine
- * Method:    setProxy
- * Signature: (JLLuaEngine/FunctionCall;)V
+ * Method:    setProxyCallback
+ * Signature: (JLFunctionCall;)V
  */
-JNIEXPORT void JNICALL Java_LuaEngine_setProxy
-  (JNIEnv *, jclass, jlong, jobject);
+JNIEXPORT void JNICALL Java_LuaEngine_setProxyCallback
+  (JNIEnv *env, jclass, jlong peer, jobject callback)
+{
+	auto lua = reinterpret_cast<Lua *>(peer);
+	lua->SetProxyCallback(env, callback);
+}
 
 /*
  * Class:     LuaEngine
@@ -445,7 +493,7 @@ JNIEXPORT jint JNICALL Java_LuaEngine_pushProxyFunction
 	{
 		// pop arg1, arg2
 		// push Lua::proxy with arg1, arg2 as upvalue
-		lua_pushcclosure(L, Lua::proxy, 2);
+		lua_pushcclosure(L, Lua::ProxyFunction, 2);
 		return 1;
 	};
 	// cfunc
