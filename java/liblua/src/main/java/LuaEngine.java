@@ -24,7 +24,9 @@ public class LuaEngine implements AutoCloseable {
 	private static final int LUA_TUSERDATA		= 7;
 	private static final int LUA_TTHREAD		= 8;
 
-	public static final int MIN_STACK = 20;
+	/** Lua max stack size. */
+	public static final int MAX_STACK = 20;
+	/** Function returns multiple values (for pcall nresults) */
 	public static final int LUA_MULTRET = -1;
 
 
@@ -101,8 +103,8 @@ public class LuaEngine implements AutoCloseable {
 
 	private String getErrorMessage()
 	{
-		byte[] types = new byte[MIN_STACK];
-		Object[] values = new Object[MIN_STACK];
+		byte[] types = new byte[MAX_STACK];
+		Object[] values = new Object[MAX_STACK];
 		int num = getValues(peer, types, values);
 		if (num <= 0) {
 			return "";

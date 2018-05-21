@@ -31,8 +31,8 @@ public class App {
 				}
 				System.out.println("top=" + lua.getTop(lua.getPeerForDebug()));
 
-				byte[] types = new byte[LuaEngine.MIN_STACK];
-				Object[] vals = new Object[LuaEngine.MIN_STACK];
+				byte[] types = new byte[LuaEngine.MAX_STACK];
+				Object[] vals = new Object[LuaEngine.MAX_STACK];
 				lua.getValues(lua.getPeerForDebug(), types, vals);
 				System.out.println(java.util.Arrays.toString(types));
 				System.out.println(java.util.Arrays.toString(vals));
@@ -47,8 +47,8 @@ public class App {
 			lua.getGlobal(lua.getPeerForDebug(), "func");
 			lua.pushValues(lua.getPeerForDebug(), new Object[]{ null, true, 3.14 });
 			lua.pcall(3, LuaEngine.LUA_MULTRET);
-			byte[] types = new byte[LuaEngine.MIN_STACK];
-			Object[] vals = new Object[LuaEngine.MIN_STACK];
+			byte[] types = new byte[LuaEngine.MAX_STACK];
+			Object[] vals = new Object[LuaEngine.MAX_STACK];
 			lua.getValues(lua.getPeerForDebug(), types, vals);
 			System.out.println(java.util.Arrays.toString(types));
 			System.out.println(java.util.Arrays.toString(vals));

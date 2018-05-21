@@ -8,7 +8,7 @@ static_assert(sizeof(lua_Number) == sizeof(jdouble), "lua_Number");
 static_assert(sizeof(lua_Integer) == sizeof(jlong), "lua_Integer");
 
 /* Lua C define - Java constant assert */
-static_assert(LUA_MINSTACK == LuaEngine_MIN_STACK, "LUA_MINSTACK");
+static_assert(LUA_MINSTACK == LuaEngine_MAX_STACK, "LUA_MINSTACK");
 static_assert(LUA_MULTRET == LuaEngine_LUA_MULTRET, "LUA_MULTRET");
 
 namespace {
