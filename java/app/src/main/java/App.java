@@ -56,11 +56,17 @@ public class App {
 		}
 
 		try (LuaEngine lua = new LuaEngine()) {
-			lua.addGlobalFunction("javafunc", () -> {
-					System.out.println("hello");
-					return 0;
+			lua.addGlobalFunction("jprint", (params) -> {
+					System.out.printf("%d parameters%n", params.length);
+					for (Object x : params) {
+						System.out.println(x);
+					}
+					return null;
 				});
-			lua.loadString("javafunc()", "test.lua");
+			lua.addGlobalFunction("jget", (params) -> {
+					return new Object[] { 3.14, 2 };
+				});
+			lua.loadString("x, y = jget() jprint(nil, 123, 3.14, \"string\", x * y)", "test.lua");
 			try {
 				lua.pcall(0, 0);
 			} catch (Exception ex) {

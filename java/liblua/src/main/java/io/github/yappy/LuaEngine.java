@@ -72,6 +72,19 @@ public class LuaEngine implements AutoCloseable {
 		deletePeer(peer);
 	}
 
+	private static Object covertL2J(byte type, Object luaValue) {
+		switch(type) {
+		case LUA_TNIL:
+			return null;
+		case LUA_TBOOLEAN:
+		case LUA_TNUMBER:
+		case LUA_TSTRING:
+			return luaValue;
+		default:
+			return null;
+		}
+	}
+
 	// Function call root
 	private class FunctionRootImpl implements FunctionRoot {
 		@Override
@@ -79,7 +92,27 @@ public class LuaEngine implements AutoCloseable {
 			if (id < 0 || id >= functionList.size()) {
 				throw new Error("Invalid function root call ID");
 			}
-			return functionList.get(id).call();
+
+			// Pop all params from the stack
+			byte[] types = new byte[MAX_STACK];
+			Object[] values = new Object[MAX_STACK];
+			int numParams = getValues(peer, types, values);
+			setTop(peer, 0);
+
+			Object[] params = new Object[numParams];
+			for (int i = 0; i < params.length; i++) {
+				params[i] = covertL2J(types[i], values[i]);
+			}
+
+			// dispatch
+			Object[] results = functionList.get(id).call(params);
+
+			// Push results into the stack and return count
+			if (results == null) {
+				return 0;
+			}
+			pushValues(peer, results);
+			return results.length;
 		}
 	}
 
