@@ -9,11 +9,21 @@ static_assert(sizeof(lua_Integer) == sizeof(jlong), "lua_Integer");
 
 /* Lua C define - Java constant assert */
 static_assert(LUA_MINSTACK == io_github_yappy_LuaEngine_MAX_STACK,
-	"LUA_MINSTACK");
+	"MAX_STACK");
 static_assert(LUA_MULTRET == io_github_yappy_LuaEngine_LUA_MULTRET,
 	"LUA_MULTRET");
 
 namespace {
+
+	const std::array<const char *, 4> VersionStrList = {
+		LUA_VERSION,
+		LUA_RELEASE,
+		LUA_COPYRIGHT,
+		LUA_AUTHORS,
+	};
+	static_assert(
+		VersionStrList.size() == io_github_yappy_LuaEngine_VERSION_ARRAY_SIZE,
+		"VERSION_ARRAY_SIZE");
 
 	class Lua {
 	public:
@@ -151,14 +161,8 @@ extern "C" {
 JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_getVersionInfo
   (JNIEnv *env, jclass, jobjectArray info)
 {
-	const std::array<const char *, 4> strlist = {
-		LUA_VERSION,
-		LUA_RELEASE,
-		LUA_COPYRIGHT,
-		LUA_AUTHORS,
-	};
 	jsize index = 0;
-	for (auto str : strlist) {
+	for (auto str : VersionStrList) {
 		jstring jstr = env->NewStringUTF(str);
 		env->SetObjectArrayElement(info, index, jstr);
 		index++;

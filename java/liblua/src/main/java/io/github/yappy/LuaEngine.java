@@ -12,16 +12,18 @@ public class LuaEngine implements AutoCloseable {
 	/** Lua max stack size. */
 	public static final int MAX_STACK = 20;
 
+	// getVersion String[] size
+	private static final int VERSION_ARRAY_SIZE	= 4;
 	// Function returns multiple values (for C API pcall nresults)
-	private static final int LUA_MULTRET = -1;
+	private static final int LUA_MULTRET		= -1;
 	// LUA C API return code (lua.h)
-	private static final int LUA_OK			= 0;
-	private static final int LUA_YIELD		= 1;
-	private static final int LUA_ERRRUN		= 2;
-	private static final int LUA_ERRSYNTAX	= 3;
-	private static final int LUA_ERRMEM		= 4;
-	private static final int LUA_ERRGCMM	= 5;
-	private static final int LUA_ERRERR		= 6;
+	private static final int LUA_OK				= 0;
+	private static final int LUA_YIELD			= 1;
+	private static final int LUA_ERRRUN			= 2;
+	private static final int LUA_ERRSYNTAX		= 3;
+	private static final int LUA_ERRMEM			= 4;
+	private static final int LUA_ERRGCMM		= 5;
+	private static final int LUA_ERRERR			= 6;
 	// LUA C API value type (lua.h)
 	private static final int LUA_TNIL			= 0;
 	private static final int LUA_TBOOLEAN		= 1;
@@ -33,8 +35,8 @@ public class LuaEngine implements AutoCloseable {
 	private static final int LUA_TUSERDATA		= 7;
 	private static final int LUA_TTHREAD		= 8;
 
-
-	public static native int getVersionInfo(String[] info);
+	// Native interface
+	private static native int getVersionInfo(String[] info);
 	private static native long newPeer();
 	private static native void deletePeer(long peer);
 	private static native int loadString(
@@ -52,9 +54,10 @@ public class LuaEngine implements AutoCloseable {
 		long peer, FunctionRoot callback);
 	private static native int pushProxyFunction(long peer, int id);
 
-
+	// private variables
 	private long peer = 0;
-	private int nextFunctionId = 0;
+	private int versionInt;
+	private String version, release, copyright, author;
 	private List<LuaFunction> functionList = new ArrayList<LuaFunction>();
 
 	public LuaEngine() {
@@ -64,12 +67,35 @@ public class LuaEngine implements AutoCloseable {
 			throw new OutOfMemoryError();
 		}
 		setProxyCallback(peer, new FunctionRootImpl());
+
+		String[] strs = new String[VERSION_ARRAY_SIZE];
+		versionInt = getVersionInfo(strs);
+		this.version = strs[0];
+		this.release = strs[1];
+		this.copyright = strs[2];
+		this.author = strs[3];
 	}
 
 	@Override
 	public void close() {
 		deletePeer(peer);
 		peer = 0;
+	}
+
+	public int getVersionInt() {
+		return versionInt;
+	}
+	public String getVersion() {
+		return version;
+	}
+	public String getRelease() {
+		return release;
+	}
+	public String getCopyright() {
+		return copyright;
+	}
+	public String getAuthor() {
+		return author;
 	}
 
 	private static Object covertL2J(byte type, Object luaValue) {
@@ -113,7 +139,7 @@ public class LuaEngine implements AutoCloseable {
 			Object[] results = functionList.get(id).call(params);
 
 			// Push results into the stack and return count
-			if (results == null) {
+			if (results == null || results.length == 0) {
 				return 0;
 			}
 			checkLuaError(pushValues(peer, results));
