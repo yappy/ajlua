@@ -115,6 +115,11 @@ namespace {
 				jniutil::MethodId::DebugHook_hook);
 			jboolean ret = lua->m_env->CallBooleanMethod(
 				lua->m_hook.get(), method, ar->event, ar->currentline);
+			// RuntimeException or Error because no "throws"
+			if (lua->m_env->ExceptionCheck()) {
+				// longjmp
+				lua_error(L);
+			}
 
 			// If false, raise lua error to abort pcall
 			if (!ret) {

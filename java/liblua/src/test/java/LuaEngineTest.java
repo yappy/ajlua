@@ -67,7 +67,8 @@ public class LuaEngineTest {
 		exception.expectMessage("execution aborted");
 		long start = System.currentTimeMillis();
 		lua.execString((type, line) -> {
-				return System.currentTimeMillis() - start < 100;
+				boolean wait = System.currentTimeMillis() - start < 100;
+				return !wait;
 			},
 			"while true do end",
 			"timeoutError.lua");

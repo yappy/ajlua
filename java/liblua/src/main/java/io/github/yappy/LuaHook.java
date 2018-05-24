@@ -9,7 +9,8 @@ public interface LuaHook {
 	/**
 	 *
 	 * @param type Hook type.
-	 * @return If true, abort pcall with lua error.
+	 * @param line Line number. (valid only if type == Type.LINE)
+	 * @return If false, abort pcall with lua error.
 	 */
 	boolean hook(Type type, int line);
 
