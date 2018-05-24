@@ -43,9 +43,8 @@ namespace {
 
 	class Lua {
 	public:
-		static const int PROXY_UPVALUE_COUNT = 2;
-		static const int PROXY_UPVALUE_IND_LUA = 1;
-		static const int PROXY_UPVALUE_IND_ID = 2;
+		static const int PROXY_UPVALUE_COUNT = 1;
+		static const int PROXY_UPVALUE_IND_ID = 1;
 
 		Lua(JNIEnv *env) :
 			m_env(env),
@@ -94,7 +93,7 @@ namespace {
 
 		static void Hook(lua_State *L, lua_Debug *ar)
 		{
-			auto lua = *static_cast<Lua **>(lua_getextraspace(L));
+			Lua *lua = FromExtraSpace(L);
 
 			// Java interface call
 			jmethodID method = jniutil::GetMethodId(
@@ -122,11 +121,12 @@ namespace {
 
 		static int ProxyFunction(lua_State *L)
 		{
+			// get from extraspace
+			Lua *lua = FromExtraSpace(L);
 			// get from upvalue
-			auto lua = static_cast<Lua *>(
-				lua_touserdata(L, lua_upvalueindex(PROXY_UPVALUE_IND_LUA)));
 			auto id = static_cast<jint>(
 				lua_tointeger(L, lua_upvalueindex(PROXY_UPVALUE_IND_ID)));
+
 			// Java interface call
 			jmethodID method = jniutil::GetMethodId(
 				jniutil::MethodId::FunctionRoot_call);
@@ -175,6 +175,11 @@ namespace {
 					return luaL_error(L, "%s", cmsg);
 				}
 			}
+		}
+
+		static Lua *FromExtraSpace(lua_State *L)
+		{
+			return *static_cast<Lua **>(lua_getextraspace(L));
 		}
 
 	private:
@@ -643,21 +648,25 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_pushProxyFunction
 	auto lua = reinterpret_cast<Lua *>(peer);
 	auto L = lua->L();
 
+	// cfunction + upvalue
+	if (!HasFreeStack(L, 1 + Lua::PROXY_UPVALUE_COUNT)) {
+		jniutil::ThrowIllegalStateException(env, "Stack overflow");
+		return 0;
+	}
+
 	lua_CFunction f = [](lua_State *L) -> int
 	{
-		// pop arg1, arg2
-		// push Lua::proxy with arg1, arg2 as upvalue
-		lua_pushcclosure(L, Lua::ProxyFunction, 2);
+		// pop arg1
+		// push Lua::proxy with arg1 as upvalue
+		lua_pushcclosure(L, Lua::ProxyFunction, Lua::PROXY_UPVALUE_COUNT);
 		return 1;
 	};
 	// cfunc
 	lua_pushcfunction(L, f);
-	// arg1: Lua *
-	lua_pushlightuserdata(L, lua);
-	// arg2: id
+	// arg1: id
 	lua_pushinteger(L, id);
-	// longjmp_safe call (args=2, ret=1)
-	return lua_pcall(L, 2, 1, 0);
+	// longjmp_safe call (args=1, ret=1)
+	return lua_pcall(L, 1, 1, 0);
 }
 
 
