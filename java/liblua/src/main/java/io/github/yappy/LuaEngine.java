@@ -20,6 +20,18 @@ public class LuaEngine implements AutoCloseable {
 	private static final int VERSION_ARRAY_SIZE	= 4;
 	// Function returns multiple values (for C API pcall nresults)
 	private static final int LUA_MULTRET		= -1;
+	// openLibs() bit
+	private static final int LIB_BIT_BASE		= 1 << 0;
+	private static final int LIB_BIT_PACKAGE	= 1 << 1;
+	private static final int LIB_BIT_COROUTINE	= 1 << 2;
+	private static final int LIB_BIT_TABLE		= 1 << 3;
+	private static final int LIB_BIT_IO			= 1 << 4;
+	private static final int LIB_BIT_OS			= 1 << 5;
+	private static final int LIB_BIT_STRING		= 1 << 6;
+	private static final int LIB_BIT_MATH		= 1 << 7;
+	private static final int LIB_BIT_UTF8		= 1 << 8;
+	private static final int LIB_BIT_DEBUG		= 1 << 9;
+	private static final int LIB_ID_COUNT		= 10;
 	// Lua C API return code (lua.h)
 	private static final int LUA_OK				= 0;
 	private static final int LUA_YIELD			= 1;
@@ -56,6 +68,7 @@ public class LuaEngine implements AutoCloseable {
 	private static native void deletePeer(long peer);
 	private static native void setDebugHook(long peer, DebugHook hook);
 	private static native void setHookMask(long peer, int mask, int count);
+	private static native int openLibs(long peer, int libs);
 	private static native int loadString(
 		long peer, String buf, String chunkName);
 	private static native int getTop(long peer);

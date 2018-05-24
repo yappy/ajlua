@@ -9,10 +9,10 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 # for jni.h and jni_md.h
 include_directories("$ENV{JAVA_HOME}/include")
-if (WIN32)
+if(WIN32)
 	include_directories("$ENV{JAVA_HOME}/include/win32")
 endif()
-if (UNIX)
+if(UNIX)
 	include_directories("$ENV{JAVA_HOME}/include/linux")
 endif()
 

@@ -25,6 +25,21 @@ namespace {
 		VersionStrList.size() == io_github_yappy_LuaEngine_VERSION_ARRAY_SIZE,
 		"VERSION_ARRAY_SIZE");
 
+	const std::array<luaL_Reg, 10> LoadLibs = {{
+		{"_G", luaopen_base},
+		{LUA_LOADLIBNAME, luaopen_package},
+		{LUA_COLIBNAME, luaopen_coroutine},
+		{LUA_TABLIBNAME, luaopen_table},
+		{LUA_IOLIBNAME, luaopen_io},
+		{LUA_OSLIBNAME, luaopen_os},
+		{LUA_STRLIBNAME, luaopen_string},
+		{LUA_MATHLIBNAME, luaopen_math},
+		{LUA_UTF8LIBNAME, luaopen_utf8},
+		{LUA_DBLIBNAME, luaopen_debug}
+	}};
+	static_assert(LoadLibs.size() == io_github_yappy_LuaEngine_LIB_ID_COUNT,
+		"LIB_ID_COUNT");
+
 	/*
 	 * Lua panic means that longjmp is not caught by pcall.
 	 * It is not expected from this module,
@@ -322,6 +337,38 @@ JNIEXPORT void JNICALL Java_io_github_yappy_LuaEngine_setHookMask
 {
 	auto L = reinterpret_cast<Lua *>(peer)->L();
 	lua_sethook(L, Lua::Hook, mask, count);
+}
+
+/*
+ * Class:     io_github_yappy_LuaEngine
+ * Method:    openLibs
+ * Signature: (JI)I
+ */
+JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_openLibs
+  (JNIEnv *, jclass, jlong peer, jint libs)
+{
+	auto L = reinterpret_cast<Lua *>(peer)->L();
+	uint32_t bits = static_cast<uint32_t>(libs);
+
+	// arg1: bits(uint32)
+	// ret: none
+	lua_CFunction f = [](lua_State *L) -> int
+	{
+		uint32_t bits = lua_tointeger(L, 1);
+		for (uint32_t id = 0; id < LoadLibs.size(); id++) {
+			if (bits & (1U << id)) {
+				luaL_requiref(L, LoadLibs[id].name, LoadLibs[id].func, 1);
+				lua_pop(L, 1);  /* remove lib */
+			}
+		}
+		return 0;
+	};
+	// cfunc
+	lua_pushcfunction(L, f);
+	// arg1:
+	lua_pushinteger(L, bits);
+	// longjmp_safe call (args=1, ret=0)
+	return lua_pcall(L, 1, 0, 0);
 }
 
 /*
