@@ -72,16 +72,23 @@ namespace {
 				return ret;
 			}
 			else {
+				// call Throwable#getMessage()
 				jmethodID method = jniutil::GetMethodId(
 					jniutil::MethodId::Throwable_getMessage);
 				jstring jmsg = static_cast<jstring>(
 					lua->m_env->CallObjectMethod(ex, method));
-				auto cmsg = jniutil::JstrToChars(lua->m_env, jmsg);
-				if (cmsg == nullptr) {
-					jniutil::ThrowOutOfMemoryError(lua->m_env, "Native heap");
-					// longjmp
-					return lua_error(L);
+
+				std::unique_ptr<char[]> msg = nullptr;
+				if (jmsg != nullptr) {
+					msg = jniutil::JstrToChars(lua->m_env, jmsg);
+					if (msg == nullptr) {
+						jniutil::ThrowOutOfMemoryError(
+							lua->m_env, "Native heap");
+						// longjmp
+						return lua_error(L);
+					}
 				}
+				const char *cmsg = (msg != nullptr) ? msg.get() : "";
 
 				jclass clsRE = jniutil::FindClass(
 					jniutil::ClassId::RuntimeException);
@@ -91,14 +98,14 @@ namespace {
 					// RuntimeException or Error
 					// Do not clear exception status
 					// longjmp to pcall point
-					return luaL_error(L, "%s", cmsg.get());
+					return luaL_error(L, "%s", cmsg);
 				}
 				else {
 					// other Exceptions
 					// catch exception
 					lua->m_env->ExceptionClear();
 					// longjmp to pcall point
-					return luaL_error(L, "%s", cmsg.get());
+					return luaL_error(L, "%s", cmsg);
 				}
 			}
 		}
