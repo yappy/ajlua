@@ -1,3 +1,4 @@
+package io.github.yappy;
 
 public class LuaEngine implements AutoCloseable, FunctionCall {
 
@@ -128,10 +129,4 @@ public class LuaEngine implements AutoCloseable, FunctionCall {
 		}
 	}
 
-}
-
-// package private
-interface FunctionCall {
-	// @returns results count on the stack
-	int call(int id) throws Exception;
 }

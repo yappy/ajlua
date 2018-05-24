@@ -5,8 +5,14 @@ project(jlua)
 # JNI header (javah) dir and files
 set(JNICLASSDIR "${PROJECT_SOURCE_DIR}/../../java/liblua/build/classes/java/main")
 set(JNIINC "${CMAKE_CURRENT_BINARY_DIR}/jniinc")
-set(JNICLASS "LuaEngine")
-set(JNIHEADER "${JNIINC}/${JNICLASS}.h")
+# class name to javah
+set(JNICLASS "io.github.yappy.LuaEngine")
+# class file path for depandency
+string (REPLACE "." "/" JNICLASS_SLASH "${JNICLASS}")
+set(JNICLASSFILE "${JNICLASSDIR}/${JNICLASS_SLASH}.class")
+# javah output file name
+string(REPLACE "." "_" JNICLASS_BAR "${JNICLASS}")
+set(JNIHEADER "${JNIINC}/${JNICLASS_BAR}.h")
 
 # source files
 file(GLOB SRCS "src/*.cpp")
@@ -28,4 +34,4 @@ add_custom_command(
 			"-d" "${JNIINC}"
 			"-classpath" "${JNICLASSDIR}"
 			"${JNICLASS}"
-	DEPENDS "${JNICLASSDIR}/${JNICLASS}.class")
+	DEPENDS "${JNICLASSFILE}")

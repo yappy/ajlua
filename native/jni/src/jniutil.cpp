@@ -19,14 +19,14 @@ namespace {
 	};
 
 	ClassCacheEntry s_classCache[] = {
-		{ nullptr, "FunctionCall"				},
-		{ nullptr, "java/lang/Number"			},
-		{ nullptr, "java/lang/Boolean"			},
-		{ nullptr, "java/lang/Long"				},
-		{ nullptr, "java/lang/Double"			},
-		{ nullptr, "java/lang/Throwable"		},
-		{ nullptr, "java/lang/RuntimeException"	},
-		{ nullptr, "java/lang/Error"			},
+		{ nullptr, "io/github/yappy/FunctionCall"	},
+		{ nullptr, "java/lang/Number"				},
+		{ nullptr, "java/lang/Boolean"				},
+		{ nullptr, "java/lang/Long"					},
+		{ nullptr, "java/lang/Double"				},
+		{ nullptr, "java/lang/Throwable"			},
+		{ nullptr, "java/lang/RuntimeException"		},
+		{ nullptr, "java/lang/Error"				},
 	};
 	static_assert(
 		sizeof(s_classCache) / sizeof(s_classCache[0]) ==
