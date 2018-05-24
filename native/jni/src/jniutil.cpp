@@ -20,6 +20,7 @@ namespace {
 
 	ClassCacheEntry s_classCache[] = {
 		{ nullptr, "io/github/yappy/DebugHook"		},
+		{ nullptr, "io/github/yappy/LuaPrint"		},
 		{ nullptr, "io/github/yappy/FunctionRoot"	},
 		{ nullptr, "java/lang/Number"				},
 		{ nullptr, "java/lang/Boolean"				},
@@ -37,6 +38,10 @@ namespace {
 	MethodCacheEntry s_methodCache[] = {
 		{ nullptr, false,	ClassId::DebugHook,
 			"hook",			"(II)V"					},
+		{ nullptr, false,	ClassId::LuaPrint,
+			"writeString",	"(Ljava/lang/String;)V"	},
+		{ nullptr, false,	ClassId::LuaPrint,
+			"writeLine",	"()V"					},
 		{ nullptr, false,	ClassId::FunctionRoot,
 			"call",			"(I)I"					},
 		{ nullptr, false,	ClassId::Number,

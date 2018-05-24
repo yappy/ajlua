@@ -64,6 +64,7 @@ namespace {
 		Lua(JNIEnv *env) :
 			m_env(env),
 			m_hook(nullptr, jniutil::GlobalRefDeleter(env)),
+			m_print(nullptr, jniutil::GlobalRefDeleter(env)),
 			m_callback(nullptr, jniutil::GlobalRefDeleter(env))
 		{}
 		~Lua() = default;
@@ -120,6 +121,88 @@ namespace {
 				// longjmp to pcall point
 				lua_error(L);
 			}
+		}
+
+		void SetPrintFunction(jobject print)
+		{
+			// Create global ref to callback
+			// It will be deleted when overwritten or delete Lua
+			jobject global = m_env->NewGlobalRef(print);
+			if (global == nullptr) {
+				jniutil::ThrowOutOfMemoryError(m_env, "NewGlobalRef");
+				return;
+			}
+			m_print.reset(global);
+		}
+
+		static int Print(lua_State *L)
+		{
+			Lua *lua = FromExtraSpace(L);
+			JNIEnv *env = lua->m_env;
+
+			// Java interface methods
+			jmethodID idWriteString = jniutil::GetMethodId(
+				jniutil::MethodId::LuaPrint_writeString);
+			jmethodID idWriteLine = jniutil::GetMethodId(
+				jniutil::MethodId::LuaPrint_writeLine);
+
+			auto writeString = [lua, L, env, idWriteString]
+					(const char *str, size_t) {
+				jstring jstr = env->NewStringUTF(str);
+				if (jstr == nullptr) {
+					if (env->ExceptionCheck()) {
+						// OutOfMemoryError
+						// longjmp to pcall point
+						lua_error(L);
+					}
+					// Invalid UTF-8 string: ignore
+					return;
+				}
+				env->CallVoidMethod(lua->m_print.get(), idWriteString, jstr);
+				env->DeleteLocalRef(jstr);
+				// RuntimeException or Error
+				if (lua->m_env->ExceptionCheck()) {
+					// longjmp to pcall point
+					lua_error(L);
+				}
+			};
+			auto writeLine = [lua, L, env, idWriteLine]() {
+				env->CallVoidMethod(lua->m_print.get(), idWriteLine);
+				// RuntimeException or Error
+				if (env->ExceptionCheck()) {
+					// longjmp to pcall point
+					lua_error(L);
+				}
+			};
+
+			// see also: luaB_print() in lbaselib.c
+			// number of arguments
+			int n = lua_gettop(L);
+			lua_getglobal(L, "tostring");
+			for (int i = 1; i <= n; i++) {
+				const char *s;
+				size_t l;
+				//  function to be called
+				lua_pushvalue(L, -1);
+				// value to print
+				lua_pushvalue(L, i);
+				lua_call(L, 1, 1);
+				// get result
+				s = lua_tolstring(L, -1, &l);
+				if (s == nullptr) {
+					return luaL_error(L,
+						"'tostring' must return a string to 'print'");
+				}
+				if (i > 1) {
+					writeString("\t", 1);
+				}
+				writeString(s, l);
+				lua_pop(L, 1);  /* pop result */
+			}
+			writeLine();
+			// luaB_print() end
+
+			return 0;
 		}
 
 		void SetProxyCallback(jobject callback)
@@ -210,6 +293,7 @@ namespace {
 		JNIEnv *m_env;
 		size_t m_memoryLimit;
 		jniutil::GlobalRef m_hook;
+		jniutil::GlobalRef m_print;
 		jniutil::GlobalRef m_callback;
 
 		static void *Alloc(void *ud, void *ptr, size_t osize, size_t nsize)
@@ -370,6 +454,37 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_openLibs
 	lua_pushinteger(L, bits);
 	// longjmp_safe call (args=1, ret=0)
 	return lua_pcall(L, 1, 0, 0);
+}
+
+/*
+ * Class:     io_github_yappy_LuaEngine
+ * Method:    replacePrintFunc
+ * Signature: (JLio/github/yappy/LuaPrint;)I
+ */
+JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_replacePrintFunc
+  (JNIEnv *env, jclass, jlong peer, jobject print)
+{
+	auto lua = reinterpret_cast<Lua *>(peer);
+	auto L = lua->L();
+
+	if (!HasFreeStack(L, 1)) {
+		jniutil::ThrowIllegalStateException(env, "Stack overflow");
+		return 0;
+	}
+
+	lua->SetPrintFunction(print);
+
+	lua_CFunction f = [](lua_State *L) -> int
+	{
+		// replace global "print" with Lua::Print()
+		lua_pushcfunction(L, Lua::Print);
+		lua_setglobal(L, "print");
+		return 0;
+	};
+	// cfunc
+	lua_pushcfunction(L, f);
+	// longjmp_safe call (args=0, ret=0)
+	return lua_pcall(L, 0, 0, 0);
 }
 
 /*

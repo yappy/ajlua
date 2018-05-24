@@ -7,6 +7,7 @@ namespace jniutil {
 
 	enum class ClassId {
 		DebugHook,
+		LuaPrint,
 		FunctionRoot,
 		Number,
 		Boolean,
@@ -19,6 +20,8 @@ namespace jniutil {
 	};
 	enum class MethodId {
 		DebugHook_hook,
+		LuaPrint_writeString,
+		LuaPrint_writeLine,
 		FunctionRoot_call,
 		Number_doubleValue,
 		Boolean_valueOf,

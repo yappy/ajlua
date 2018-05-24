@@ -70,6 +70,7 @@ public class LuaEngine implements AutoCloseable {
 	private static native void setDebugHook(long peer, DebugHook hook);
 	private static native void setHookMask(long peer, int mask, int count);
 	private static native int openLibs(long peer, int libs);
+	private static native int replacePrintFunc(long peer, LuaPrint print);
 	private static native int loadString(
 			long peer, String buf, String chunkName);
 	private static native int getTop(long peer);
@@ -91,6 +92,8 @@ public class LuaEngine implements AutoCloseable {
 	private int versionInt;
 	private String version, release, copyright, author;
 	private LuaHook hook = null;
+	private LuaPrint print = null;
+	private LuaPrint printRoot = new LuaPrintImpl();
 	private List<LuaFunction> functionList = new ArrayList<LuaFunction>();
 
 	public LuaEngine() {
@@ -201,6 +204,29 @@ public class LuaEngine implements AutoCloseable {
 		}
 	}
 
+	private class LuaPrintImpl implements LuaPrint {
+		@Override
+		public void writeString(String str) {
+			if (print != null) {
+				print.writeString(str);
+			}
+			else {
+				// default
+				System.out.print(str);
+			}
+		}
+		@Override
+		public void writeLine() {
+			if (print != null) {
+				print.writeLine();
+			}
+			else {
+				// default
+				System.out.println();
+			}
+		}
+	}
+
 	// Function call root
 	private class FunctionRootImpl implements FunctionRoot {
 		@Override
@@ -234,6 +260,15 @@ public class LuaEngine implements AutoCloseable {
 			bits |= e.ordinal();
 		}
 		checkLuaError(openLibs(peer, bits));
+
+		// replace "print" function if base library is loaded
+		if (libs.contains(LuaStdLib.BASE)) {
+			replacePrintFunc(peer, printRoot);
+		}
+	}
+
+	public void setPrintFunction(LuaPrint print) {
+		this.print = print;
 	}
 
 	public void addGlobalFunction(String name, LuaFunction func)
