@@ -36,18 +36,6 @@ public class App {
 				System.out.println(ex.getMessage());
 			}
 		}
-
-		try (LuaEngine lua = new LuaEngine()) {
-			try {
-				long start = System.currentTimeMillis();
-				lua.execString((type, line) -> {
-						return System.currentTimeMillis() - start > 1000;
-					},
-					"while true do end", "test.lua");
-			} catch (Exception ex) {
-				System.out.println(ex.getMessage());
-			}
-		}
 	}
 
 }

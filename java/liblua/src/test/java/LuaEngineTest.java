@@ -63,15 +63,20 @@ public class LuaEngineTest {
 
 	@Test
 	public void timeoutError() throws Exception {
-		exception.expect(LuaException.class);
-		exception.expectMessage("execution aborted");
+		exception.expect(InterruptedException.class);
 		long start = System.currentTimeMillis();
-		lua.execString((type, line) -> {
-				boolean wait = System.currentTimeMillis() - start < 100;
-				return !wait;
-			},
-			"while true do end",
-			"timeoutError.lua");
+		Thread main = Thread.currentThread();
+		Thread sub = new Thread(() -> {
+			try { Thread.sleep(100); } catch(Exception e) {}
+			main.interrupt();
+		});
+		sub.start();
+		try {
+			lua.execString("while true do end", "timeoutError.lua");
+		}
+		finally {
+			sub.join();
+		}
 	}
 
 	@Test

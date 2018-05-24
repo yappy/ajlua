@@ -36,7 +36,7 @@ namespace {
 
 	MethodCacheEntry s_methodCache[] = {
 		{ nullptr, false,	ClassId::DebugHook,
-			"hook",			"(II)Z"					},
+			"hook",			"(II)V"					},
 		{ nullptr, false,	ClassId::FunctionRoot,
 			"call",			"(I)I"					},
 		{ nullptr, false,	ClassId::Number,

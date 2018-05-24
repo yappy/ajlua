@@ -71,18 +71,19 @@ public class LuaEngine implements AutoCloseable {
 	private static native void setHookMask(long peer, int mask, int count);
 	private static native int openLibs(long peer, int libs);
 	private static native int loadString(
-		long peer, String buf, String chunkName);
+			long peer, String buf, String chunkName);
 	private static native int getTop(long peer);
 	private static native void setTop(long peer, int index);
 	private static native int pushValues(long peer, Object[] values);
 	private static native int getValues(
-		long peer, byte[] types, Object[] values);
+			long peer, byte[] types, Object[] values);
 	private static native int pcall(
-		long peer, int nargs, int nresults, int msgh);
+			long peer, int nargs, int nresults, int msgh)
+			throws InterruptedException;
 	private static native int getGlobal(long peer, String name);
 	private static native int setGlobal(long peer, String name);
 	private static native void setProxyCallback(
-		long peer, FunctionRoot callback);
+			long peer, FunctionRoot callback);
 	private static native int pushProxyFunction(long peer, int id);
 
 	// private variables
@@ -162,7 +163,8 @@ public class LuaEngine implements AutoCloseable {
 		return result;
 	}
 
-	private int pcallWithHook(LuaHook hook, int nargs, int nresults, int msgh) {
+	private int pcallWithHook(LuaHook hook, int nargs, int nresults, int msgh)
+			throws InterruptedException {
 		this.hook = hook;
 		try {
 			return pcall(peer, nargs, nresults, msgh);
@@ -174,23 +176,27 @@ public class LuaEngine implements AutoCloseable {
 
 	private class DebugHookImpl implements DebugHook {
 		@Override
-		public boolean hook(int event, int currentline) {
-			if (hook == null) {
-				return true;
+		public void hook(int event, int currentline)
+				throws InterruptedException {
+			if (hook != null) {
+				switch (event) {
+				case LUA_HOOKCALL:
+					hook.hook(LuaHook.Type.CALL, currentline);
+				case LUA_HOOKRET:
+					hook.hook(LuaHook.Type.RET, currentline);
+				case LUA_HOOKLINE:
+					hook.hook(LuaHook.Type.LINE, currentline);
+				case LUA_HOOKCOUNT:
+					hook.hook(LuaHook.Type.COUNT, currentline);
+				case LUA_HOOKTAILCALL:
+					hook.hook(LuaHook.Type.TAILCALL, currentline);
+				default:
+					throw new Error("Unkwon hook event");
+				}
 			}
-			switch (event) {
-			case LUA_HOOKCALL:
-				return hook.hook(LuaHook.Type.CALL, currentline);
-			case LUA_HOOKRET:
-				return hook.hook(LuaHook.Type.RET, currentline);
-			case LUA_HOOKLINE:
-				return hook.hook(LuaHook.Type.LINE, currentline);
-			case LUA_HOOKCOUNT:
-				return hook.hook(LuaHook.Type.COUNT, currentline);
-			case LUA_HOOKTAILCALL:
-				return hook.hook(LuaHook.Type.TAILCALL, currentline);
-			default:
-				throw new Error("Unkwon hook event");
+			// return true if interrupted
+			if (Thread.currentThread().isInterrupted()) {
+				throw new InterruptedException();
 			}
 		}
 	}
@@ -258,13 +264,13 @@ public class LuaEngine implements AutoCloseable {
 
 	public Object[] callGlobalFunction(
 			String name, Object... params)
-			throws LuaException {
+			throws LuaException, InterruptedException {
 		return callGlobalFunction(null, name, params);
 	}
 
 	public Object[] callGlobalFunction(
 			LuaHook hook, String name, Object... params)
-			throws LuaException {
+			throws LuaException, InterruptedException {
 		if (name == null) {
 			throw new NullPointerException("name");
 		}
@@ -292,12 +298,13 @@ public class LuaEngine implements AutoCloseable {
 		return peer;
 	}
 
-	public void execString(String buf, String chunkName) throws LuaException {
+	public void execString(String buf, String chunkName)
+			throws LuaException, InterruptedException {
 		execString(null, buf, chunkName);
 	}
 
 	public void execString(LuaHook hook, String buf, String chunkName)
-			throws LuaException {
+			throws LuaException, InterruptedException {
 		// push chunk function
 		checkLuaError(loadString(peer, buf, chunkName));
 		// pcall nargs=0, nresults=0

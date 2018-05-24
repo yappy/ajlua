@@ -113,17 +113,12 @@ namespace {
 			// Java interface call
 			jmethodID method = jniutil::GetMethodId(
 				jniutil::MethodId::DebugHook_hook);
-			jboolean ret = lua->m_env->CallBooleanMethod(
+			lua->m_env->CallVoidMethod(
 				lua->m_hook.get(), method, ar->event, ar->currentline);
-			// RuntimeException or Error because no "throws"
+			// including InterruptedException
 			if (lua->m_env->ExceptionCheck()) {
-				// longjmp
+				// longjmp to pcall point
 				lua_error(L);
-			}
-
-			// If false, raise lua error to abort pcall
-			if (!ret) {
-				luaL_error(L, "execution aborted");
 			}
 		}
 
@@ -171,7 +166,7 @@ namespace {
 					if (msg == nullptr) {
 						jniutil::ThrowOutOfMemoryError(
 							lua->m_env, "Native heap");
-						// longjmp
+						// longjmp to pcall point
 						return lua_error(L);
 					}
 				}
@@ -183,14 +178,15 @@ namespace {
 				if (lua->m_env->IsInstanceOf(ex, clsRE) ||
 					lua->m_env->IsInstanceOf(ex, clsError)) {
 					// RuntimeException or Error
-					// Do not clear exception status
+					// DO NOT clear exception status
 					// longjmp to pcall point
-					return luaL_error(L, "%s", cmsg);
+					return lua_error(L);
 				}
 				else {
 					// other Exceptions
-					// catch exception
+					// clear exception
 					lua->m_env->ExceptionClear();
+					// treat as lua error (msg = ex.getMessage())
 					// longjmp to pcall point
 					return luaL_error(L, "%s", cmsg);
 				}
@@ -593,6 +589,19 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_pcall
 {
 	auto L = reinterpret_cast<Lua *>(peer)->L();
 
+	/*
+	 * setjmp() and call lua function
+	 * pcall could call Lua::ProxyFunc or Lua::Hook.
+	 * They could
+	 * - set Java exception status and longjmp() (with lua_error())
+	 * -- RuntimeException
+	 * -- Error
+	 * -- InterrupedException
+	 * - longjmp() (with luaL_error() = push string + lua_error())
+	 * lua_pcall() would return LUA_ERRRUN in both cases,
+	 * but if exception status is set, an exception would be thrown and
+	 * LUA_ERRRUN would be invisible from Java code.
+	 */
 	return lua_pcall(L, nargs, nresults, msgh);
 }
 
