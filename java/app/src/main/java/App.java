@@ -56,8 +56,10 @@ public class App {
 		}
 
 		try (LuaEngine lua = new LuaEngine()) {
-			lua.pushProxyFunction(lua.getPeerForDebug(), 123);
-			lua.setGlobal(lua.getPeerForDebug(), "javafunc");
+			lua.addGlobalFunction("javafunc", () -> {
+					System.out.println("hello");
+					return 0;
+				});
 			lua.loadString("javafunc()", "test.lua");
 			try {
 				lua.pcall(0, 0);

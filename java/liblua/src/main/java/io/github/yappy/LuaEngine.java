@@ -1,6 +1,9 @@
 package io.github.yappy;
 
-public class LuaEngine implements AutoCloseable, FunctionRoot {
+import java.util.ArrayList;
+import java.util.List;
+
+public class LuaEngine implements AutoCloseable {
 
 	static {
 		System.loadLibrary("jlua");
@@ -46,12 +49,14 @@ public class LuaEngine implements AutoCloseable, FunctionRoot {
 		long peer, int nargs, int nresults, int msgh);
 	public static native int getGlobal(long peer, String name);
 	public static native int setGlobal(long peer, String name);
-	public static native void setProxyCallback(
+	private static native void setProxyCallback(
 		long peer, FunctionRoot callback);
-	public static native int pushProxyFunction(long peer, int id);
+	private static native int pushProxyFunction(long peer, int id);
 
 
 	private long peer = 0;
+	private int nextFunctionId = 0;
+	private List<LuaFunction> functionList = new ArrayList<LuaFunction>();
 
 	public LuaEngine() {
 		this.peer = newPeer();
@@ -59,7 +64,7 @@ public class LuaEngine implements AutoCloseable, FunctionRoot {
 			// probably cannot allocate in native heap
 			throw new OutOfMemoryError();
 		}
-		setProxyCallback(peer, this);
+		setProxyCallback(peer, new FunctionRootImpl());
 	}
 
 	@Override
@@ -67,11 +72,32 @@ public class LuaEngine implements AutoCloseable, FunctionRoot {
 		deletePeer(peer);
 	}
 
-	@Override
-	public int call(int id) throws Exception {
-		System.out.println("callback! " + id);
-		throw new Exception("TEST EXCEPTION");
+	// Function call root
+	private class FunctionRootImpl implements FunctionRoot {
+		@Override
+		public int call(int id) throws Exception {
+			if (id < 0 || id >= functionList.size()) {
+				throw new Error("Invalid function root call ID");
+			}
+			return functionList.get(id).call();
+		}
 	}
+
+	public void addGlobalFunction(String name, LuaFunction func) {
+		if (func == null) {
+			throw new NullPointerException("func");
+		}
+		if (name == null) {
+			throw new NullPointerException("name");
+		}
+
+		int id = functionList.size();
+		functionList.add(func);
+		// TODO: error handling
+		pushProxyFunction(peer, id);
+		setGlobal(peer, name);
+	}
+
 
 	public long getPeerForDebug() {
 		return peer;

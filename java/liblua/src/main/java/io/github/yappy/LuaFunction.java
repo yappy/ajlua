@@ -1,6 +1,6 @@
 package io.github.yappy;
 
-public interface Function {
+public interface LuaFunction {
 
 	// @returns Results count on the stack.
 	// @throws Exception Its message will be converted to lua error.
