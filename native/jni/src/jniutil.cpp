@@ -19,6 +19,7 @@ namespace {
 	};
 
 	ClassCacheEntry s_classCache[] = {
+		{ nullptr, "io/github/yappy/DebugHook"		},
 		{ nullptr, "io/github/yappy/FunctionRoot"	},
 		{ nullptr, "java/lang/Number"				},
 		{ nullptr, "java/lang/Boolean"				},
@@ -34,6 +35,8 @@ namespace {
 		"ClassCache num");
 
 	MethodCacheEntry s_methodCache[] = {
+		{ nullptr, false,	ClassId::DebugHook,
+			"hook",			"(II)Z"					},
 		{ nullptr, false,	ClassId::FunctionRoot,
 			"call",			"(I)I"					},
 		{ nullptr, false,	ClassId::Number,

@@ -11,6 +11,8 @@ public class LuaEngine implements AutoCloseable {
 
 	/** Default memory limit */
 	public static final long DEFAULT_MEMORY_LIMIT = 16 * 1024 * 1024;
+	/** Default instruction count for interrupt */
+	public static final int DEFAULT_INTR_INST_COUNT = 1000;
 	/** Lua max stack size. */
 	public static final int MAX_STACK = 20;
 
@@ -76,15 +78,17 @@ public class LuaEngine implements AutoCloseable {
 	private List<LuaFunction> functionList = new ArrayList<LuaFunction>();
 
 	public LuaEngine() {
-		this(DEFAULT_MEMORY_LIMIT);
+		this(DEFAULT_MEMORY_LIMIT, DEFAULT_INTR_INST_COUNT);
 	}
 
-	public LuaEngine(long nativeMemoryLimit) {
+	public LuaEngine(long nativeMemoryLimit, int intrInstCount) {
 		this.peer = newPeer(nativeMemoryLimit);
 		if (peer == 0) {
 			// probably cannot allocate in native heap
 			throw new OutOfMemoryError();
 		}
+		setDebugHook(peer, new DebugHookImpl());
+		setHookMask(peer, LUA_MASKCOUNT, intrInstCount);
 		setProxyCallback(peer, new FunctionRootImpl());
 
 		String[] strs = new String[VERSION_ARRAY_SIZE];
@@ -141,6 +145,15 @@ public class LuaEngine implements AutoCloseable {
 			result[i] = covertL2J(types[i], values[i]);
 		}
 		return result;
+	}
+
+	private class DebugHookImpl implements DebugHook {
+		@Override
+		public boolean hook(int event, int currentline) {
+			System.out.printf("hook event=%d, currentline=%d%n",
+				event, currentline);
+			return true;
+		}
 	}
 
 	// Function call root

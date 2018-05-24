@@ -36,6 +36,14 @@ public class App {
 				System.out.println(ex.getMessage());
 			}
 		}
+
+		try (LuaEngine lua = new LuaEngine()) {
+			try {
+				lua.execString("while true do end", "test.lua");
+			} catch (Exception ex) {
+				System.out.println(ex.getMessage());
+			}
+		}
 	}
 
 }

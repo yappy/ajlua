@@ -6,6 +6,7 @@
 namespace jniutil {
 
 	enum class ClassId {
+		DebugHook,
 		FunctionRoot,
 		Number,
 		Boolean,
@@ -17,6 +18,7 @@ namespace jniutil {
 		ClassCacheNum,
 	};
 	enum class MethodId {
+		DebugHook_hook,
 		FunctionRoot_call,
 		Number_doubleValue,
 		Boolean_valueOf,

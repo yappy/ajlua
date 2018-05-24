@@ -63,9 +63,14 @@ namespace {
 			if (m_lua == nullptr) {
 				return false;
 			}
+
 			// set panic handler
 			env_for_panic = m_env;
 			lua_atpanic(m_lua.get(), panic_handler);
+
+			// set this at extraspace
+			void *extra = lua_getextraspace(m_lua.get());
+			*static_cast<Lua **>(extra) = this;
 
 			return true;
 		}
@@ -85,6 +90,22 @@ namespace {
 				return;
 			}
 			m_hook.reset(global);
+		}
+
+		static void Hook(lua_State *L, lua_Debug *ar)
+		{
+			auto lua = *static_cast<Lua **>(lua_getextraspace(L));
+
+			// Java interface call
+			jmethodID method = jniutil::GetMethodId(
+				jniutil::MethodId::DebugHook_hook);
+			jboolean ret = lua->m_env->CallBooleanMethod(
+				lua->m_hook.get(), method, ar->event, ar->currentline);
+
+			// If false, raise lua error to abort pcall
+			if (!ret) {
+				luaL_error(L, "Aborted");
+			}
 		}
 
 		void SetProxyCallback(jobject callback)
@@ -292,7 +313,11 @@ JNIEXPORT void JNICALL Java_io_github_yappy_LuaEngine_setDebugHook
  * Signature: (JII)V
  */
 JNIEXPORT void JNICALL Java_io_github_yappy_LuaEngine_setHookMask
-  (JNIEnv *, jclass, jlong, jint, jint);
+  (JNIEnv *, jclass, jlong peer, jint mask, jint count)
+{
+	auto L = reinterpret_cast<Lua *>(peer)->L();
+	lua_sethook(L, Lua::Hook, mask, count);
+}
 
 /*
  * Class:     io_github_yappy_LuaEngine

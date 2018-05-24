@@ -6,7 +6,7 @@ package io.github.yappy;
 interface DebugHook {
 
 	// If an exception is thrown, lua error will be occured.
-	// @throws InterruptedException Causes lua error for aborting pcall.
-	boolean hook(int event, int currentline) throws InterruptedException;
+	// @return Raise lua error for aborting pcall if false.
+	boolean hook(int event, int currentline);
 
 }
