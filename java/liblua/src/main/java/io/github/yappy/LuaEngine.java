@@ -70,6 +70,7 @@ public class LuaEngine implements AutoCloseable {
 	@Override
 	public void close() {
 		deletePeer(peer);
+		peer = 0;
 	}
 
 	private static Object covertL2J(byte type, Object luaValue) {
@@ -111,12 +112,13 @@ public class LuaEngine implements AutoCloseable {
 			if (results == null) {
 				return 0;
 			}
-			pushValues(peer, results);
+			checkLuaError(pushValues(peer, results));
 			return results.length;
 		}
 	}
 
-	public void addGlobalFunction(String name, LuaFunction func) {
+	public void addGlobalFunction(String name, LuaFunction func)
+		throws LuaException {
 		if (func == null) {
 			throw new NullPointerException("func");
 		}
@@ -126,9 +128,9 @@ public class LuaEngine implements AutoCloseable {
 
 		int id = functionList.size();
 		functionList.add(func);
-		// TODO: error handling
-		pushProxyFunction(peer, id);
-		setGlobal(peer, name);
+
+		checkLuaError(pushProxyFunction(peer, id));
+		checkLuaError(setGlobal(peer, name));
 	}
 
 
@@ -136,43 +138,36 @@ public class LuaEngine implements AutoCloseable {
 		return peer;
 	}
 
-	public void loadString(String buf, String chunkName) throws Exception {
+	public void loadString(String buf, String chunkName) throws LuaException {
 		int ret = loadString(peer, buf, chunkName);
-		// TODO: define exception
-		switch (ret) {
-		case LUA_OK:
-			return;
-		case LUA_ERRSYNTAX:
-			throw new Exception("syntax error: " + getErrorMessage());
-		case LUA_ERRMEM:
-			throw new OutOfMemoryError();
-		case LUA_ERRGCMM:
-			throw new Exception("error in gc");
-		default:
-			throw new Error();
-		}
+		checkLuaError(ret);
 	}
 
-	public void pcall(int nargs, int nresults) throws Exception {
+	public void pcall(int nargs, int nresults) throws LuaException {
 		int ret = pcall(peer, nargs, nresults, 0);
-		// TODO: define exception
-		switch (ret) {
+		checkLuaError(ret);
+	}
+
+	private void checkLuaError(int code) throws LuaException {
+		switch (code) {
 		case LUA_OK:
 			return;
 		case LUA_ERRRUN:
-			throw new Exception("runtime error: " + getErrorMessage());
+			throw new LuaRuntimeException("runtime error: " + getLuaErrorMsg());
+		case LUA_ERRSYNTAX:
+			throw new LuaSyntaxException("syntax error: " + getLuaErrorMsg());
 		case LUA_ERRMEM:
-			throw new OutOfMemoryError();
-		case LUA_ERRERR:
-			throw new Exception("error in msgh");
+			throw new LuaException("memory error");
 		case LUA_ERRGCMM:
-			throw new Exception("error in gc");
+			throw new LuaException("error in gc");
+		case LUA_ERRERR:
+			throw new LuaException("error in message handler");
 		default:
-			throw new Error();
+			throw new Error("Unknown return code");
 		}
 	}
 
-	private String getErrorMessage()
+	private String getLuaErrorMsg()
 	{
 		byte[] types = new byte[MAX_STACK];
 		Object[] values = new Object[MAX_STACK];
