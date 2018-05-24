@@ -1,6 +1,7 @@
 import io.github.yappy.*;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -40,6 +41,22 @@ public class LuaEngineTest {
 	public void runtimeError() throws Exception {
 		exception.expect(LuaRuntimeException.class);
 		lua.execString("x = nil x(0)", "runtimeError.lua");
+	}
+
+	@Test
+	@Ignore
+	public void memoryError() throws Exception {
+		exception.expect(LuaException.class);
+		exception.expectMessage("memory error");
+		lua.execString(
+			"t = {}\n" +
+			"t[1] = \"nanglasgfsaafsdisabgksbsgabbikgbslieagbilaegbilrgag\"\n" +
+			"i = 2\n" +
+			"while true do\n" +
+			"  t[i] = t[i - 1] .. t[i - 1]\n" +
+			"  i = i + 1\n" +
+			"end",
+			"runtimeError.lua");
 	}
 
 }
