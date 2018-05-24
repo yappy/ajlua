@@ -1,6 +1,6 @@
 package io.github.yappy;
 
-public class LuaEngine implements AutoCloseable, FunctionCall {
+public class LuaEngine implements AutoCloseable, FunctionRoot {
 
 	static {
 		System.loadLibrary("jlua");
@@ -47,7 +47,7 @@ public class LuaEngine implements AutoCloseable, FunctionCall {
 	public static native int getGlobal(long peer, String name);
 	public static native int setGlobal(long peer, String name);
 	public static native void setProxyCallback(
-		long peer, FunctionCall callback);
+		long peer, FunctionRoot callback);
 	public static native int pushProxyFunction(long peer, int id);
 
 

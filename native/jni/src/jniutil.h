@@ -6,7 +6,7 @@
 namespace jniutil {
 
 	enum class ClassId {
-		FunctionCall,
+		FunctionRoot,
 		Number,
 		Boolean,
 		Long,
@@ -17,7 +17,7 @@ namespace jniutil {
 		ClassCacheNum,
 	};
 	enum class MethodId {
-		FunctionCall_call,
+		FunctionRoot_call,
 		Number_doubleValue,
 		Boolean_valueOf,
 		Boolean_booleanValue,

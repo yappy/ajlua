@@ -62,7 +62,7 @@ namespace {
 				lua_tointeger(L, lua_upvalueindex(PROXY_UPVALUE_IND_ID)));
 			// Java interface call
 			jmethodID method = jniutil::GetMethodId(
-				jniutil::MethodId::FunctionCall_call);
+				jniutil::MethodId::FunctionRoot_call);
 			int ret = lua->m_env->CallIntMethod(
 				lua->m_callback.get(), method, id);
 			// exception check
@@ -495,7 +495,7 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_setGlobal
 /*
  * Class:     io_github_yappy_LuaEngine
  * Method:    setProxyCallback
- * Signature: (JLio/github/yappy/FunctionCall;)V
+ * Signature: (JLio/github/yappy/FunctionRoot;)V
  */
 JNIEXPORT void JNICALL Java_io_github_yappy_LuaEngine_setProxyCallback
   (JNIEnv *env, jclass, jlong peer, jobject callback)
