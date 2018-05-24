@@ -44,13 +44,12 @@ public class LuaEngineTest {
 	}
 
 	@Test
-	@Ignore
 	public void memoryError() throws Exception {
 		exception.expect(LuaException.class);
 		exception.expectMessage("memory error");
 		lua.execString(
 			"t = {}\n" +
-			"t[1] = \"nanglasgfsaafsdisabgksbsgabbikgbslieagbilaegbilrgag\"\n" +
+			"t[1] = \"abcde\"\n" +
 			"i = 2\n" +
 			"while true do\n" +
 			"  t[i] = t[i - 1] .. t[i - 1]\n" +

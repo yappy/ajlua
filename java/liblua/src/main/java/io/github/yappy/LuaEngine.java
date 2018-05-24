@@ -9,6 +9,8 @@ public class LuaEngine implements AutoCloseable {
 		System.loadLibrary("jlua");
 	}
 
+	/** Default memory limit */
+	public static final long DEFAULT_MEMORY_LIMIT = 16 * 1024 * 1024;
 	/** Lua max stack size. */
 	public static final int MAX_STACK = 20;
 
@@ -37,7 +39,7 @@ public class LuaEngine implements AutoCloseable {
 
 	// Native interface
 	private static native int getVersionInfo(String[] info);
-	private static native long newPeer();
+	private static native long newPeer(long nativeMemoryLimit);
 	private static native void deletePeer(long peer);
 	private static native int loadString(
 		long peer, String buf, String chunkName);
@@ -61,7 +63,11 @@ public class LuaEngine implements AutoCloseable {
 	private List<LuaFunction> functionList = new ArrayList<LuaFunction>();
 
 	public LuaEngine() {
-		this.peer = newPeer();
+		this(DEFAULT_MEMORY_LIMIT);
+	}
+
+	public LuaEngine(long nativeMemoryLimit) {
+		this.peer = newPeer(nativeMemoryLimit);
 		if (peer == 0) {
 			// probably cannot allocate in native heap
 			throw new OutOfMemoryError();

@@ -25,6 +25,22 @@ namespace {
 		VersionStrList.size() == io_github_yappy_LuaEngine_VERSION_ARRAY_SIZE,
 		"VERSION_ARRAY_SIZE");
 
+	/*
+	 * Lua panic means that longjmp is not caught by pcall.
+	 * It is not expected from this module,
+	 * and C++, JNI, Java stack might have been vanished.
+	 * (destructor, cleanup local ref would not work in that case)
+	 * It is dangerous situation and unrecoverable.
+	 * So shutdown the JVM with FatalError.
+	 */
+	JNIEnv *env_for_panic = nullptr;
+	int panic_handler(lua_State *L) {
+		if (env_for_panic != nullptr) {
+			env_for_panic->FatalError("unprotected error in lua");
+		}
+		return 0;
+	}
+
 	class Lua {
 	public:
 		static const int PROXY_UPVALUE_COUNT = 2;
@@ -37,12 +53,19 @@ namespace {
 		{}
 		~Lua() = default;
 
-		bool Initialize()
+		bool Initialize(size_t memoryLimit)
 		{
-			m_lua.reset(luaL_newstate());
+			// custom allocator param
+			m_memoryLimit = memoryLimit;
+			// initialize with custom allocator
+			m_lua.reset(lua_newstate(Alloc, this));
 			if (m_lua == nullptr) {
 				return false;
 			}
+			// set panic handler
+			env_for_panic = m_env;
+			lua_atpanic(m_lua.get(), panic_handler);
+
 			return true;
 		}
 
@@ -130,7 +153,42 @@ namespace {
 		std::unique_ptr<lua_State, LuaDeleter> m_lua;
 
 		JNIEnv *m_env;
+		size_t m_memoryLimit;
 		jniutil::GlobalRef m_callback;
+
+		static void *Alloc(void *ud, void *ptr, size_t osize, size_t nsize)
+		{
+			auto lua = static_cast<Lua *>(ud);
+			if (nsize == 0) {
+				// free oldsize
+				lua->m_memoryLimit += osize;
+				std::free(ptr);
+				return nullptr;
+			}
+			else {
+				if (ptr == nullptr) {
+					// malloc newsize
+					if (lua->m_memoryLimit < nsize) {
+						return nullptr;
+					}
+					lua->m_memoryLimit -= nsize;
+					return std::malloc(nsize);
+				}
+				else {
+					// realloc oldsize -> newsize
+					if (nsize > osize) {
+						if (lua->m_memoryLimit < nsize - osize) {
+							return nullptr;
+						}
+						lua->m_memoryLimit -= nsize - osize;
+					}
+					else {
+						lua->m_memoryLimit += osize - nsize;
+					}
+					return std::realloc(ptr, nsize);
+				}
+			}
+		}
 	};
 
 
@@ -173,17 +231,17 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_getVersionInfo
 /*
  * Class:     io_github_yappy_LuaEngine
  * Method:    newPeer
- * Signature: ()J
+ * Signature: (J)J
  */
 JNIEXPORT jlong JNICALL Java_io_github_yappy_LuaEngine_newPeer
-  (JNIEnv *env, jclass)
+  (JNIEnv *env, jclass, jlong nativeMemoryLimit)
 {
 	Lua *lua = new(std::nothrow) Lua(env);
 	if (lua == nullptr) {
 		// new failed; out of memory
 		return 0;
 	}
-	if (!lua->Initialize()) {
+	if (!lua->Initialize(nativeMemoryLimit)) {
 		// lua_newstate failed; out of memory
 		delete lua;
 		return 0;
