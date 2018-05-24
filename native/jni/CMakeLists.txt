@@ -25,6 +25,8 @@ target_link_libraries(${PROJECT_NAME} "lua")
 
 install(TARGETS ${PROJECT_NAME}
 	DESTINATION "${PROJECT_SOURCE_DIR}/../../java/app/build/natives")
+install(TARGETS ${PROJECT_NAME}
+	DESTINATION "${PROJECT_SOURCE_DIR}/../../java/liblua/build/natives")
 
 # javah target
 add_custom_target(javah SOURCES ${JNIHEADER})
