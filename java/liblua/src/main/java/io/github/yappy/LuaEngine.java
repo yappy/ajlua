@@ -2,6 +2,7 @@ package io.github.yappy;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class LuaEngine implements AutoCloseable {
 
@@ -217,6 +218,18 @@ public class LuaEngine implements AutoCloseable {
 		}
 	}
 
+	public void openStdLibs() throws LuaException {
+		openStdLibs(LuaStdLib.DEFAULT_SET);
+	}
+
+	public void openStdLibs(Set<LuaStdLib> libs) throws LuaException {
+		int bits = 0;
+		for (LuaStdLib e : libs) {
+			bits |= e.ordinal();
+		}
+		checkLuaError(openLibs(peer, bits));
+	}
+
 	public void addGlobalFunction(String name, LuaFunction func)
 			throws LuaException {
 		if (name == null) {
@@ -306,7 +319,7 @@ public class LuaEngine implements AutoCloseable {
 		case LUA_ERRERR:
 			throw new LuaException("error in message handler");
 		default:
-			throw new Error("Unknown return code");
+			throw new Error("Unknown return code: " + code);
 		}
 	}
 

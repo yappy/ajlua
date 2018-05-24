@@ -73,4 +73,21 @@ public class LuaEngineTest {
 			"timeoutError.lua");
 	}
 
+	@Test
+	public void stdlibTest() throws Exception {
+		lua.openStdLibs();
+		lua.execString(
+			"function f()\n" +
+			"  local t = {5, 2, 1, 4, 3}\n" +
+			"  table.sort(t)\n" +
+			"  return table.unpack(t)\n" +
+			"end",
+			"stdlibTest.lua");
+		Object[] results = lua.callGlobalFunction("f");
+		assertArrayEquals(
+			new Object[] { Double.valueOf(1.0), Double.valueOf(2.0),
+				Double.valueOf(3.0), Double.valueOf(4.0), Double.valueOf(5.0)},
+			results);
+	}
+
 }
