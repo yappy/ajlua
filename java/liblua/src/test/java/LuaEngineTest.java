@@ -5,6 +5,7 @@ import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.rules.Timeout;
 import static org.junit.Assert.*;
 
 public class LuaEngineTest {
@@ -24,6 +25,8 @@ public class LuaEngineTest {
 
 	@Rule
 	public ExpectedException exception = ExpectedException.none();
+	@Rule
+	public Timeout globalTimeout = Timeout.millis(1000);
 
 
 	@Test
@@ -56,6 +59,18 @@ public class LuaEngineTest {
 			"  i = i + 1\n" +
 			"end",
 			"runtimeError.lua");
+	}
+
+	@Test
+	public void timeoutError() throws Exception {
+		exception.expect(LuaException.class);
+		exception.expectMessage("execution aborted");
+		long start = System.currentTimeMillis();
+		lua.execString((type, line) -> {
+				return System.currentTimeMillis() - start < 100;
+			},
+			"while true do end",
+			"timeoutError.lua");
 	}
 
 }

@@ -104,7 +104,7 @@ namespace {
 
 			// If false, raise lua error to abort pcall
 			if (!ret) {
-				luaL_error(L, "Aborted");
+				luaL_error(L, "execution aborted");
 			}
 		}
 
