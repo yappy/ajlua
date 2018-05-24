@@ -75,6 +75,7 @@ public class LuaEngine implements AutoCloseable {
 	private long peer = 0;
 	private int versionInt;
 	private String version, release, copyright, author;
+	private LuaHook hook = null;
 	private List<LuaFunction> functionList = new ArrayList<LuaFunction>();
 
 	public LuaEngine() {
@@ -147,12 +148,36 @@ public class LuaEngine implements AutoCloseable {
 		return result;
 	}
 
+	private int pcallWithHook(LuaHook hook, int nargs, int nresults, int msgh) {
+		this.hook = hook;
+		try {
+			return pcall(peer, nargs, nresults, msgh);
+		}
+		finally {
+			this.hook = null;
+		}
+	}
+
 	private class DebugHookImpl implements DebugHook {
 		@Override
 		public boolean hook(int event, int currentline) {
-			System.out.printf("hook event=%d, currentline=%d%n",
-				event, currentline);
-			return true;
+			if (hook == null) {
+				return true;
+			}
+			switch (event) {
+			case LUA_HOOKCALL:
+				return hook.hook(LuaHook.Type.CALL, currentline);
+			case LUA_HOOKRET:
+				return hook.hook(LuaHook.Type.RET, currentline);
+			case LUA_HOOKLINE:
+				return hook.hook(LuaHook.Type.LINE, currentline);
+			case LUA_HOOKCOUNT:
+				return hook.hook(LuaHook.Type.COUNT, currentline);
+			case LUA_HOOKTAILCALL:
+				return hook.hook(LuaHook.Type.TAILCALL, currentline);
+			default:
+				throw new Error("Unkwon hook event");
+			}
 		}
 	}
 
@@ -205,7 +230,14 @@ public class LuaEngine implements AutoCloseable {
 		checkLuaError(setGlobal(peer, name));
 	}
 
-	public Object[] callGlobalFunction(String name, Object... params)
+	public Object[] callGlobalFunction(
+			String name, Object... params)
+			throws LuaException {
+		return callGlobalFunction(null, name, params);
+	}
+
+	public Object[] callGlobalFunction(
+			LuaHook hook, String name, Object... params)
 			throws LuaException {
 		if (name == null) {
 			throw new NullPointerException("name");
@@ -222,7 +254,7 @@ public class LuaEngine implements AutoCloseable {
 		// push parameters
 		checkLuaError(pushValues(peer, params));
 		// pcall
-		checkLuaError(pcall(peer, params.length, LUA_MULTRET, 0));
+		checkLuaError(pcallWithHook(hook, params.length, LUA_MULTRET, 0));
 		// pop results
 		Object[] results = popAndConvertAll();
 
@@ -235,10 +267,15 @@ public class LuaEngine implements AutoCloseable {
 	}
 
 	public void execString(String buf, String chunkName) throws LuaException {
+		execString(null, buf, chunkName);
+	}
+
+	public void execString(LuaHook hook, String buf, String chunkName)
+			throws LuaException {
 		// push chunk function
 		checkLuaError(loadString(peer, buf, chunkName));
 		// pcall nargs=0, nresults=0
-		checkLuaError(pcall(peer, 0, 0, 0));
+		checkLuaError(pcallWithHook(hook, 0, 0, 0));
 	}
 
 	private void checkLuaError(int code) throws LuaException {
