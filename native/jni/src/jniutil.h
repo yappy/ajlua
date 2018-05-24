@@ -54,19 +54,19 @@ namespace jniutil {
 	{
 		jclass cls = FindClass(ClassId::Boolean);
 		jmethodID method = GetMethodId(MethodId::Boolean_valueOf);
-		env->CallStaticObjectMethod(cls, method, jb);
+		return env->CallStaticObjectMethod(cls, method, jb);
 	}
 	inline jobject BoxingLong(JNIEnv *env, jlong jl)
 	{
 		jclass cls = FindClass(ClassId::Long);
 		jmethodID method = GetMethodId(MethodId::Long_valueOf);
-		env->CallStaticObjectMethod(cls, method, jl);
+		return env->CallStaticObjectMethod(cls, method, jl);
 	}
 	inline jobject BoxingDouble(JNIEnv *env, jdouble jd)
 	{
 		jclass cls = FindClass(ClassId::Double);
 		jmethodID method = GetMethodId(MethodId::Double_valueOf);
-		env->CallStaticObjectMethod(cls, method, jd);
+		return env->CallStaticObjectMethod(cls, method, jd);
 	}
 
 	/*

@@ -49,7 +49,7 @@ namespace {
 	 * So shutdown the JVM with FatalError.
 	 */
 	JNIEnv *env_for_panic = nullptr;
-	int panic_handler(lua_State *L) {
+	int panic_handler(lua_State *) {
 		if (env_for_panic != nullptr) {
 			env_for_panic->FatalError("unprotected error in lua");
 		}
@@ -584,11 +584,11 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_getValues
  * Signature: (JIII)I
  */
 JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_pcall
-  (JNIEnv *env, jclass, jlong peer, jint nargs, jint nresults, jint msgh)
+  (JNIEnv *, jclass, jlong peer, jint nargs, jint nresults, jint msgh)
 {
 	auto L = reinterpret_cast<Lua *>(peer)->L();
 
-	return lua_pcall(L, nargs, nresults, 0);
+	return lua_pcall(L, nargs, nresults, msgh);
 }
 
 /*
@@ -719,7 +719,7 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_pushProxyFunction
 
 const jint USE_VNI_VERSION = JNI_VERSION_1_2;
 
-JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved)
+JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void * /*reserved*/)
 {
 	JNIEnv *env;
 	if (vm->GetEnv(reinterpret_cast<void **>(&env), USE_VNI_VERSION) < 0) {
@@ -734,7 +734,7 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved)
 	return USE_VNI_VERSION;
 }
 
-JNIEXPORT void JNICALL JNI_OnUnload(JavaVM *vm, void *reserved)
+JNIEXPORT void JNICALL JNI_OnUnload(JavaVM *vm, void * /*reserved*/)
 {	JNIEnv *env;
 	if (vm->GetEnv(reinterpret_cast<void **>(&env), USE_VNI_VERSION) < 0) {
 		// give up
