@@ -11,11 +11,10 @@ public class LuaEngine implements AutoCloseable {
 
 	/** Lua max stack size. */
 	public static final int MAX_STACK = 20;
-	/** Function returns multiple values (for pcall nresults) */
-	public static final int LUA_MULTRET = -1;
 
-
-	// lua.h
+	// Function returns multiple values (for C API pcall nresults)
+	private static final int LUA_MULTRET = -1;
+	// LUA C API return code (lua.h)
 	private static final int LUA_OK			= 0;
 	private static final int LUA_YIELD		= 1;
 	private static final int LUA_ERRRUN		= 2;
@@ -23,7 +22,7 @@ public class LuaEngine implements AutoCloseable {
 	private static final int LUA_ERRMEM		= 4;
 	private static final int LUA_ERRGCMM	= 5;
 	private static final int LUA_ERRERR		= 6;
-
+	// LUA C API value type (lua.h)
 	private static final int LUA_TNIL			= 0;
 	private static final int LUA_TBOOLEAN		= 1;
 	private static final int LUA_TLIGHTUSERDATA	= 2;
@@ -40,15 +39,15 @@ public class LuaEngine implements AutoCloseable {
 	private static native void deletePeer(long peer);
 	private static native int loadString(
 		long peer, String buf, String chunkName);
-	public static native int getTop(long peer);
-	public static native void setTop(long peer, int index);
-	public static native int pushValues(long peer, Object[] values);
-	public static native int getValues(
+	private static native int getTop(long peer);
+	private static native void setTop(long peer, int index);
+	private static native int pushValues(long peer, Object[] values);
+	private static native int getValues(
 		long peer, byte[] types, Object[] values);
 	private static native int pcall(
 		long peer, int nargs, int nresults, int msgh);
-	public static native int getGlobal(long peer, String name);
-	public static native int setGlobal(long peer, String name);
+	private static native int getGlobal(long peer, String name);
+	private static native int setGlobal(long peer, String name);
 	private static native void setProxyCallback(
 		long peer, FunctionRoot callback);
 	private static native int pushProxyFunction(long peer, int id);
@@ -86,6 +85,19 @@ public class LuaEngine implements AutoCloseable {
 		}
 	}
 
+	private Object[] popAndConvertAll() {
+		byte[] types = new byte[MAX_STACK];
+		Object[] values = new Object[MAX_STACK];
+		int count = getValues(peer, types, values);
+		setTop(peer, 0);
+
+		Object[] result = new Object[count];
+		for (int i = 0; i < result.length; i++) {
+			result[i] = covertL2J(types[i], values[i]);
+		}
+		return result;
+	}
+
 	// Function call root
 	private class FunctionRootImpl implements FunctionRoot {
 		@Override
@@ -95,15 +107,7 @@ public class LuaEngine implements AutoCloseable {
 			}
 
 			// Pop all params from the stack
-			byte[] types = new byte[MAX_STACK];
-			Object[] values = new Object[MAX_STACK];
-			int numParams = getValues(peer, types, values);
-			setTop(peer, 0);
-
-			Object[] params = new Object[numParams];
-			for (int i = 0; i < params.length; i++) {
-				params[i] = covertL2J(types[i], values[i]);
-			}
+			Object[] params = popAndConvertAll();
 
 			// dispatch
 			Object[] results = functionList.get(id).call(params);
@@ -118,12 +122,12 @@ public class LuaEngine implements AutoCloseable {
 	}
 
 	public void addGlobalFunction(String name, LuaFunction func)
-		throws LuaException {
-		if (func == null) {
-			throw new NullPointerException("func");
-		}
+			throws LuaException {
 		if (name == null) {
 			throw new NullPointerException("name");
+		}
+		if (func == null) {
+			throw new NullPointerException("func");
 		}
 
 		int id = functionList.size();
@@ -133,19 +137,50 @@ public class LuaEngine implements AutoCloseable {
 		checkLuaError(setGlobal(peer, name));
 	}
 
+	public void setGlobalVariable(String name, Object value)
+			throws LuaException {
+		if (name == null) {
+			throw new NullPointerException("name");
+		}
+
+		checkLuaError(pushValues(peer, new Object[] { value }));
+		checkLuaError(setGlobal(peer, name));
+	}
+
+	public Object[] callGlobalFunction(String name, Object... params)
+			throws LuaException {
+		if (name == null) {
+			throw new NullPointerException("name");
+		}
+		if (params == null) {
+			throw new NullPointerException("params");
+		}
+		if (getTop(peer) != 0) {
+			throw new IllegalStateException("stack not empty");
+		}
+
+		// push global
+		checkLuaError(getGlobal(peer, name));
+		// push parameters
+		checkLuaError(pushValues(peer, params));
+		// pcall
+		checkLuaError(pcall(peer, params.length, LUA_MULTRET, 0));
+		// pop results
+		Object[] results = popAndConvertAll();
+
+		return results;
+	}
+
 
 	public long getPeerForDebug() {
 		return peer;
 	}
 
-	public void loadString(String buf, String chunkName) throws LuaException {
-		int ret = loadString(peer, buf, chunkName);
-		checkLuaError(ret);
-	}
-
-	public void pcall(int nargs, int nresults) throws LuaException {
-		int ret = pcall(peer, nargs, nresults, 0);
-		checkLuaError(ret);
+	public void execString(String buf, String chunkName) throws LuaException {
+		// push chunk function
+		checkLuaError(loadString(peer, buf, chunkName));
+		// pcall nargs=0, nresults=0
+		checkLuaError(pcall(peer, 0, 0, 0));
 	}
 
 	private void checkLuaError(int code) throws LuaException {
@@ -173,10 +208,10 @@ public class LuaEngine implements AutoCloseable {
 		Object[] values = new Object[MAX_STACK];
 		int num = getValues(peer, types, values);
 		if (num <= 0) {
-			return "";
+			return "(no message)";
 		}
 		else if (values[num - 1] == null) {
-			return "";
+			return "(invalid message type)";
 		}
 		else {
 			return values[num - 1].toString();

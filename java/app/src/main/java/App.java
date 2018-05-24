@@ -19,40 +19,9 @@ public class App {
 		}
 
 		try (LuaEngine lua = new LuaEngine()) {
-			System.out.println(lua.getPeerForDebug());
-
-			String[] testCode = { "return 1, 2, 3", "function function" };
-			for (String str : testCode) {
-				try {
-					lua.loadString(str, "testchunk.lua");
-					lua.pcall(0, LuaEngine.LUA_MULTRET);
-					System.out.println("OK");
-				} catch(Exception e) {
-					e.printStackTrace();
-				}
-				System.out.println("top=" + lua.getTop(lua.getPeerForDebug()));
-
-				byte[] types = new byte[LuaEngine.MAX_STACK];
-				Object[] vals = new Object[LuaEngine.MAX_STACK];
-				lua.getValues(lua.getPeerForDebug(), types, vals);
-				System.out.println(java.util.Arrays.toString(types));
-				System.out.println(java.util.Arrays.toString(vals));
-
-				lua.setTop(lua.getPeerForDebug(), 0);
-			}
-		}
-
-		try (LuaEngine lua = new LuaEngine()) {
-			lua.loadString("function func(a, b, c) return a, b, c end", "test.lua");
-			lua.pcall(0, 0);
-			lua.getGlobal(lua.getPeerForDebug(), "func");
-			lua.pushValues(lua.getPeerForDebug(), new Object[]{ null, true, 3.14 });
-			lua.pcall(3, LuaEngine.LUA_MULTRET);
-			byte[] types = new byte[LuaEngine.MAX_STACK];
-			Object[] vals = new Object[LuaEngine.MAX_STACK];
-			lua.getValues(lua.getPeerForDebug(), types, vals);
-			System.out.println(java.util.Arrays.toString(types));
-			System.out.println(java.util.Arrays.toString(vals));
+			lua.execString("function func(a, b, c) return a, b, c end", "test.lua");
+			Object[] results = lua.callGlobalFunction("func", null, true, 3.14);
+			System.out.println(java.util.Arrays.toString(results));
 		}
 
 		try (LuaEngine lua = new LuaEngine()) {
@@ -66,9 +35,9 @@ public class App {
 			lua.addGlobalFunction("jget", (params) -> {
 					return new Object[] { 3.14, 2 };
 				});
-			lua.loadString("x, y = jget() jprint(nil, 123, 3.14, \"string\", x * y)", "test.lua");
+
 			try {
-				lua.pcall(0, 0);
+				lua.execString("x, y = jget() jprint(nil, 123, 3.14, \"string\", x * y)", "test.lua");
 			} catch (Exception ex) {
 				System.out.println(ex.getMessage());
 			}

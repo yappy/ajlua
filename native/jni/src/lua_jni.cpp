@@ -351,7 +351,7 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_getValues
 {
 	auto L = reinterpret_cast<Lua *>(peer)->L();
 
-	int num = lua_gettop(L);
+	int num = std::min(lua_gettop(L), LUA_MINSTACK);
 	jbyte ctypes[LUA_MINSTACK];
 	for (int i = 0; i < num; i++) {
 		int lind = i + 1;
