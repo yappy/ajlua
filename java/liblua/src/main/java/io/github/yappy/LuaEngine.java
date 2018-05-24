@@ -18,7 +18,7 @@ public class LuaEngine implements AutoCloseable {
 	private static final int VERSION_ARRAY_SIZE	= 4;
 	// Function returns multiple values (for C API pcall nresults)
 	private static final int LUA_MULTRET		= -1;
-	// LUA C API return code (lua.h)
+	// Lua C API return code (lua.h)
 	private static final int LUA_OK				= 0;
 	private static final int LUA_YIELD			= 1;
 	private static final int LUA_ERRRUN			= 2;
@@ -26,7 +26,7 @@ public class LuaEngine implements AutoCloseable {
 	private static final int LUA_ERRMEM			= 4;
 	private static final int LUA_ERRGCMM		= 5;
 	private static final int LUA_ERRERR			= 6;
-	// LUA C API value type (lua.h)
+	// Lua C API value type (lua.h)
 	private static final int LUA_TNIL			= 0;
 	private static final int LUA_TBOOLEAN		= 1;
 	private static final int LUA_TLIGHTUSERDATA	= 2;
@@ -36,11 +36,24 @@ public class LuaEngine implements AutoCloseable {
 	private static final int LUA_TFUNCTION		= 6;
 	private static final int LUA_TUSERDATA		= 7;
 	private static final int LUA_TTHREAD		= 8;
+	// Lua C API hook event code (lua.h)
+	private static final int LUA_HOOKCALL		= 0;
+	private static final int LUA_HOOKRET		= 1;
+	private static final int LUA_HOOKLINE		= 2;
+	private static final int LUA_HOOKCOUNT		= 3;
+	private static final int LUA_HOOKTAILCALL	= 4;
+	// Lua C API hook event mask (lua.h)
+	private static final int LUA_MASKCALL		= (1 << LUA_HOOKCALL);
+	private static final int LUA_MASKRET		= (1 << LUA_HOOKRET);
+	private static final int LUA_MASKLINE		= (1 << LUA_HOOKLINE);
+	private static final int LUA_MASKCOUNT		= (1 << LUA_HOOKCOUNT);
 
 	// Native interface
 	private static native int getVersionInfo(String[] info);
 	private static native long newPeer(long nativeMemoryLimit);
 	private static native void deletePeer(long peer);
+	private static native void setDebugHook(long peer, DebugHook hook);
+	private static native void setHookMask(long peer, int mask, int count);
 	private static native int loadString(
 		long peer, String buf, String chunkName);
 	private static native int getTop(long peer);

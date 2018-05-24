@@ -49,6 +49,7 @@ namespace {
 
 		Lua(JNIEnv *env) :
 			m_env(env),
+			m_hook(nullptr, jniutil::GlobalRefDeleter(env)),
 			m_callback(nullptr, jniutil::GlobalRefDeleter(env))
 		{}
 		~Lua() = default;
@@ -74,13 +75,25 @@ namespace {
 			return m_lua.get();
 		}
 
-		void SetProxyCallback(JNIEnv *env, jobject callback)
+		void SetDebugHook(jobject hook)
+		{
+			// Create global ref to hook
+			// It will be deleted when overwritten or delete Lua
+			jobject global = m_env->NewGlobalRef(hook);
+			if (global == nullptr) {
+				jniutil::ThrowOutOfMemoryError(m_env, "NewGlobalRef");
+				return;
+			}
+			m_hook.reset(global);
+		}
+
+		void SetProxyCallback(jobject callback)
 		{
 			// Create global ref to callback
 			// It will be deleted when overwritten or delete Lua
-			jobject global = env->NewGlobalRef(callback);
+			jobject global = m_env->NewGlobalRef(callback);
 			if (global == nullptr) {
-				jniutil::ThrowOutOfMemoryError(env, "NewGlobalRef");
+				jniutil::ThrowOutOfMemoryError(m_env, "NewGlobalRef");
 				return;
 			}
 			m_callback.reset(global);
@@ -154,6 +167,7 @@ namespace {
 
 		JNIEnv *m_env;
 		size_t m_memoryLimit;
+		jniutil::GlobalRef m_hook;
 		jniutil::GlobalRef m_callback;
 
 		static void *Alloc(void *ud, void *ptr, size_t osize, size_t nsize)
@@ -259,6 +273,26 @@ JNIEXPORT void JNICALL Java_io_github_yappy_LuaEngine_deletePeer
 {
 	delete reinterpret_cast<Lua *>(peer);
 }
+
+/*
+ * Class:     io_github_yappy_LuaEngine
+ * Method:    setDebugHook
+ * Signature: (JLio/github/yappy/DebugHook;)V
+ */
+JNIEXPORT void JNICALL Java_io_github_yappy_LuaEngine_setDebugHook
+  (JNIEnv *, jclass, jlong peer, jobject hook)
+{
+	auto lua = reinterpret_cast<Lua *>(peer);
+	lua->SetDebugHook(hook);
+}
+
+/*
+ * Class:     io_github_yappy_LuaEngine
+ * Method:    setHookMask
+ * Signature: (JII)V
+ */
+JNIEXPORT void JNICALL Java_io_github_yappy_LuaEngine_setHookMask
+  (JNIEnv *, jclass, jlong, jint, jint);
 
 /*
  * Class:     io_github_yappy_LuaEngine
@@ -567,10 +601,10 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_setGlobal
  * Signature: (JLio/github/yappy/FunctionRoot;)V
  */
 JNIEXPORT void JNICALL Java_io_github_yappy_LuaEngine_setProxyCallback
-  (JNIEnv *env, jclass, jlong peer, jobject callback)
+  (JNIEnv *, jclass, jlong peer, jobject callback)
 {
 	auto lua = reinterpret_cast<Lua *>(peer);
-	lua->SetProxyCallback(env, callback);
+	lua->SetProxyCallback(callback);
 }
 
 /*
