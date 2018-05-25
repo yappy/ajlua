@@ -22,46 +22,52 @@ public class LuaEngine implements AutoCloseable {
 	// Function returns multiple values (for C API pcall nresults)
 	private static final int LUA_MULTRET		= -1;
 	// openLibs() bit
-	private static final int LIB_BIT_BASE		= 1 << 0;
-	private static final int LIB_BIT_PACKAGE	= 1 << 1;
-	private static final int LIB_BIT_COROUTINE	= 1 << 2;
-	private static final int LIB_BIT_TABLE		= 1 << 3;
-	private static final int LIB_BIT_IO			= 1 << 4;
-	private static final int LIB_BIT_OS			= 1 << 5;
-	private static final int LIB_BIT_STRING		= 1 << 6;
-	private static final int LIB_BIT_MATH		= 1 << 7;
-	private static final int LIB_BIT_UTF8		= 1 << 8;
-	private static final int LIB_BIT_DEBUG		= 1 << 9;
-	private static final int LIB_ID_COUNT		= 10;
+	private static final int LIB_BIT_BASE			= (1 << 0);
+	private static final int LIB_BIT_PACKAGE		= (1 << 1);
+	private static final int LIB_BIT_COROUTINE		= (1 << 2);
+	private static final int LIB_BIT_TABLE			= (1 << 3);
+	private static final int LIB_BIT_IO				= (1 << 4);
+	private static final int LIB_BIT_OS				= (1 << 5);
+	private static final int LIB_BIT_STRING			= (1 << 6);
+	private static final int LIB_BIT_MATH			= (1 << 7);
+	private static final int LIB_BIT_UTF8			= (1 << 8);
+	private static final int LIB_BIT_DEBUG			= (1 << 9);
+	private static final int LIB_ID_COUNT			= 10;
 	// Lua C API return code (lua.h)
-	private static final int LUA_OK				= 0;
-	private static final int LUA_YIELD			= 1;
-	private static final int LUA_ERRRUN			= 2;
-	private static final int LUA_ERRSYNTAX		= 3;
-	private static final int LUA_ERRMEM			= 4;
-	private static final int LUA_ERRGCMM		= 5;
-	private static final int LUA_ERRERR			= 6;
+	private static final int LUA_OK					= 0;
+	private static final int LUA_YIELD				= 1;
+	private static final int LUA_ERRRUN				= 2;
+	private static final int LUA_ERRSYNTAX			= 3;
+	private static final int LUA_ERRMEM				= 4;
+	private static final int LUA_ERRGCMM			= 5;
+	private static final int LUA_ERRERR				= 6;
 	// Lua C API value type (lua.h)
-	private static final int LUA_TNIL			= 0;
-	private static final int LUA_TBOOLEAN		= 1;
-	private static final int LUA_TLIGHTUSERDATA	= 2;
-	private static final int LUA_TNUMBER		= 3;
-	private static final int LUA_TSTRING		= 4;
-	private static final int LUA_TTABLE			= 5;
-	private static final int LUA_TFUNCTION		= 6;
-	private static final int LUA_TUSERDATA		= 7;
-	private static final int LUA_TTHREAD		= 8;
+	private static final int LUA_TNIL				= 0;
+	private static final int LUA_TBOOLEAN			= 1;
+	private static final int LUA_TLIGHTUSERDATA		= 2;
+	private static final int LUA_TNUMBER			= 3;
+	private static final int LUA_TSTRING			= 4;
+	private static final int LUA_TTABLE				= 5;
+	private static final int LUA_TFUNCTION			= 6;
+	private static final int LUA_TUSERDATA			= 7;
+	private static final int LUA_TTHREAD			= 8;
+	// For getCheckedValues()
+	private static final int CHECK_TYPE_BOOLEAN		= 0;
+	private static final int CHECK_TYPE_INTEGER		= 1;
+	private static final int CHECK_TYPE_NUMBER		= 2;
+	private static final int CHECK_TYPE_STRING		= 3;
+	private static final int CHECK_OPT_ALLOW_NIL	= (1 << 16);
 	// Lua C API hook event code (lua.h)
-	private static final int LUA_HOOKCALL		= 0;
-	private static final int LUA_HOOKRET		= 1;
-	private static final int LUA_HOOKLINE		= 2;
-	private static final int LUA_HOOKCOUNT		= 3;
-	private static final int LUA_HOOKTAILCALL	= 4;
+	private static final int LUA_HOOKCALL			= 0;
+	private static final int LUA_HOOKRET			= 1;
+	private static final int LUA_HOOKLINE			= 2;
+	private static final int LUA_HOOKCOUNT			= 3;
+	private static final int LUA_HOOKTAILCALL		= 4;
 	// Lua C API hook event mask (lua.h)
-	private static final int LUA_MASKCALL		= (1 << LUA_HOOKCALL);
-	private static final int LUA_MASKRET		= (1 << LUA_HOOKRET);
-	private static final int LUA_MASKLINE		= (1 << LUA_HOOKLINE);
-	private static final int LUA_MASKCOUNT		= (1 << LUA_HOOKCOUNT);
+	private static final int LUA_MASKCALL			= (1 << LUA_HOOKCALL);
+	private static final int LUA_MASKRET			= (1 << LUA_HOOKRET);
+	private static final int LUA_MASKLINE			= (1 << LUA_HOOKLINE);
+	private static final int LUA_MASKCOUNT			= (1 << LUA_HOOKCOUNT);
 
 	// Native interface
 	private static native int getVersionInfo(String[] info);
@@ -78,6 +84,8 @@ public class LuaEngine implements AutoCloseable {
 	private static native int pushValues(long peer, Object[] values);
 	private static native int getValues(
 			long peer, byte[] types, Object[] values);
+	private static native int getCheckedValues(
+			long peer, int[] checks, Object[] values);
 	private static native int pcall(
 			long peer, int nargs, int nresults, int msgh)
 			throws InterruptedException;

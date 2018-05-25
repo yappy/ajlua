@@ -635,6 +635,7 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_pushValues
  * Method:    getValues
  * Signature: (J[B[Ljava/lang/Object;)I
  */
+// BUG: lua_tostring() may do longjmp().
 JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_getValues
   (JNIEnv *env, jclass, jlong peer, jbyteArray types, jobjectArray values)
 {
@@ -692,6 +693,141 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_getValues
 	env->SetByteArrayRegion(types, 0, num, ctypes);
 
 	return num;
+}
+
+/*
+ * Class:     io_github_yappy_LuaEngine
+ * Method:    getCheckedValues
+ * Signature: (J[I[Ljava/lang/Object;)I
+ */
+JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_getCheckedValues
+  (JNIEnv *env, jclass, jlong peer, jintArray checks, jobjectArray values)
+{
+	auto L = reinterpret_cast<Lua *>(peer)->L();
+
+	if (checks == nullptr) {
+		jniutil::ThrowNullPointerException(env, "checks");
+		return 0;
+	}
+	if (values == nullptr) {
+		jniutil::ThrowNullPointerException(env, "values");
+		return 0;
+	}
+	if (!HasFreeStack(L, 2)) {
+		jniutil::ThrowIllegalStateException(env, "Stack overflow");
+		return 0;
+	}
+	jsize length = env->GetArrayLength(checks);
+	if (length > LUA_MINSTACK) {
+		jniutil::ThrowIllegalArgumentException(env, "length too much");
+		return 0;
+	}
+	jint cchecks[LUA_MINSTACK];
+	env->GetIntArrayRegion(checks, 0, length, cchecks);
+
+	// JNIEnv *env, const jint *cchecks, jobjectArray values, jsize length
+	using Params = std::tuple<JNIEnv *, const jint *, jobjectArray, jsize>;
+	Params params = std::make_tuple(env, cchecks, values, length);
+
+	// arg[1..x-1]: original stack
+	// arg[x]: params tuple
+	// ret: original stack (multiret)
+	auto f = [](lua_State *L) -> int
+	{
+		// pop param tuple pointer
+		const auto &params = *static_cast<Params *>(lua_touserdata(L, -1));
+		lua_pop(L, 1);
+		JNIEnv *env = std::get<0>(params);
+		const jint *cchecks = std::get<1>(params);
+		jobjectArray values = std::get<2>(params);
+		jsize length = std::get<3>(params);
+
+		for (jsize i = 0; i < length; i++) {
+			int lind = i + 1;
+			bool valid = i < lua_gettop(L);
+			if (!valid) {
+				if (cchecks[i] & io_github_yappy_LuaEngine_CHECK_OPT_ALLOW_NIL) {
+					env->SetObjectArrayElement(values, i, nullptr);
+				}
+				else {
+					// longjmp to pcall
+					luaL_error(L, "bad argument #%d", lind);
+				}
+			}
+			// copy and push
+			lua_pushvalue(L, lind);
+			switch (cchecks[i]) {
+			case io_github_yappy_LuaEngine_CHECK_TYPE_BOOLEAN:
+			{
+				int val = lua_toboolean(L, -1);
+				jobject jobj = jniutil::BoxingBoolean(env, val);
+				env->SetObjectArrayElement(values, i, jobj);
+				env->DeleteLocalRef(jobj);
+				break;
+			}
+			case io_github_yappy_LuaEngine_CHECK_TYPE_INTEGER:
+			{
+				int isnum = 0;
+				lua_Integer val = lua_tointegerx(L, -1, &isnum);
+				if (!isnum) {
+					// longjmp to pcall
+					luaL_error(L, "bad argument #%d", lind);
+				}
+				jobject jobj = jniutil::BoxingLong(env, val);
+				env->SetObjectArrayElement(values, i, jobj);
+				env->DeleteLocalRef(jobj);
+				break;
+			}
+			case io_github_yappy_LuaEngine_CHECK_TYPE_NUMBER:
+			{
+				int isnum = 0;
+				lua_Number val = lua_tonumberx(L, -1, &isnum);
+				if (!isnum) {
+					// longjmp to pcall
+					luaL_error(L, "bad argument #%d", lind);
+				}
+				jobject jobj = jniutil::BoxingDouble(env, val);
+				env->SetObjectArrayElement(values, i, jobj);
+				env->DeleteLocalRef(jobj);
+				break;
+			}
+			case io_github_yappy_LuaEngine_CHECK_TYPE_STRING:
+			{
+				const char *cstr = lua_tostring(L, -1);
+				if (cstr == nullptr) {
+					// longjmp to pcall
+					luaL_error(L, "bad argument #%d", lind);
+				}
+				jstring jstr = env->NewStringUTF(cstr);
+				// jstr might be nullptr if OOM or invalid utf
+				env->SetObjectArrayElement(values, i, jstr);
+				if (env->ExceptionCheck()) {
+					return 0;
+				}
+				if (jstr != nullptr) {
+					env->DeleteLocalRef(jstr);
+				}
+				break;
+			}
+			default:
+				jniutil::ThrowIllegalArgumentException(env, "checks");
+				return 0;
+			}
+			// pop copy
+			lua_pop(L, 1);
+		}
+
+		return lua_gettop(L);
+	};
+	// current values count on the stack
+	int orgSize = lua_gettop(L);
+	// cfunc into stack bottom
+	lua_pushcfunction(L, f);
+	lua_insert(L, 1);
+	// arg_last: param tuple
+	lua_pushlightuserdata(L, &params);
+	// longjmp_safe call (args=orgSize+tuple, ret=orgSize)
+	return lua_pcall(L, orgSize + 1, orgSize, 0);
 }
 
 /*
