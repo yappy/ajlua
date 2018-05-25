@@ -744,10 +744,12 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_getCheckedValues
 
 		for (jsize i = 0; i < length; i++) {
 			int lind = i + 1;
-			bool valid = i < lua_gettop(L);
-			if (!valid) {
+			// treat "not exist" as nil
+			bool valid = (lind <= lua_gettop(L));
+			if (!valid || lua_isnil(L, lind)) {
 				if (cchecks[i] & io_github_yappy_LuaEngine_CHECK_OPT_ALLOW_NIL) {
 					env->SetObjectArrayElement(values, i, nullptr);
+					continue;
 				}
 				else {
 					// longjmp to pcall
@@ -756,7 +758,7 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_getCheckedValues
 			}
 			// copy and push
 			lua_pushvalue(L, lind);
-			switch (cchecks[i]) {
+			switch (cchecks[i] & io_github_yappy_LuaEngine_CHECK_TYPE_MASK) {
 			case io_github_yappy_LuaEngine_CHECK_TYPE_BOOLEAN:
 			{
 				int val = lua_toboolean(L, -1);

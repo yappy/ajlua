@@ -23,10 +23,10 @@ public interface LuaFunction {
 	 * <tr><td>String</td><td>string</td></tr>
 	 * </table>
 	 *
-	 * @param params Function parameters.
+	 * @param args Function args.
 	 * @return Function results. null means 0-length results.
 	 * @throws Exception Its message will be converted to lua error.
 	 */
-	Object[] call(Object[] params) throws Exception;
+	Object[] call(Object[] args) throws Exception;
 
 }

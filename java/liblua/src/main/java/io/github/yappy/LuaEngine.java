@@ -57,6 +57,7 @@ public class LuaEngine implements AutoCloseable {
 	private static final int CHECK_TYPE_NUMBER		= 2;
 	private static final int CHECK_TYPE_STRING		= 3;
 	private static final int CHECK_OPT_ALLOW_NIL	= (1 << 16);
+	private static final int CHECK_TYPE_MASK		= 0xffff;
 	// Lua C API hook event code (lua.h)
 	private static final int LUA_HOOKCALL			= 0;
 	private static final int LUA_HOOKRET			= 1;
@@ -103,6 +104,7 @@ public class LuaEngine implements AutoCloseable {
 	private LuaPrint print = null;
 	private LuaPrint printRoot = new LuaPrintImpl();
 	private List<LuaFunction> functionList = new ArrayList<LuaFunction>();
+	private List<LuaArg[]> argsList = new ArrayList<LuaArg[]>();
 
 	public LuaEngine() {
 		this(DEFAULT_MEMORY_LIMIT, DEFAULT_INTR_INST_COUNT);
@@ -243,11 +245,52 @@ public class LuaEngine implements AutoCloseable {
 				throw new Error("Invalid function root call ID");
 			}
 
+			LuaFunction func = functionList.get(id);
+			LuaArg[] argsCheck = argsList.get(id);
+
 			// Pop all params from the stack
-			Object[] params = popAndConvertAll();
+			Object[] args;
+			if (argsCheck.length >= 1 && argsCheck[0] == LuaArg.ANY) {
+				args = popAndConvertAll();
+			}
+			else {
+				int[] checks = new int[argsCheck.length];
+				args = new Object[argsCheck.length];
+				for (int i = 0; i < checks.length; i++) {
+					switch (argsCheck[i]) {
+					case BOOLEAN:
+						checks[i] = CHECK_TYPE_BOOLEAN;
+						break;
+					case BOOLEAN_OR_NIL:
+						checks[i] = CHECK_TYPE_BOOLEAN | CHECK_OPT_ALLOW_NIL;
+						break;
+					case LONG:
+						checks[i] = CHECK_TYPE_INTEGER;
+						break;
+					case LONG_OR_NIL:
+						checks[i] = CHECK_TYPE_INTEGER | CHECK_OPT_ALLOW_NIL;
+						break;
+					case DOUBLE:
+						checks[i] = CHECK_TYPE_NUMBER;
+						break;
+					case DOUBLE_OR_NIL:
+						checks[i] = CHECK_TYPE_NUMBER | CHECK_OPT_ALLOW_NIL;
+						break;
+					case STRING:
+						checks[i] = CHECK_TYPE_STRING;
+						break;
+					case STRING_OR_NIL:
+						checks[i] = CHECK_TYPE_STRING | CHECK_OPT_ALLOW_NIL;
+						break;
+					default:
+						throw new IllegalStateException();
+					}
+				}
+				checkLuaError(getCheckedValues(peer, checks, args));
+			}
 
 			// dispatch
-			Object[] results = functionList.get(id).call(params);
+			Object[] results = func.call(args);
 
 			// Push results into the stack and return count
 			if (results == null || results.length == 0) {
@@ -279,17 +322,29 @@ public class LuaEngine implements AutoCloseable {
 		this.print = print;
 	}
 
-	public void addGlobalFunction(String name, LuaFunction func)
-			throws LuaException {
+	public void addGlobalFunction(String name, LuaFunction func,
+			LuaArg... args) throws LuaException {
 		if (name == null) {
 			throw new NullPointerException("name");
 		}
 		if (func == null) {
 			throw new NullPointerException("func");
 		}
+		if (args == null) {
+			throw new NullPointerException("args");
+		}
+		for (int i = 0; i < args.length; i++) {
+			if (args[i] == null) {
+				throw new NullPointerException("args");
+			}
+			if (i != 0 && args[i] == LuaArg.ANY) {
+				throw new IllegalArgumentException("args[not 0] cannot be ANY");
+			}
+		}
 
 		int id = functionList.size();
 		functionList.add(func);
+		argsList.add((LuaArg[])args.clone());
 
 		checkLuaError(pushProxyFunction(peer, id));
 		checkLuaError(setGlobal(peer, name));

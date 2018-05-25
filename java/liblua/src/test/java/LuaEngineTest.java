@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.Timeout;
 import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.*;
 
 public class LuaEngineTest {
 
@@ -94,6 +95,41 @@ public class LuaEngineTest {
 			new Object[] { Double.valueOf(1.0), Double.valueOf(2.0),
 				Double.valueOf(3.0), Double.valueOf(4.0), Double.valueOf(5.0)},
 			results);
+	}
+
+	@Test
+	public void callCheckedFunction() throws Exception {
+		LuaFunction func = (Object[] args) -> {
+			assertThat(args[0], instanceOf(Boolean.class));
+			assertThat(((Boolean)args[0]).booleanValue(), is(true));
+			assertThat(args[1], instanceOf(Long.class));
+			assertThat(((Long)args[1]).longValue(), is(7L));
+			assertThat(args[2], instanceOf(Double.class));
+			assertThat(((Double)args[2]).doubleValue(), is(3.14));
+			assertThat(args[3], instanceOf(String.class));
+			assertThat(((String)args[3]), is("hello"));
+			return null;
+		};
+		lua.addGlobalFunction("func", func,
+			LuaArg.BOOLEAN, LuaArg.LONG, LuaArg.DOUBLE, LuaArg.STRING);
+		lua.execString("func(true, 7, 3.14, \"hello\")",
+			"callCheckedFunction.lua");
+	}
+
+	@Test
+	public void callNullableFunction() throws Exception {
+		LuaFunction func = (Object[] args) -> {
+			assertThat(args[0], is(nullValue()));
+			assertThat(args[1], is(nullValue()));
+			assertThat(args[2], is(nullValue()));
+			assertThat(args[3], is(nullValue()));
+			return null;
+		};
+		lua.addGlobalFunction("func", func,
+			LuaArg.BOOLEAN_OR_NIL, LuaArg.LONG_OR_NIL,
+			LuaArg.DOUBLE_OR_NIL, LuaArg.STRING_OR_NIL);
+		lua.execString("func(nil, nil, nil, nil)",
+			"callNullableFunction.lua");
 	}
 
 }
