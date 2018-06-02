@@ -22,6 +22,12 @@ android {
         }
     }
 
+	externalNativeBuild {
+		cmake {
+			path "../../native/CMakeLists.txt"
+		}
+	}
+
 }
 
 dependencies {

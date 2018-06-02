@@ -16,12 +16,16 @@ else()
 endif()
 
 # for jni.h and jni_md.h
-include_directories("$ENV{JAVA_HOME}/include")
-if(WIN32)
-	include_directories("$ENV{JAVA_HOME}/include/win32")
-endif()
-if(UNIX)
-	include_directories("$ENV{JAVA_HOME}/include/linux")
+if(ANDROID)
+	# use sysroot/usr/include/jni.h
+else()
+	# use $JAVA_HOME/include
+	include_directories("$ENV{JAVA_HOME}/include")
+	if(WIN32)
+		include_directories("$ENV{JAVA_HOME}/include/win32")
+	elseif(UNIX)
+		include_directories("$ENV{JAVA_HOME}/include/linux")
+	endif()
 endif()
 
 add_subdirectory(lua)
