@@ -7,31 +7,33 @@
  */
 
 plugins {
-    // Apply the java plugin to add support for Java
-    id 'java'
+	// Apply the java plugin to add support for Java
+	id 'java'
 
-    // Apply the application plugin to add support for building an application
-    id 'application'
+	// Apply the application plugin to add support for building an application
+	id 'application'
+
+	id 'eclipse'
 }
 
 // Define the main class for the application
 mainClassName = 'App'
 
 dependencies {
-    // This dependency is found on compile classpath of this component and consumers.
-    compile project(':liblua')
+	// This dependency is found on compile classpath of this component and consumers.
+	compile project(':liblua')
 
-    // Use JUnit test framework
-    testCompile 'junit:junit:4.12'
+	// Use JUnit test framework
+	testCompile 'junit:junit:4.12'
 }
 
 // In this section you declare where to find the dependencies of your project
 repositories {
-    // Use jcenter for resolving your dependencies.
-    // You can declare any Maven/Ivy/file repository here.
-    jcenter()
+	// Use jcenter for resolving your dependencies.
+	// You can declare any Maven/Ivy/file repository here.
+	jcenter()
 }
 
 run {
-    systemProperty 'java.library.path', file('build/natives/')
+	systemProperty 'java.library.path', file('build/natives/')
 }
