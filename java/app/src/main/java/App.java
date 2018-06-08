@@ -128,7 +128,7 @@ public class App extends JFrame {
 					}
 				});
 
-				lua.addGlobalFunction("jget", (params) -> {
+				lua.setGlobalFunction("jget", (params) -> {
 					return new Object[] { 3.14, 2 };
 				});
 

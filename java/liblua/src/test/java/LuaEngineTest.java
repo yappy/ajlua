@@ -110,7 +110,7 @@ public class LuaEngineTest {
 			assertThat(((String)args[3]), is("hello"));
 			return null;
 		};
-		lua.addGlobalFunction("func", func,
+		lua.setGlobalFunction("func", func,
 			LuaArg.BOOLEAN, LuaArg.LONG, LuaArg.DOUBLE, LuaArg.STRING);
 		lua.execString("func(true, 7, 3.14, \"hello\")",
 			"callCheckedFunction.lua");
@@ -125,7 +125,7 @@ public class LuaEngineTest {
 			assertThat(args[3], is(nullValue()));
 			return null;
 		};
-		lua.addGlobalFunction("func", func,
+		lua.setGlobalFunction("func", func,
 			LuaArg.BOOLEAN_OR_NIL, LuaArg.LONG_OR_NIL,
 			LuaArg.DOUBLE_OR_NIL, LuaArg.STRING_OR_NIL);
 		lua.execString("func(nil, nil, nil, nil)",

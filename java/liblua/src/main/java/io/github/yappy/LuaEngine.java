@@ -322,7 +322,7 @@ public class LuaEngine implements AutoCloseable {
 		this.print = print;
 	}
 
-	public void addGlobalFunction(String name, LuaFunction func,
+	public void setGlobalFunction(String name, LuaFunction func,
 			LuaArg... args) throws LuaException {
 		if (name == null) {
 			throw new NullPointerException("name");
