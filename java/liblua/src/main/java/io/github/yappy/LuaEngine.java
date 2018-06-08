@@ -166,16 +166,42 @@ public class LuaEngine implements AutoCloseable {
 		}
 	}
 
-	private Object[] popAndConvertAll() {
+	private Object[] getStackAll() {
 		byte[] types = new byte[MAX_STACK];
 		Object[] values = new Object[MAX_STACK];
 		int count = getValues(peer, types, values);
-		setTop(peer, 0);
 
 		Object[] result = new Object[count];
 		for (int i = 0; i < result.length; i++) {
 			result[i] = covertL2J(types[i], values[i]);
 		}
+		return result;
+	}
+
+	private byte[] getStackTypes() {
+		byte[] types = new byte[MAX_STACK];
+		Object[] values = new Object[MAX_STACK];
+		int count = getValues(peer, types, values);
+
+		byte[] result = new byte[count];
+		System.arraycopy(types, 0, result, 0, count);
+		return types;
+	}
+
+	private Object[] popStack(int n) {
+		Object[] all = getStackAll();
+		if (all.length < n) {
+			throw new IllegalArgumentException("Stack underflow");
+		}
+		Object[] result = new Object[n];
+		System.arraycopy(all, all.length - n, result, 0, n);
+		setTop(peer, all.length - n);
+		return result;
+	}
+
+	private Object[] popStackAll() {
+		Object[] result = getStackAll();
+		setTop(peer, 0);
 		return result;
 	}
 
@@ -254,7 +280,7 @@ public class LuaEngine implements AutoCloseable {
 			// Pop all params from the stack
 			Object[] args;
 			if (argsCheck.length >= 1 && argsCheck[0] == LuaArg.ANY) {
-				args = popAndConvertAll();
+				args = popStackAll();
 			}
 			else {
 				int[] checks = new int[argsCheck.length];
@@ -325,7 +351,38 @@ public class LuaEngine implements AutoCloseable {
 		this.print = print;
 	}
 
-	public void setGlobalFunction(String name, LuaFunction func,
+	public void addGlobalVariable(String name, Object value)
+			throws LuaException {
+		if (name == null) {
+			throw new NullPointerException("name");
+		}
+
+		checkLuaError(pushValues(peer, new Object[] { value }));
+		checkLuaError(setGlobal(peer, name));
+	}
+
+	public void addLibVariable(String table, String name, Object value)
+			throws LuaException {
+		if (table == null) {
+			throw new NullPointerException("table");
+		}
+		if (name == null) {
+			throw new NullPointerException("name");
+		}
+		// push _G["table"]
+		checkLuaError(getGlobal(peer, table));
+		// push value
+		checkLuaError(pushValues(peer, new Object[] { value }));
+		// table[name] = value
+		checkLuaError(setTableField(peer, -2, name));
+	}
+
+	public void addLibTable(String name) throws LuaException {
+		checkLuaError(pushNewTable(peer, 0, 0));
+		checkLuaError(setGlobal(peer, name));
+	}
+
+	public void addGlobalFunction(String name, LuaFunction func,
 			LuaArg... args) throws LuaException {
 		if (name == null) {
 			throw new NullPointerException("name");
@@ -350,16 +407,6 @@ public class LuaEngine implements AutoCloseable {
 		argsList.add((LuaArg[])args.clone());
 
 		checkLuaError(pushProxyFunction(peer, id));
-		checkLuaError(setGlobal(peer, name));
-	}
-
-	public void setGlobalVariable(String name, Object value)
-			throws LuaException {
-		if (name == null) {
-			throw new NullPointerException("name");
-		}
-
-		checkLuaError(pushValues(peer, new Object[] { value }));
 		checkLuaError(setGlobal(peer, name));
 	}
 
@@ -389,7 +436,7 @@ public class LuaEngine implements AutoCloseable {
 		// pcall
 		checkLuaError(pcallWithHook(hook, params.length, LUA_MULTRET, 0));
 		// pop results
-		Object[] results = popAndConvertAll();
+		Object[] results = popStackAll();
 
 		return results;
 	}
