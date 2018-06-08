@@ -2,6 +2,8 @@ package io.github.yappy;
 
 public class LuaRuntimeException extends LuaException {
 
+	private static final long serialVersionUID = 1L;
+
 	public LuaRuntimeException() {
 	}
 

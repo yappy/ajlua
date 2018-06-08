@@ -2,6 +2,8 @@
 
 public class LuaSyntaxException extends LuaException {
 
+	private static final long serialVersionUID = 1L;
+
 	public LuaSyntaxException() {
 	}
 

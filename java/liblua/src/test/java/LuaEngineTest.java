@@ -1,13 +1,22 @@
-import io.github.yappy.*;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertThat;
+
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.Timeout;
-import static org.junit.Assert.*;
-import static org.hamcrest.CoreMatchers.*;
+
+import io.github.yappy.LuaArg;
+import io.github.yappy.LuaEngine;
+import io.github.yappy.LuaException;
+import io.github.yappy.LuaFunction;
+import io.github.yappy.LuaRuntimeException;
+import io.github.yappy.LuaSyntaxException;
 
 public class LuaEngineTest {
 
@@ -65,7 +74,6 @@ public class LuaEngineTest {
 	@Test
 	public void timeoutError() throws Exception {
 		exception.expect(InterruptedException.class);
-		long start = System.currentTimeMillis();
 		Thread main = Thread.currentThread();
 		Thread sub = new Thread(() -> {
 			try { Thread.sleep(100); } catch(Exception e) {}
