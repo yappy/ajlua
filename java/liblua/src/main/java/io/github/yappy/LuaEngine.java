@@ -351,6 +351,15 @@ public class LuaEngine implements AutoCloseable {
 		this.print = print;
 	}
 
+	public Object getGlobalVariable(String name) throws LuaException {
+		if (name == null) {
+			throw new NullPointerException("name");
+		}
+
+		checkLuaError(getGlobal(peer, name));
+		return popStack(1)[0];
+	}
+
 	public void addGlobalVariable(String name, Object value)
 			throws LuaException {
 		if (name == null) {
