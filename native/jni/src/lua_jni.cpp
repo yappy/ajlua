@@ -835,6 +835,22 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_getCheckedValues
 
 /*
  * Class:     io_github_yappy_LuaEngine
+ * Method:    pushNewTable
+ * Signature: (JII)I
+ */
+JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_pushNewTable
+  (JNIEnv *, jclass, jlong, jint, jint);
+
+/*
+ * Class:     io_github_yappy_LuaEngine
+ * Method:    setTableField
+ * Signature: (JILjava/lang/String;)I
+ */
+JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_setTableField
+  (JNIEnv *, jclass, jlong, jint, jstring);
+
+/*
+ * Class:     io_github_yappy_LuaEngine
  * Method:    pcall
  * Signature: (JIII)I
  */

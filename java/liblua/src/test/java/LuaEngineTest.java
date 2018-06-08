@@ -108,6 +108,17 @@ public class LuaEngineTest {
 	}
 
 	@Test
+	public void libVariable() throws Exception {
+		double x = 10007;
+		lua.addLibTable("lib");
+		lua.addLibVariable("lib", "x", x);
+		lua.execString("y = x * 2", "globalVariable.lua");
+		Object obj = lua.getGlobalVariable("y");
+		assertThat(obj, instanceOf(Double.class));
+		assertThat((Double)obj, is(x * 2));
+	}
+
+	@Test
 	public void callCheckedFunction() throws Exception {
 		LuaFunction func = (Object[] args) -> {
 			assertThat(args[0], instanceOf(Boolean.class));
