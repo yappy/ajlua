@@ -871,10 +871,47 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_pushNewTable
 /*
  * Class:     io_github_yappy_LuaEngine
  * Method:    setTableField
- * Signature: (JILjava/lang/String;)I
+ * Signature: (JLjava/lang/String;)I
  */
 JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_setTableField
-  (JNIEnv *, jclass, jlong, jint, jstring);
+  (JNIEnv *env, jclass, jlong peer, jstring key)
+{
+	auto L = reinterpret_cast<Lua *>(peer)->L();
+	if (!HasFreeStack(L, 2)) {
+		jniutil::ThrowIllegalStateException(env, "Stack overflow");
+		return 0;
+	}
+	auto cKey = jniutil::JstrToChars(env, key);
+	if (cKey == nullptr) {
+		jniutil::ThrowOutOfMemoryError(env, "Native heap");
+		return 0;
+	}
+
+	using Params = std::tuple<const char *>;
+	Params params = std::make_tuple(cKey.get());
+
+	auto f = [](lua_State *L) -> int
+	{
+		// params, table, value
+		// get param tuple pointer
+		const auto &params = *static_cast<Params *>(lua_touserdata(L, 1));
+		const char *cKey = std::get<0>(params);
+
+		// table(2)[cKey] = value(3) (pop value)
+		lua_setfield(L, 2, cKey);
+		// return table
+		return 1;
+	};
+	// (bottom) table, value (top)
+	lua_pushcfunction(L, f);
+	lua_insert(L, -3);
+	// f, table, value
+	lua_pushlightuserdata(L, &params);
+	lua_insert(L, -3);
+	// f, params, table, value
+	// longjmp_safe call (args=3, ret=1(table))
+	return lua_pcall(L, 3, 1, 0);
+}
 
 /*
  * Class:     io_github_yappy_LuaEngine

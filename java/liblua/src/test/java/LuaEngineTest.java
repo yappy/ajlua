@@ -112,7 +112,7 @@ public class LuaEngineTest {
 		double x = 10007;
 		lua.addLibTable("lib");
 		lua.addLibVariable("lib", "x", x);
-		lua.execString("y = x * 2", "globalVariable.lua");
+		lua.execString("y = lib.x * 2", "libVariable.lua");
 		Object obj = lua.getGlobalVariable("y");
 		assertThat(obj, instanceOf(Double.class));
 		assertThat((Double)obj, is(x * 2));

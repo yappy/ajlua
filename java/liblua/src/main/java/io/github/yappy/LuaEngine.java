@@ -88,8 +88,7 @@ public class LuaEngine implements AutoCloseable {
 	private static native int getCheckedValues(
 			long peer, int[] checks, Object[] values);
 	private static native int pushNewTable(long peer, int narr, int nrec);
-	private static native int setTableField(
-			long peer, int tableIndex, String key);
+	private static native int setTableField(long peer, String key);
 	private static native int pcall(
 			long peer, int nargs, int nresults, int msgh)
 			throws InterruptedException;
@@ -382,8 +381,10 @@ public class LuaEngine implements AutoCloseable {
 		checkLuaError(getGlobal(peer, table));
 		// push value
 		checkLuaError(pushValues(peer, new Object[] { value }));
-		// table[name] = value
-		checkLuaError(setTableField(peer, -2, name));
+		// table[name] = value (pop value)
+		checkLuaError(setTableField(peer, name));
+		// pop table
+		setTop(peer, getTop(peer) - 1);
 	}
 
 	public void addLibTable(String name) throws LuaException {
