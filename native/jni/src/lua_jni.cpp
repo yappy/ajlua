@@ -839,7 +839,34 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_getCheckedValues
  * Signature: (JII)I
  */
 JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_pushNewTable
-  (JNIEnv *, jclass, jlong, jint, jint);
+  (JNIEnv *env, jclass, jlong peer, jint narr, jint nrec)
+{
+	auto L = reinterpret_cast<Lua *>(peer)->L();
+	if (!HasFreeStack(L, 2)) {
+		jniutil::ThrowIllegalStateException(env, "Stack overflow");
+		return 0;
+	}
+
+	using Params = std::tuple<jint, jint>;
+	Params params = std::make_tuple(narr, nrec);
+
+	auto f = [](lua_State *L) -> int
+	{
+		// pop param tuple pointer
+		const auto &params = *static_cast<Params *>(lua_touserdata(L, -1));
+		lua_pop(L, 1);
+		jint narr = std::get<0>(params);
+		jint nrec = std::get<1>(params);
+
+		// might cause memory error
+		lua_createtable(L, narr, nrec);
+		return 1;
+	};
+	lua_pushcfunction(L, f);
+	lua_pushlightuserdata(L, &params);
+	// longjmp_safe call (args=1, ret=1)
+	return lua_pcall(L, 1, 1, 0);
+}
 
 /*
  * Class:     io_github_yappy_LuaEngine
