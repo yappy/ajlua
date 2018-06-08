@@ -5,8 +5,17 @@ import java.util.EnumSet;
 import java.util.Set;
 
 public enum LuaStdLib {
-	BASE, PACKAGE, COROUTINE, TABLE, IO,
-	OS, STRING, MATH, UTF8, DEBUG;
+	BASE(0), PACKAGE(1), COROUTINE(2), TABLE(3), IO(4),
+	OS(5), STRING(6), MATH(7), UTF8(8), DEBUG(9);
+
+	private int id;
+	private LuaStdLib(int id) {
+		this.id = id;
+	}
+	// package private
+	int getId() {
+		return id;
+	}
 
 	public static final Set<LuaStdLib> DEFAULT_SET =
 		Collections.unmodifiableSet(EnumSet.of(

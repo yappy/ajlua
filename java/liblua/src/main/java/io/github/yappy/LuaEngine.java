@@ -308,7 +308,7 @@ public class LuaEngine implements AutoCloseable {
 	public void openStdLibs(Set<LuaStdLib> libs) throws LuaException {
 		int bits = 0;
 		for (LuaStdLib e : libs) {
-			bits |= e.ordinal();
+			bits |= (1 << e.getId());
 		}
 		checkLuaError(openLibs(peer, bits));
 
