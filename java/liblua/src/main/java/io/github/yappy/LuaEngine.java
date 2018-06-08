@@ -87,6 +87,9 @@ public class LuaEngine implements AutoCloseable {
 			long peer, byte[] types, Object[] values);
 	private static native int getCheckedValues(
 			long peer, int[] checks, Object[] values);
+	private static native int pushNewTable(long peer, int narr, int nrec);
+	private static native int setTableField(
+			long peer, int tableIndex, String key);
 	private static native int pcall(
 			long peer, int nargs, int nresults, int msgh)
 			throws InterruptedException;
