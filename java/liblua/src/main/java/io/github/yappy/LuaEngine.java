@@ -471,6 +471,35 @@ public class LuaEngine implements AutoCloseable {
 		checkLuaError(setGlobal(peer, name));
 	}
 
+	public void addLibFunction(String table, String name,
+			LuaFunction func, LuaArg... args) throws LuaException {
+		if (table == null) throw new NullPointerException("table");
+		if (name == null) throw new NullPointerException("name");
+		if (func == null) throw new NullPointerException("func");
+		if (args == null) throw new NullPointerException("args");
+		for (int i = 0; i < args.length; i++) {
+			if (args[i] == null) {
+				throw new NullPointerException("args");
+			}
+			if (i != 0 && args[i] == LuaArg.ANY) {
+				throw new IllegalArgumentException("args[not 0] cannot be ANY");
+			}
+		}
+
+		int id = functionList.size();
+		functionList.add(func);
+		argsList.add((LuaArg[])args.clone());
+
+		// push _G["table"]
+		checkLuaError(getGlobal(peer, table));
+		// push function
+		checkLuaError(pushProxyFunction(peer, id));
+		// table[name] = function (pop function)
+		checkLuaError(setTableField(peer, name));
+		// pop table
+		setTop(peer, getTop(peer) - 1);
+	}
+
 	public Object[] callGlobalFunction(
 			String name, Object... params)
 			throws LuaException, InterruptedException {

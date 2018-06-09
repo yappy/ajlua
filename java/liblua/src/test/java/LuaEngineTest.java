@@ -3,6 +3,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.After;
 import org.junit.Before;
@@ -127,7 +128,8 @@ public class LuaEngineTest {
 	}
 
 	@Test
-	public void callCheckedFunction() throws Exception {
+	public void callGlobalFunction() throws Exception {
+		boolean[] flag = new boolean[1];
 		LuaFunction func = (Object[] args) -> {
 			assertThat(args[0], instanceOf(Boolean.class));
 			assertThat(((Boolean)args[0]).booleanValue(), is(true));
@@ -137,28 +139,76 @@ public class LuaEngineTest {
 			assertThat(((Double)args[2]).doubleValue(), is(3.14));
 			assertThat(args[3], instanceOf(String.class));
 			assertThat(((String)args[3]), is("hello"));
+			flag[0] = true;
 			return null;
 		};
 		lua.addGlobalFunction("func", func,
 			LuaArg.BOOLEAN, LuaArg.LONG, LuaArg.DOUBLE, LuaArg.STRING);
 		lua.execString("func(true, 7, 3.14, \"hello\")",
-			"callCheckedFunction.lua");
+			"callGlobalFunction.lua");
+		assertTrue(flag[0]);
 	}
 
 	@Test
-	public void callNullableFunction() throws Exception {
+	public void callLibFunction() throws Exception {
+		boolean[] flag = new boolean[1];
+		LuaFunction func = (Object[] args) -> {
+			assertThat(args[0], instanceOf(Boolean.class));
+			assertThat(((Boolean)args[0]).booleanValue(), is(true));
+			assertThat(args[1], instanceOf(Long.class));
+			assertThat(((Long)args[1]).longValue(), is(7L));
+			assertThat(args[2], instanceOf(Double.class));
+			assertThat(((Double)args[2]).doubleValue(), is(3.14));
+			assertThat(args[3], instanceOf(String.class));
+			assertThat(((String)args[3]), is("hello"));
+			flag[0] = true;
+			return null;
+		};
+		lua.addLibTable("lib");
+		lua.addLibFunction("lib", "func", func,
+			LuaArg.BOOLEAN, LuaArg.LONG, LuaArg.DOUBLE, LuaArg.STRING);
+		lua.execString("lib.func(true, 7, 3.14, \"hello\")",
+			"callLibFunction.lua");
+		assertTrue(flag[0]);
+	}
+
+	@Test
+	public void callNullableGlobalFunction() throws Exception {
+		boolean[] flag = new boolean[1];
 		LuaFunction func = (Object[] args) -> {
 			assertThat(args[0], is(nullValue()));
 			assertThat(args[1], is(nullValue()));
 			assertThat(args[2], is(nullValue()));
 			assertThat(args[3], is(nullValue()));
+			flag[0] = true;
 			return null;
 		};
 		lua.addGlobalFunction("func", func,
 			LuaArg.BOOLEAN_OR_NIL, LuaArg.LONG_OR_NIL,
 			LuaArg.DOUBLE_OR_NIL, LuaArg.STRING_OR_NIL);
 		lua.execString("func(nil, nil, nil, nil)",
-			"callNullableFunction.lua");
+			"callNullableGlobalFunction.lua");
+		assertTrue(flag[0]);
+	}
+
+	@Test
+	public void callNullableLibFunction() throws Exception {
+		boolean[] flag = new boolean[1];
+		LuaFunction func = (Object[] args) -> {
+			assertThat(args[0], is(nullValue()));
+			assertThat(args[1], is(nullValue()));
+			assertThat(args[2], is(nullValue()));
+			assertThat(args[3], is(nullValue()));
+			flag[0] = true;
+			return null;
+		};
+		lua.addLibTable("lib");
+		lua.addLibFunction("lib", "func", func,
+			LuaArg.BOOLEAN_OR_NIL, LuaArg.LONG_OR_NIL,
+			LuaArg.DOUBLE_OR_NIL, LuaArg.STRING_OR_NIL);
+		lua.execString("lib.func(nil, nil, nil, nil)",
+			"callNullableLibFunction.lua");
+		assertTrue(flag[0]);
 	}
 
 }
