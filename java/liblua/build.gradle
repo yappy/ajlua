@@ -25,6 +25,10 @@ repositories {
 	jcenter()
 }
 
+javadoc {
+	destinationDir file('../../docs')
+}
+
 test {
 	systemProperty 'java.library.path', file('build/natives/')
 }
