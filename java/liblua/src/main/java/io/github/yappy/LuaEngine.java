@@ -4,15 +4,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Lua language execution engine.
+ * @author yappy
+ */
 public class LuaEngine implements AutoCloseable {
 
 	static {
 		System.loadLibrary("jlua");
 	}
 
-	/** Default memory limit */
+	/** Default memory limit. */
 	public static final long DEFAULT_MEMORY_LIMIT = 16 * 1024 * 1024;
-	/** Default instruction count for interrupt */
+	/** Default debug hook instruction count for interrupt. */
 	public static final int DEFAULT_INTR_INST_COUNT = 1000;
 	/** Lua max stack size. */
 	public static final int MAX_STACK = 20;
@@ -108,10 +112,22 @@ public class LuaEngine implements AutoCloseable {
 	private List<LuaFunction> functionList = new ArrayList<LuaFunction>();
 	private List<LuaArg[]> argsList = new ArrayList<LuaArg[]>();
 
+	/**
+	 * Initialize LuaEngine with {@link #DEFAULT_MEMORY_LIMIT} and {@link #DEFAULT_INTR_INST_COUNT}.
+	 */
 	public LuaEngine() {
 		this(DEFAULT_MEMORY_LIMIT, DEFAULT_INTR_INST_COUNT);
 	}
 
+	/**
+	 * Initialize LuaEngine.
+	 * Lua allocates native memory for work with lua_Alloc callback.
+	 * nativeMemoryLimit can limit it.
+	 * This engine sets debug hook for interrupt check.
+	 * intrInstCount is its frequency. (instruction count)
+	 * @param nativeMemoryLimit Native heap size which Lua can use.
+	 * @param intrInstCount Instruction count for debug hook.
+	 */
 	public LuaEngine(long nativeMemoryLimit, int intrInstCount) {
 		this.peer = newPeer(nativeMemoryLimit);
 		if (peer == 0) {
@@ -130,24 +146,48 @@ public class LuaEngine implements AutoCloseable {
 		this.author = strs[3];
 	}
 
+	/**
+	 * Destroy LuaEngine.
+	 * All native resources will be destroyed.
+	 */
 	@Override
 	public void close() {
 		deletePeer(peer);
 		peer = 0;
 	}
 
+	/**
+	 * Get version info.
+	 * @return Version represented as an integer.
+	 */
 	public int getVersionInt() {
 		return versionInt;
 	}
+	/**
+	 * Get version info.
+	 * @return Version info as a string.
+	 */
 	public String getVersion() {
 		return version;
 	}
+	/**
+	 * Get version info.
+	 * @return Release info.
+	 */
 	public String getRelease() {
 		return release;
 	}
+	/**
+	 * Get version info.
+	 * @return Copyright info.
+	 */
 	public String getCopyright() {
 		return copyright;
 	}
+	/**
+	 * Get version info.
+	 * @return Author info.
+	 */
 	public String getAuthor() {
 		return author;
 	}
@@ -329,10 +369,21 @@ public class LuaEngine implements AutoCloseable {
 		}
 	}
 
+	/**
+	 * Open Lua default standard libraries.
+	 * Library set is {@link LuaStdLib#DEFAULT_SET}.
+	 * @throws LuaException A Lua error occurred.
+	 */
 	public void openStdLibs() throws LuaException {
 		openStdLibs(LuaStdLib.DEFAULT_SET);
 	}
 
+	/**
+	 * Open Lua standard libraries.
+	 * The parameter should be EnumSet of {@link LuaStdLib}
+	 * @param libs Set of {@link LuaStdLib}.
+	 * @throws LuaException A Lua error occurred.
+	 */
 	public void openStdLibs(Set<LuaStdLib> libs) throws LuaException {
 		int bits = 0;
 		for (LuaStdLib e : libs) {

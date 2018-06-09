@@ -1,5 +1,9 @@
 package io.github.yappy;
 
+/**
+ * Lua -&gt; Java function call interface.
+ * @author yappy
+ */
 public interface LuaFunction {
 
 	/**
