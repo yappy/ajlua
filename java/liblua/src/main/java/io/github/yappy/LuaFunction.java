@@ -29,7 +29,8 @@ public interface LuaFunction {
 	 *
 	 * @param args Function args.
 	 * @return Function results. null means 0-length results.
-	 * @throws Exception Its message will be converted to lua error.
+	 * @throws Exception Causes lua error.
+	 * Its message will be converted to lua error message.
 	 */
 	Object[] call(Object[] args) throws Exception;
 

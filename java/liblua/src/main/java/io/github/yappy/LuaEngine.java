@@ -259,6 +259,7 @@ public class LuaEngine implements AutoCloseable {
 		@Override
 		public void hook(int event, int currentline)
 				throws InterruptedException {
+			// dispatch
 			if (hook != null) {
 				switch (event) {
 				case LUA_HOOKCALL:
@@ -275,7 +276,8 @@ public class LuaEngine implements AutoCloseable {
 					throw new Error("Unkwon hook event");
 				}
 			}
-			// return true if interrupted
+			// LUA_HOOKCOUNT will be called periodically
+			// Checks interrupt here and throws to native code
 			if (Thread.currentThread().isInterrupted()) {
 				throw new InterruptedException();
 			}
@@ -397,6 +399,11 @@ public class LuaEngine implements AutoCloseable {
 		}
 	}
 
+	/**
+	 * Set Lua standard print() function callback.
+	 * Lua print() func is replaced automatically by this engine.
+	 * @param print
+	 */
 	public void setPrintFunction(LuaPrint print) {
 		this.print = print;
 	}
