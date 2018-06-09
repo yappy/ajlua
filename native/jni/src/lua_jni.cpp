@@ -591,6 +591,7 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_pushValues
 
 		jclass clsBoolean = jniutil::FindClass(jniutil::ClassId::Boolean);
 		jclass clsNumber = jniutil::FindClass(jniutil::ClassId::Number);
+		jclass clsString = jniutil::FindClass(jniutil::ClassId::String);
 
 		for (int i = 0; i < length; i++) {
 			jobject jobj = env->GetObjectArrayElement(values, i);
@@ -609,6 +610,16 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_pushValues
 					jniutil::MethodId::Number_doubleValue);
 				jdouble d = env->CallDoubleMethod(jobj, method);
 				lua_pushnumber(L, d);
+			}
+			else if (env->IsInstanceOf(jobj, clsString)) {
+				auto cstr = jniutil::JstrToChars(env,
+					static_cast<jstring>(jobj));
+				if (cstr != nullptr) {
+					lua_pushstring(L, cstr.get());
+				}
+				else {
+					lua_pushnil(L);
+				}
 			}
 			else {
 				jniutil::ThrowIllegalArgumentException(env, "Invalid type");
