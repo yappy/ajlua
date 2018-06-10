@@ -352,11 +352,11 @@ extern "C" {
 #endif
 
 /*
- * Class:     io_github_yappy_LuaEngine
+ * Class:     io_github_yappy_lua_LuaEngine
  * Method:    getVersionInfo
  * Signature: ([Ljava/lang/String;)I
  */
-JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_getVersionInfo
+JNIEXPORT jint JNICALL Java_io_github_yappy_lua_LuaEngine_getVersionInfo
   (JNIEnv *env, jclass, jobjectArray info)
 {
 	jsize index = 0;
@@ -369,11 +369,11 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_getVersionInfo
 }
 
 /*
- * Class:     io_github_yappy_LuaEngine
+ * Class:     io_github_yappy_lua_LuaEngine
  * Method:    newPeer
  * Signature: (J)J
  */
-JNIEXPORT jlong JNICALL Java_io_github_yappy_LuaEngine_newPeer
+JNIEXPORT jlong JNICALL Java_io_github_yappy_lua_LuaEngine_newPeer
   (JNIEnv *env, jclass, jlong nativeMemoryLimit)
 {
 	Lua *lua = new(std::nothrow) Lua(env);
@@ -390,22 +390,22 @@ JNIEXPORT jlong JNICALL Java_io_github_yappy_LuaEngine_newPeer
 }
 
 /*
- * Class:     io_github_yappy_LuaEngine
+ * Class:     io_github_yappy_lua_LuaEngine
  * Method:    deletePeer
  * Signature: (J)V
  */
-JNIEXPORT void JNICALL Java_io_github_yappy_LuaEngine_deletePeer
+JNIEXPORT void JNICALL Java_io_github_yappy_lua_LuaEngine_deletePeer
   (JNIEnv *, jclass, jlong peer)
 {
 	delete reinterpret_cast<Lua *>(peer);
 }
 
 /*
- * Class:     io_github_yappy_LuaEngine
+ * Class:     io_github_yappy_lua_LuaEngine
  * Method:    setDebugHook
- * Signature: (JLio/github/yappy/DebugHook;)V
+ * Signature: (JLio/github/yappy/lua/DebugHook;)V
  */
-JNIEXPORT void JNICALL Java_io_github_yappy_LuaEngine_setDebugHook
+JNIEXPORT void JNICALL Java_io_github_yappy_lua_LuaEngine_setDebugHook
   (JNIEnv *, jclass, jlong peer, jobject hook)
 {
 	auto lua = reinterpret_cast<Lua *>(peer);
@@ -413,11 +413,11 @@ JNIEXPORT void JNICALL Java_io_github_yappy_LuaEngine_setDebugHook
 }
 
 /*
- * Class:     io_github_yappy_LuaEngine
+ * Class:     io_github_yappy_lua_LuaEngine
  * Method:    setHookMask
  * Signature: (JII)V
  */
-JNIEXPORT void JNICALL Java_io_github_yappy_LuaEngine_setHookMask
+JNIEXPORT void JNICALL Java_io_github_yappy_lua_LuaEngine_setHookMask
   (JNIEnv *, jclass, jlong peer, jint mask, jint count)
 {
 	auto L = reinterpret_cast<Lua *>(peer)->L();
@@ -425,11 +425,11 @@ JNIEXPORT void JNICALL Java_io_github_yappy_LuaEngine_setHookMask
 }
 
 /*
- * Class:     io_github_yappy_LuaEngine
+ * Class:     io_github_yappy_lua_LuaEngine
  * Method:    openLibs
  * Signature: (JI)I
  */
-JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_openLibs
+JNIEXPORT jint JNICALL Java_io_github_yappy_lua_LuaEngine_openLibs
   (JNIEnv *, jclass, jlong peer, jint libs)
 {
 	auto L = reinterpret_cast<Lua *>(peer)->L();
@@ -457,11 +457,11 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_openLibs
 }
 
 /*
- * Class:     io_github_yappy_LuaEngine
+ * Class:     io_github_yappy_lua_LuaEngine
  * Method:    replacePrintFunc
- * Signature: (JLio/github/yappy/LuaPrint;)I
+ * Signature: (JLio/github/yappy/lua/LuaPrint;)I
  */
-JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_replacePrintFunc
+JNIEXPORT jint JNICALL Java_io_github_yappy_lua_LuaEngine_replacePrintFunc
   (JNIEnv *env, jclass, jlong peer, jobject print)
 {
 	auto lua = reinterpret_cast<Lua *>(peer);
@@ -488,11 +488,11 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_replacePrintFunc
 }
 
 /*
- * Class:     io_github_yappy_LuaEngine
+ * Class:     io_github_yappy_lua_LuaEngine
  * Method:    loadString
  * Signature: (JLjava/lang/String;Ljava/lang/String;)I
  */
-JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_loadString
+JNIEXPORT jint JNICALL Java_io_github_yappy_lua_LuaEngine_loadString
   (JNIEnv *env, jclass, jlong peer, jstring buf, jstring chunkName)
 {
 	if (buf == nullptr || chunkName == nullptr) {
@@ -520,11 +520,11 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_loadString
 }
 
 /*
- * Class:     io_github_yappy_LuaEngine
+ * Class:     io_github_yappy_lua_LuaEngine
  * Method:    getTop
  * Signature: (J)I
  */
-JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_getTop
+JNIEXPORT jint JNICALL Java_io_github_yappy_lua_LuaEngine_getTop
   (JNIEnv *, jclass, jlong peer)
 {
 	auto L = reinterpret_cast<Lua *>(peer)->L();
@@ -533,11 +533,11 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_getTop
 }
 
 /*
- * Class:     io_github_yappy_LuaEngine
+ * Class:     io_github_yappy_lua_LuaEngine
  * Method:    setTop
  * Signature: (JI)V
  */
-JNIEXPORT void JNICALL Java_io_github_yappy_LuaEngine_setTop
+JNIEXPORT void JNICALL Java_io_github_yappy_lua_LuaEngine_setTop
   (JNIEnv *env, jclass, jlong peer, jint index)
 {
 	auto L = reinterpret_cast<Lua *>(peer)->L();
@@ -558,11 +558,11 @@ JNIEXPORT void JNICALL Java_io_github_yappy_LuaEngine_setTop
 }
 
 /*
- * Class:     io_github_yappy_LuaEngine
+ * Class:     io_github_yappy_lua_LuaEngine
  * Method:    pushValues
  * Signature: (J[Ljava/lang/Object;)I
  */
-JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_pushValues
+JNIEXPORT jint JNICALL Java_io_github_yappy_lua_LuaEngine_pushValues
   (JNIEnv *env, jclass, jlong peer, jobjectArray values)
 {
 	auto L = reinterpret_cast<Lua *>(peer)->L();
@@ -641,13 +641,13 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_pushValues
 	return lua_pcall(L, 3, length, 0);
 }
 
+// BUG: lua_tostring() may do longjmp().
 /*
- * Class:     io_github_yappy_LuaEngine
+ * Class:     io_github_yappy_lua_LuaEngine
  * Method:    getValues
  * Signature: (J[B[Ljava/lang/Object;)I
  */
-// BUG: lua_tostring() may do longjmp().
-JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_getValues
+JNIEXPORT jint JNICALL Java_io_github_yappy_lua_LuaEngine_getValues
   (JNIEnv *env, jclass, jlong peer, jbyteArray types, jobjectArray values)
 {
 	auto L = reinterpret_cast<Lua *>(peer)->L();
@@ -707,11 +707,11 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_getValues
 }
 
 /*
- * Class:     io_github_yappy_LuaEngine
+ * Class:     io_github_yappy_lua_LuaEngine
  * Method:    getCheckedValues
  * Signature: (J[I[Ljava/lang/Object;)I
  */
-JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_getCheckedValues
+JNIEXPORT jint JNICALL Java_io_github_yappy_lua_LuaEngine_getCheckedValues
   (JNIEnv *env, jclass, jlong peer, jintArray checks, jobjectArray values)
 {
 	auto L = reinterpret_cast<Lua *>(peer)->L();
@@ -846,11 +846,11 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_getCheckedValues
 }
 
 /*
- * Class:     io_github_yappy_LuaEngine
+ * Class:     io_github_yappy_lua_LuaEngine
  * Method:    pushNewTable
  * Signature: (JII)I
  */
-JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_pushNewTable
+JNIEXPORT jint JNICALL Java_io_github_yappy_lua_LuaEngine_pushNewTable
   (JNIEnv *env, jclass, jlong peer, jint narr, jint nrec)
 {
 	auto L = reinterpret_cast<Lua *>(peer)->L();
@@ -881,11 +881,11 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_pushNewTable
 }
 
 /*
- * Class:     io_github_yappy_LuaEngine
+ * Class:     io_github_yappy_lua_LuaEngine
  * Method:    setTableField
  * Signature: (JLjava/lang/String;)I
  */
-JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_setTableField
+JNIEXPORT jint JNICALL Java_io_github_yappy_lua_LuaEngine_setTableField
   (JNIEnv *env, jclass, jlong peer, jstring key)
 {
 	auto L = reinterpret_cast<Lua *>(peer)->L();
@@ -926,11 +926,11 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_setTableField
 }
 
 /*
- * Class:     io_github_yappy_LuaEngine
+ * Class:     io_github_yappy_lua_LuaEngine
  * Method:    pcall
  * Signature: (JIII)I
  */
-JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_pcall
+JNIEXPORT jint JNICALL Java_io_github_yappy_lua_LuaEngine_pcall
   (JNIEnv *, jclass, jlong peer, jint nargs, jint nresults, jint msgh)
 {
 	auto L = reinterpret_cast<Lua *>(peer)->L();
@@ -952,11 +952,11 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_pcall
 }
 
 /*
- * Class:     io_github_yappy_LuaEngine
+ * Class:     io_github_yappy_lua_LuaEngine
  * Method:    getGlobal
  * Signature: (JLjava/lang/String;)I
  */
-JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_getGlobal
+JNIEXPORT jint JNICALL Java_io_github_yappy_lua_LuaEngine_getGlobal
   (JNIEnv *env, jclass, jlong peer, jstring name)
 {
 	auto L = reinterpret_cast<Lua *>(peer)->L();
@@ -992,11 +992,11 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_getGlobal
 }
 
 /*
- * Class:     io_github_yappy_LuaEngine
+ * Class:     io_github_yappy_lua_LuaEngine
  * Method:    setGlobal
  * Signature: (JLjava/lang/String;)I
  */
-JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_setGlobal
+JNIEXPORT jint JNICALL Java_io_github_yappy_lua_LuaEngine_setGlobal
   (JNIEnv *env, jclass, jlong peer, jstring name)
 {
 	auto L = reinterpret_cast<Lua *>(peer)->L();
@@ -1033,11 +1033,11 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_setGlobal
 }
 
 /*
- * Class:     io_github_yappy_LuaEngine
+ * Class:     io_github_yappy_lua_LuaEngine
  * Method:    setProxyCallback
- * Signature: (JLio/github/yappy/FunctionRoot;)V
+ * Signature: (JLio/github/yappy/lua/FunctionRoot;)V
  */
-JNIEXPORT void JNICALL Java_io_github_yappy_LuaEngine_setProxyCallback
+JNIEXPORT void JNICALL Java_io_github_yappy_lua_LuaEngine_setProxyCallback
   (JNIEnv *, jclass, jlong peer, jobject callback)
 {
 	auto lua = reinterpret_cast<Lua *>(peer);
@@ -1045,11 +1045,11 @@ JNIEXPORT void JNICALL Java_io_github_yappy_LuaEngine_setProxyCallback
 }
 
 /*
- * Class:     io_github_yappy_LuaEngine
+ * Class:     io_github_yappy_lua_LuaEngine
  * Method:    pushProxyFunction
  * Signature: (JI)I
  */
-JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_pushProxyFunction
+JNIEXPORT jint JNICALL Java_io_github_yappy_lua_LuaEngine_pushProxyFunction
   (JNIEnv *env, jclass, jlong peer, jint id)
 {
 	auto lua = reinterpret_cast<Lua *>(peer);
