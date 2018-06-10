@@ -6,7 +6,7 @@ project(jlua)
 set(JNICLASSDIR "${PROJECT_SOURCE_DIR}/../../java/liblua/build/classes/java/main")
 set(JNIINC "${CMAKE_CURRENT_BINARY_DIR}/jniinc")
 # class name to javah
-set(JNICLASS "io.github.yappy.LuaEngine")
+set(JNICLASS "io.github.yappy.lua.LuaEngine")
 # class file path for depandency
 string (REPLACE "." "/" JNICLASS_SLASH "${JNICLASS}")
 set(JNICLASSFILE "${JNICLASSDIR}/${JNICLASS_SLASH}.class")

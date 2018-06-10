@@ -1,4 +1,4 @@
-#include <io_github_yappy_LuaEngine.h>
+#include <io_github_yappy_lua_LuaEngine.h>
 #include <lua.hpp>
 #include <array>
 #include <memory>
@@ -9,9 +9,9 @@ static_assert(sizeof(lua_Number) == sizeof(jdouble), "lua_Number");
 static_assert(sizeof(lua_Integer) == sizeof(jlong), "lua_Integer");
 
 /* Lua C define - Java constant assert */
-static_assert(LUA_MINSTACK == io_github_yappy_LuaEngine_MAX_STACK,
+static_assert(LUA_MINSTACK == io_github_yappy_lua_LuaEngine_MAX_STACK,
 	"MAX_STACK");
-static_assert(LUA_MULTRET == io_github_yappy_LuaEngine_LUA_MULTRET,
+static_assert(LUA_MULTRET == io_github_yappy_lua_LuaEngine_LUA_MULTRET,
 	"LUA_MULTRET");
 
 namespace {
@@ -22,9 +22,8 @@ namespace {
 		LUA_COPYRIGHT,
 		LUA_AUTHORS,
 	};
-	static_assert(
-		VersionStrList.size() == io_github_yappy_LuaEngine_VERSION_ARRAY_SIZE,
-		"VERSION_ARRAY_SIZE");
+	static_assert(VersionStrList.size() ==
+		io_github_yappy_lua_LuaEngine_VERSION_ARRAY_SIZE, "VERSION_ARRAY_SIZE");
 
 	const std::array<luaL_Reg, 10> LoadLibs = {{
 		{"_G", luaopen_base},
@@ -38,7 +37,7 @@ namespace {
 		{LUA_UTF8LIBNAME, luaopen_utf8},
 		{LUA_DBLIBNAME, luaopen_debug}
 	}};
-	static_assert(LoadLibs.size() == io_github_yappy_LuaEngine_LIB_ID_COUNT,
+	static_assert(LoadLibs.size() == io_github_yappy_lua_LuaEngine_LIB_ID_COUNT,
 		"LIB_ID_COUNT");
 
 	/*
@@ -759,7 +758,8 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_getCheckedValues
 			// treat "not exist" as nil
 			bool valid = (lind <= lua_gettop(L));
 			if (!valid || lua_isnil(L, lind)) {
-				if (cchecks[i] & io_github_yappy_LuaEngine_CHECK_OPT_ALLOW_NIL) {
+				if (cchecks[i] &
+					io_github_yappy_lua_LuaEngine_CHECK_OPT_ALLOW_NIL) {
 					env->SetObjectArrayElement(values, i, nullptr);
 					continue;
 				}
@@ -770,8 +770,9 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_getCheckedValues
 			}
 			// copy and push
 			lua_pushvalue(L, lind);
-			switch (cchecks[i] & io_github_yappy_LuaEngine_CHECK_TYPE_MASK) {
-			case io_github_yappy_LuaEngine_CHECK_TYPE_BOOLEAN:
+			switch (cchecks[i] &
+				io_github_yappy_lua_LuaEngine_CHECK_TYPE_MASK) {
+			case io_github_yappy_lua_LuaEngine_CHECK_TYPE_BOOLEAN:
 			{
 				int val = lua_toboolean(L, -1);
 				jobject jobj = jniutil::BoxingBoolean(env, val);
@@ -779,7 +780,7 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_getCheckedValues
 				env->DeleteLocalRef(jobj);
 				break;
 			}
-			case io_github_yappy_LuaEngine_CHECK_TYPE_INTEGER:
+			case io_github_yappy_lua_LuaEngine_CHECK_TYPE_INTEGER:
 			{
 				int isnum = 0;
 				lua_Integer val = lua_tointegerx(L, -1, &isnum);
@@ -792,7 +793,7 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_getCheckedValues
 				env->DeleteLocalRef(jobj);
 				break;
 			}
-			case io_github_yappy_LuaEngine_CHECK_TYPE_NUMBER:
+			case io_github_yappy_lua_LuaEngine_CHECK_TYPE_NUMBER:
 			{
 				int isnum = 0;
 				lua_Number val = lua_tonumberx(L, -1, &isnum);
@@ -805,7 +806,7 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_LuaEngine_getCheckedValues
 				env->DeleteLocalRef(jobj);
 				break;
 			}
-			case io_github_yappy_LuaEngine_CHECK_TYPE_STRING:
+			case io_github_yappy_lua_LuaEngine_CHECK_TYPE_STRING:
 			{
 				const char *cstr = lua_tostring(L, -1);
 				if (cstr == nullptr) {
