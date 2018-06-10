@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10,"i8":10,"i9":10,"i10":10,"i11":10,"i12":10,"i13":10,"i14":10,"i15":10,"i16":10,"i17":10,"i18":10,"i19":10};
+var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10,"i8":10,"i9":10,"i10":10,"i11":10,"i12":10,"i13":10,"i14":10,"i15":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -194,40 +194,54 @@ implements java.lang.AutoCloseable</pre>
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../io/github/yappy/lua/LuaEngine.html#addGlobalFunction-java.lang.String-io.github.yappy.lua.LuaFunction-io.github.yappy.lua.LuaArg...-">addGlobalFunction</a></span>(java.lang.String&nbsp;name,
                  <a href="../../../../io/github/yappy/lua/LuaFunction.html" title="interface in io.github.yappy.lua">LuaFunction</a>&nbsp;func,
-                 <a href="../../../../io/github/yappy/lua/LuaArg.html" title="enum in io.github.yappy.lua">LuaArg</a>...&nbsp;args)</code>&nbsp;</td>
+                 <a href="../../../../io/github/yappy/lua/LuaArg.html" title="enum in io.github.yappy.lua">LuaArg</a>...&nbsp;args)</code>
+<div class="block">Set a function to a global variable.</div>
+</td>
 </tr>
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../io/github/yappy/lua/LuaEngine.html#addGlobalVariable-java.lang.String-java.lang.Object-">addGlobalVariable</a></span>(java.lang.String&nbsp;name,
-                 java.lang.Object&nbsp;value)</code>&nbsp;</td>
+                 java.lang.Object&nbsp;value)</code>
+<div class="block">Set a Lua global variable.</div>
+</td>
 </tr>
 <tr id="i2" class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../io/github/yappy/lua/LuaEngine.html#addLibFunction-java.lang.String-java.lang.String-io.github.yappy.lua.LuaFunction-io.github.yappy.lua.LuaArg...-">addLibFunction</a></span>(java.lang.String&nbsp;table,
               java.lang.String&nbsp;name,
               <a href="../../../../io/github/yappy/lua/LuaFunction.html" title="interface in io.github.yappy.lua">LuaFunction</a>&nbsp;func,
-              <a href="../../../../io/github/yappy/lua/LuaArg.html" title="enum in io.github.yappy.lua">LuaArg</a>...&nbsp;args)</code>&nbsp;</td>
+              <a href="../../../../io/github/yappy/lua/LuaArg.html" title="enum in io.github.yappy.lua">LuaArg</a>...&nbsp;args)</code>
+<div class="block">Set a function to a field in a table.</div>
+</td>
 </tr>
 <tr id="i3" class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../io/github/yappy/lua/LuaEngine.html#addLibTable-java.lang.String-">addLibTable</a></span>(java.lang.String&nbsp;name)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../io/github/yappy/lua/LuaEngine.html#addLibTable-java.lang.String-">addLibTable</a></span>(java.lang.String&nbsp;name)</code>
+<div class="block">Create a new empty table, and set it to global variable.</div>
+</td>
 </tr>
 <tr id="i4" class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../io/github/yappy/lua/LuaEngine.html#addLibVariable-java.lang.String-java.lang.String-java.lang.Object-">addLibVariable</a></span>(java.lang.String&nbsp;table,
               java.lang.String&nbsp;name,
-              java.lang.Object&nbsp;value)</code>&nbsp;</td>
+              java.lang.Object&nbsp;value)</code>
+<div class="block">Set a value to a field in a table.</div>
+</td>
 </tr>
 <tr id="i5" class="rowColor">
 <td class="colFirst"><code>java.lang.Object[]</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../io/github/yappy/lua/LuaEngine.html#callGlobalFunction-io.github.yappy.lua.LuaHook-java.lang.String-java.lang.Object...-">callGlobalFunction</a></span>(<a href="../../../../io/github/yappy/lua/LuaHook.html" title="interface in io.github.yappy.lua">LuaHook</a>&nbsp;hook,
                   java.lang.String&nbsp;name,
-                  java.lang.Object...&nbsp;params)</code>&nbsp;</td>
+                  java.lang.Object...&nbsp;params)</code>
+<div class="block">Call Lua global function with debug hook.</div>
+</td>
 </tr>
 <tr id="i6" class="altColor">
 <td class="colFirst"><code>java.lang.Object[]</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../io/github/yappy/lua/LuaEngine.html#callGlobalFunction-java.lang.String-java.lang.Object...-">callGlobalFunction</a></span>(java.lang.String&nbsp;name,
-                  java.lang.Object...&nbsp;params)</code>&nbsp;</td>
+                  java.lang.Object...&nbsp;params)</code>
+<div class="block">Call Lua global function.</div>
+</td>
 </tr>
 <tr id="i7" class="rowColor">
 <td class="colFirst"><code>void</code></td>
@@ -239,64 +253,46 @@ implements java.lang.AutoCloseable</pre>
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../io/github/yappy/lua/LuaEngine.html#execString-io.github.yappy.lua.LuaHook-java.lang.String-java.lang.String-">execString</a></span>(<a href="../../../../io/github/yappy/lua/LuaHook.html" title="interface in io.github.yappy.lua">LuaHook</a>&nbsp;hook,
           java.lang.String&nbsp;buf,
-          java.lang.String&nbsp;chunkName)</code>&nbsp;</td>
+          java.lang.String&nbsp;chunkName)</code>
+<div class="block">Execute string as Lua program code with debug hook.</div>
+</td>
 </tr>
 <tr id="i9" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../io/github/yappy/lua/LuaEngine.html#execString-java.lang.String-java.lang.String-">execString</a></span>(java.lang.String&nbsp;buf,
-          java.lang.String&nbsp;chunkName)</code>&nbsp;</td>
+          java.lang.String&nbsp;chunkName)</code>
+<div class="block">Execute string as Lua program code.</div>
+</td>
 </tr>
 <tr id="i10" class="altColor">
-<td class="colFirst"><code>java.lang.String</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../io/github/yappy/lua/LuaEngine.html#getAuthor--">getAuthor</a></span>()</code>
-<div class="block">Get version info.</div>
+<td class="colFirst"><code>java.lang.Object</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../io/github/yappy/lua/LuaEngine.html#getGlobalVariable-java.lang.String-">getGlobalVariable</a></span>(java.lang.String&nbsp;name)</code>
+<div class="block">Get a Lua global variable.</div>
 </td>
 </tr>
 <tr id="i11" class="rowColor">
-<td class="colFirst"><code>java.lang.String</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../io/github/yappy/lua/LuaEngine.html#getCopyright--">getCopyright</a></span>()</code>
-<div class="block">Get version info.</div>
-</td>
-</tr>
-<tr id="i12" class="altColor">
-<td class="colFirst"><code>java.lang.Object</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../io/github/yappy/lua/LuaEngine.html#getGlobalVariable-java.lang.String-">getGlobalVariable</a></span>(java.lang.String&nbsp;name)</code>&nbsp;</td>
-</tr>
-<tr id="i13" class="rowColor">
 <td class="colFirst"><code>long</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../io/github/yappy/lua/LuaEngine.html#getPeerForDebug--">getPeerForDebug</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i14" class="altColor">
-<td class="colFirst"><code>java.lang.String</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../io/github/yappy/lua/LuaEngine.html#getRelease--">getRelease</a></span>()</code>
-<div class="block">Get version info.</div>
-</td>
-</tr>
-<tr id="i15" class="rowColor">
-<td class="colFirst"><code>java.lang.String</code></td>
+<tr id="i12" class="altColor">
+<td class="colFirst"><code><a href="../../../../io/github/yappy/lua/LuaVersion.html" title="class in io.github.yappy.lua">LuaVersion</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../io/github/yappy/lua/LuaEngine.html#getVersion--">getVersion</a></span>()</code>
-<div class="block">Get version info.</div>
+<div class="block">Get Lua version info.</div>
 </td>
 </tr>
-<tr id="i16" class="altColor">
-<td class="colFirst"><code>int</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../io/github/yappy/lua/LuaEngine.html#getVersionInt--">getVersionInt</a></span>()</code>
-<div class="block">Get version info.</div>
-</td>
-</tr>
-<tr id="i17" class="rowColor">
+<tr id="i13" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../io/github/yappy/lua/LuaEngine.html#openStdLibs--">openStdLibs</a></span>()</code>
 <div class="block">Open Lua default standard libraries.</div>
 </td>
 </tr>
-<tr id="i18" class="altColor">
+<tr id="i14" class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../io/github/yappy/lua/LuaEngine.html#openStdLibs-java.util.Set-">openStdLibs</a></span>(java.util.Set&lt;<a href="../../../../io/github/yappy/lua/LuaStdLib.html" title="enum in io.github.yappy.lua">LuaStdLib</a>&gt;&nbsp;libs)</code>
 <div class="block">Open Lua standard libraries.</div>
 </td>
 </tr>
-<tr id="i19" class="rowColor">
+<tr id="i15" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../io/github/yappy/lua/LuaEngine.html#setPrintFunction-io.github.yappy.lua.LuaPrint-">setPrintFunction</a></span>(<a href="../../../../io/github/yappy/lua/LuaPrint.html" title="interface in io.github.yappy.lua">LuaPrint</a>&nbsp;print)</code>
 <div class="block">Set Lua standard print() function callback.</div>
@@ -427,73 +423,17 @@ implements java.lang.AutoCloseable</pre>
 </dl>
 </li>
 </ul>
-<a name="getVersionInt--">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>getVersionInt</h4>
-<pre>public&nbsp;int&nbsp;getVersionInt()</pre>
-<div class="block">Get version info.</div>
-<dl>
-<dt><span class="returnLabel">Returns:</span></dt>
-<dd>Version represented as an integer.</dd>
-</dl>
-</li>
-</ul>
 <a name="getVersion--">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>getVersion</h4>
-<pre>public&nbsp;java.lang.String&nbsp;getVersion()</pre>
-<div class="block">Get version info.</div>
+<pre>public&nbsp;<a href="../../../../io/github/yappy/lua/LuaVersion.html" title="class in io.github.yappy.lua">LuaVersion</a>&nbsp;getVersion()</pre>
+<div class="block">Get Lua version info.</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>Version info as a string.</dd>
-</dl>
-</li>
-</ul>
-<a name="getRelease--">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>getRelease</h4>
-<pre>public&nbsp;java.lang.String&nbsp;getRelease()</pre>
-<div class="block">Get version info.</div>
-<dl>
-<dt><span class="returnLabel">Returns:</span></dt>
-<dd>Release info.</dd>
-</dl>
-</li>
-</ul>
-<a name="getCopyright--">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>getCopyright</h4>
-<pre>public&nbsp;java.lang.String&nbsp;getCopyright()</pre>
-<div class="block">Get version info.</div>
-<dl>
-<dt><span class="returnLabel">Returns:</span></dt>
-<dd>Copyright info.</dd>
-</dl>
-</li>
-</ul>
-<a name="getAuthor--">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>getAuthor</h4>
-<pre>public&nbsp;java.lang.String&nbsp;getAuthor()</pre>
-<div class="block">Get version info.</div>
-<dl>
-<dt><span class="returnLabel">Returns:</span></dt>
-<dd>Author info.</dd>
+<dd>Lua version info.</dd>
 </dl>
 </li>
 </ul>
@@ -542,7 +482,24 @@ implements java.lang.AutoCloseable</pre>
  Lua print() func is replaced automatically by this engine.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>print</code> - </dd>
+<dd><code>print</code> - Print callback.</dd>
+</dl>
+</li>
+</ul>
+<a name="addLibTable-java.lang.String-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>addLibTable</h4>
+<pre>public&nbsp;void&nbsp;addLibTable(java.lang.String&nbsp;name)
+                 throws <a href="../../../../io/github/yappy/lua/LuaException.html" title="class in io.github.yappy.lua">LuaException</a></pre>
+<div class="block">Create a new empty table, and set it to global variable.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>name</code> - Global variable name.</dd>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code><a href="../../../../io/github/yappy/lua/LuaException.html" title="class in io.github.yappy.lua">LuaException</a></code> - Lua error.</dd>
 </dl>
 </li>
 </ul>
@@ -554,9 +511,14 @@ implements java.lang.AutoCloseable</pre>
 <h4>getGlobalVariable</h4>
 <pre>public&nbsp;java.lang.Object&nbsp;getGlobalVariable(java.lang.String&nbsp;name)
                                    throws <a href="../../../../io/github/yappy/lua/LuaException.html" title="class in io.github.yappy.lua">LuaException</a></pre>
+<div class="block">Get a Lua global variable.</div>
 <dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>name</code> - Global variable name.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>Value.</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="../../../../io/github/yappy/lua/LuaException.html" title="class in io.github.yappy.lua">LuaException</a></code></dd>
+<dd><code><a href="../../../../io/github/yappy/lua/LuaException.html" title="class in io.github.yappy.lua">LuaException</a></code> - Lua error.</dd>
 </dl>
 </li>
 </ul>
@@ -569,9 +531,13 @@ implements java.lang.AutoCloseable</pre>
 <pre>public&nbsp;void&nbsp;addGlobalVariable(java.lang.String&nbsp;name,
                               java.lang.Object&nbsp;value)
                        throws <a href="../../../../io/github/yappy/lua/LuaException.html" title="class in io.github.yappy.lua">LuaException</a></pre>
+<div class="block">Set a Lua global variable.</div>
 <dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>name</code> - Global variable name.</dd>
+<dd><code>value</code> - Value.</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="../../../../io/github/yappy/lua/LuaException.html" title="class in io.github.yappy.lua">LuaException</a></code></dd>
+<dd><code><a href="../../../../io/github/yappy/lua/LuaException.html" title="class in io.github.yappy.lua">LuaException</a></code> - Lua error.</dd>
 </dl>
 </li>
 </ul>
@@ -585,23 +551,15 @@ implements java.lang.AutoCloseable</pre>
                            java.lang.String&nbsp;name,
                            java.lang.Object&nbsp;value)
                     throws <a href="../../../../io/github/yappy/lua/LuaException.html" title="class in io.github.yappy.lua">LuaException</a></pre>
+<div class="block">Set a value to a field in a table.
+ table["name"] = value.</div>
 <dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>table</code> - Global table variable name.</dd>
+<dd><code>name</code> - Table key.</dd>
+<dd><code>value</code> - Value.</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="../../../../io/github/yappy/lua/LuaException.html" title="class in io.github.yappy.lua">LuaException</a></code></dd>
-</dl>
-</li>
-</ul>
-<a name="addLibTable-java.lang.String-">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>addLibTable</h4>
-<pre>public&nbsp;void&nbsp;addLibTable(java.lang.String&nbsp;name)
-                 throws <a href="../../../../io/github/yappy/lua/LuaException.html" title="class in io.github.yappy.lua">LuaException</a></pre>
-<dl>
-<dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="../../../../io/github/yappy/lua/LuaException.html" title="class in io.github.yappy.lua">LuaException</a></code></dd>
+<dd><code><a href="../../../../io/github/yappy/lua/LuaException.html" title="class in io.github.yappy.lua">LuaException</a></code> - Lua error.</dd>
 </dl>
 </li>
 </ul>
@@ -615,9 +573,14 @@ implements java.lang.AutoCloseable</pre>
                               <a href="../../../../io/github/yappy/lua/LuaFunction.html" title="interface in io.github.yappy.lua">LuaFunction</a>&nbsp;func,
                               <a href="../../../../io/github/yappy/lua/LuaArg.html" title="enum in io.github.yappy.lua">LuaArg</a>...&nbsp;args)
                        throws <a href="../../../../io/github/yappy/lua/LuaException.html" title="class in io.github.yappy.lua">LuaException</a></pre>
+<div class="block">Set a function to a global variable.</div>
 <dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>name</code> - Global variable name.</dd>
+<dd><code>func</code> - Function to be called.</dd>
+<dd><code>args</code> - Function arguments check and conversion rules.</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="../../../../io/github/yappy/lua/LuaException.html" title="class in io.github.yappy.lua">LuaException</a></code></dd>
+<dd><code><a href="../../../../io/github/yappy/lua/LuaException.html" title="class in io.github.yappy.lua">LuaException</a></code> - Lua error.</dd>
 </dl>
 </li>
 </ul>
@@ -632,9 +595,16 @@ implements java.lang.AutoCloseable</pre>
                            <a href="../../../../io/github/yappy/lua/LuaFunction.html" title="interface in io.github.yappy.lua">LuaFunction</a>&nbsp;func,
                            <a href="../../../../io/github/yappy/lua/LuaArg.html" title="enum in io.github.yappy.lua">LuaArg</a>...&nbsp;args)
                     throws <a href="../../../../io/github/yappy/lua/LuaException.html" title="class in io.github.yappy.lua">LuaException</a></pre>
+<div class="block">Set a function to a field in a table.
+ table["name"] = func.</div>
 <dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>table</code> - Global table variable name.</dd>
+<dd><code>name</code> - Table key.</dd>
+<dd><code>func</code> - Function to be called.</dd>
+<dd><code>args</code> - Function arguments check and conversion rules.</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="../../../../io/github/yappy/lua/LuaException.html" title="class in io.github.yappy.lua">LuaException</a></code></dd>
+<dd><code><a href="../../../../io/github/yappy/lua/LuaException.html" title="class in io.github.yappy.lua">LuaException</a></code> - Lua error.</dd>
 </dl>
 </li>
 </ul>
@@ -648,10 +618,16 @@ implements java.lang.AutoCloseable</pre>
                                              java.lang.Object...&nbsp;params)
                                       throws <a href="../../../../io/github/yappy/lua/LuaException.html" title="class in io.github.yappy.lua">LuaException</a>,
                                              java.lang.InterruptedException</pre>
+<div class="block">Call Lua global function.</div>
 <dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>name</code> - Global variable name.</dd>
+<dd><code>params</code> - Parameters.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>Return values.</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="../../../../io/github/yappy/lua/LuaException.html" title="class in io.github.yappy.lua">LuaException</a></code></dd>
-<dd><code>java.lang.InterruptedException</code></dd>
+<dd><code><a href="../../../../io/github/yappy/lua/LuaException.html" title="class in io.github.yappy.lua">LuaException</a></code> - Lua error.</dd>
+<dd><code>java.lang.InterruptedException</code> - Thread is interrupted during execution.</dd>
 </dl>
 </li>
 </ul>
@@ -666,10 +642,17 @@ implements java.lang.AutoCloseable</pre>
                                              java.lang.Object...&nbsp;params)
                                       throws <a href="../../../../io/github/yappy/lua/LuaException.html" title="class in io.github.yappy.lua">LuaException</a>,
                                              java.lang.InterruptedException</pre>
+<div class="block">Call Lua global function with debug hook.</div>
 <dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>hook</code> - Debug hook.</dd>
+<dd><code>name</code> - Global variable name.</dd>
+<dd><code>params</code> - Parameters.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>Return values.</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="../../../../io/github/yappy/lua/LuaException.html" title="class in io.github.yappy.lua">LuaException</a></code></dd>
-<dd><code>java.lang.InterruptedException</code></dd>
+<dd><code><a href="../../../../io/github/yappy/lua/LuaException.html" title="class in io.github.yappy.lua">LuaException</a></code> - Lua error.</dd>
+<dd><code>java.lang.InterruptedException</code> - Thread is interrupted during execution.</dd>
 </dl>
 </li>
 </ul>
@@ -692,10 +675,14 @@ implements java.lang.AutoCloseable</pre>
                        java.lang.String&nbsp;chunkName)
                 throws <a href="../../../../io/github/yappy/lua/LuaException.html" title="class in io.github.yappy.lua">LuaException</a>,
                        java.lang.InterruptedException</pre>
+<div class="block">Execute string as Lua program code.</div>
 <dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>buf</code> - Lua source code.</dd>
+<dd><code>chunkName</code> - It will be used at error message.</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="../../../../io/github/yappy/lua/LuaException.html" title="class in io.github.yappy.lua">LuaException</a></code></dd>
-<dd><code>java.lang.InterruptedException</code></dd>
+<dd><code><a href="../../../../io/github/yappy/lua/LuaException.html" title="class in io.github.yappy.lua">LuaException</a></code> - Syntax or Runtime or other error.</dd>
+<dd><code>java.lang.InterruptedException</code> - Thread is interrupted during execution.</dd>
 </dl>
 </li>
 </ul>
@@ -710,10 +697,15 @@ implements java.lang.AutoCloseable</pre>
                        java.lang.String&nbsp;chunkName)
                 throws <a href="../../../../io/github/yappy/lua/LuaException.html" title="class in io.github.yappy.lua">LuaException</a>,
                        java.lang.InterruptedException</pre>
+<div class="block">Execute string as Lua program code with debug hook.</div>
 <dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>hook</code> - Lua debug hook.</dd>
+<dd><code>buf</code> - Lua source code.</dd>
+<dd><code>chunkName</code> - It will be used at error message.</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="../../../../io/github/yappy/lua/LuaException.html" title="class in io.github.yappy.lua">LuaException</a></code></dd>
-<dd><code>java.lang.InterruptedException</code></dd>
+<dd><code><a href="../../../../io/github/yappy/lua/LuaException.html" title="class in io.github.yappy.lua">LuaException</a></code> - Syntax or Runtime or other error.</dd>
+<dd><code>java.lang.InterruptedException</code> - Thread is interrupted during execution.</dd>
 </dl>
 </li>
 </ul>

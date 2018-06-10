@@ -6,6 +6,7 @@ import java.util.Set;
 
 /**
  * Lua language execution engine.
+ *
  * @author yappy
  */
 public class LuaEngine implements AutoCloseable {
@@ -104,8 +105,7 @@ public class LuaEngine implements AutoCloseable {
 
 	// private variables
 	private long peer = 0;
-	private int versionInt;
-	private String version, release, copyright, author;
+	private final LuaVersion version;
 	private LuaHook hook = null;
 	private LuaPrint print = null;
 	private LuaPrint printRoot = new LuaPrintImpl();
@@ -139,11 +139,9 @@ public class LuaEngine implements AutoCloseable {
 		setProxyCallback(peer, new FunctionRootImpl());
 
 		String[] strs = new String[VERSION_ARRAY_SIZE];
-		versionInt = getVersionInfo(strs);
-		this.version = strs[0];
-		this.release = strs[1];
-		this.copyright = strs[2];
-		this.author = strs[3];
+		int versionInt = getVersionInfo(strs);
+		this.version = new LuaVersion(versionInt,
+				strs[0], strs[1], strs[2], strs[3]);
 	}
 
 	/**
@@ -157,39 +155,11 @@ public class LuaEngine implements AutoCloseable {
 	}
 
 	/**
-	 * Get version info.
-	 * @return Version represented as an integer.
+	 * Get Lua version info.
+	 * @return Lua version info.
 	 */
-	public int getVersionInt() {
-		return versionInt;
-	}
-	/**
-	 * Get version info.
-	 * @return Version info as a string.
-	 */
-	public String getVersion() {
+	public LuaVersion getVersion() {
 		return version;
-	}
-	/**
-	 * Get version info.
-	 * @return Release info.
-	 */
-	public String getRelease() {
-		return release;
-	}
-	/**
-	 * Get version info.
-	 * @return Copyright info.
-	 */
-	public String getCopyright() {
-		return copyright;
-	}
-	/**
-	 * Get version info.
-	 * @return Author info.
-	 */
-	public String getAuthor() {
-		return author;
 	}
 
 	private static Object covertL2J(byte type, Object luaValue) {
@@ -402,12 +372,28 @@ public class LuaEngine implements AutoCloseable {
 	/**
 	 * Set Lua standard print() function callback.
 	 * Lua print() func is replaced automatically by this engine.
-	 * @param print
+	 * @param print Print callback.
 	 */
 	public void setPrintFunction(LuaPrint print) {
 		this.print = print;
 	}
 
+	/**
+	 * Create a new empty table, and set it to global variable.
+	 * @param name Global variable name.
+	 * @throws LuaException Lua error.
+	 */
+	public void addLibTable(String name) throws LuaException {
+		checkLuaError(pushNewTable(peer, 0, 0));
+		checkLuaError(setGlobal(peer, name));
+	}
+
+	/**
+	 * Get a Lua global variable.
+	 * @param name Global variable name.
+	 * @return Value.
+	 * @throws LuaException Lua error.
+	 */
 	public Object getGlobalVariable(String name) throws LuaException {
 		if (name == null) {
 			throw new NullPointerException("name");
@@ -417,6 +403,12 @@ public class LuaEngine implements AutoCloseable {
 		return popStack(1)[0];
 	}
 
+	/**
+	 * Set a Lua global variable.
+	 * @param name Global variable name.
+	 * @param value Value.
+	 * @throws LuaException Lua error.
+	 */
 	public void addGlobalVariable(String name, Object value)
 			throws LuaException {
 		if (name == null) {
@@ -427,6 +419,14 @@ public class LuaEngine implements AutoCloseable {
 		checkLuaError(setGlobal(peer, name));
 	}
 
+	/**
+	 * Set a value to a field in a table.
+	 * table["name"] = value.
+	 * @param table Global table variable name.
+	 * @param name Table key.
+	 * @param value Value.
+	 * @throws LuaException Lua error.
+	 */
 	public void addLibVariable(String table, String name, Object value)
 			throws LuaException {
 		if (table == null) {
@@ -445,11 +445,13 @@ public class LuaEngine implements AutoCloseable {
 		setTop(peer, getTop(peer) - 1);
 	}
 
-	public void addLibTable(String name) throws LuaException {
-		checkLuaError(pushNewTable(peer, 0, 0));
-		checkLuaError(setGlobal(peer, name));
-	}
-
+	/**
+	 * Set a function to a global variable.
+	 * @param name Global variable name.
+	 * @param func Function to be called.
+	 * @param args Function arguments check and conversion rules.
+	 * @throws LuaException Lua error.
+	 */
 	public void addGlobalFunction(String name, LuaFunction func,
 			LuaArg... args) throws LuaException {
 		if (name == null) {
@@ -478,6 +480,15 @@ public class LuaEngine implements AutoCloseable {
 		checkLuaError(setGlobal(peer, name));
 	}
 
+	/**
+	 * Set a function to a field in a table.
+	 * table["name"] = func.
+	 * @param table Global table variable name.
+	 * @param name Table key.
+	 * @param func Function to be called.
+	 * @param args Function arguments check and conversion rules.
+	 * @throws LuaException Lua error.
+	 */
 	public void addLibFunction(String table, String name,
 			LuaFunction func, LuaArg... args) throws LuaException {
 		if (table == null) throw new NullPointerException("table");
@@ -507,12 +518,29 @@ public class LuaEngine implements AutoCloseable {
 		setTop(peer, getTop(peer) - 1);
 	}
 
+	/**
+	 * Call Lua global function.
+	 * @param name Global variable name.
+	 * @param params Parameters.
+	 * @return Return values.
+	 * @throws LuaException Lua error.
+	 * @throws InterruptedException Thread is interrupted during execution.
+	 */
 	public Object[] callGlobalFunction(
 			String name, Object... params)
 			throws LuaException, InterruptedException {
 		return callGlobalFunction(null, name, params);
 	}
 
+	/**
+	 * Call Lua global function with debug hook.
+	 * @param hook Debug hook.
+	 * @param name Global variable name.
+	 * @param params Parameters.
+	 * @return Return values.
+	 * @throws LuaException Lua error.
+	 * @throws InterruptedException Thread is interrupted during execution.
+	 */
 	public Object[] callGlobalFunction(
 			LuaHook hook, String name, Object... params)
 			throws LuaException, InterruptedException {
@@ -543,11 +571,26 @@ public class LuaEngine implements AutoCloseable {
 		return peer;
 	}
 
+	/**
+	 * Execute string as Lua program code.
+	 * @param buf Lua source code.
+	 * @param chunkName It will be used at error message.
+	 * @throws LuaException Syntax or Runtime or other error.
+	 * @throws InterruptedException Thread is interrupted during execution.
+	 */
 	public void execString(String buf, String chunkName)
 			throws LuaException, InterruptedException {
 		execString(null, buf, chunkName);
 	}
 
+	/**
+	 * Execute string as Lua program code with debug hook.
+	 * @param hook Lua debug hook.
+	 * @param buf Lua source code.
+	 * @param chunkName It will be used at error message.
+	 * @throws LuaException Syntax or Runtime or other error.
+	 * @throws InterruptedException Thread is interrupted during execution.
+	 */
 	public void execString(LuaHook hook, String buf, String chunkName)
 			throws LuaException, InterruptedException {
 		// push chunk function
