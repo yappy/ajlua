@@ -4,6 +4,11 @@ Java and Android porting of native Lua
 ## API reference
 https://yappy.github.io/ajlua/
 
+## Lua reference manual
+Official: https://www.lua.org/manual/5.3/
+
+Unofficial Japanese: http://milkpot.sakura.ne.jp/lua/lua53_manual_ja.html
+
 ## How to build
 
 ### Java project
