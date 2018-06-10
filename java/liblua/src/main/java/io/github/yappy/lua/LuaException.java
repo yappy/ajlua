@@ -1,4 +1,4 @@
-package io.github.yappy;
+package io.github.yappy.lua;
 
 public class LuaException extends Exception {
 

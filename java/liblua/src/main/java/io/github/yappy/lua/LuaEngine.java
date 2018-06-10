@@ -1,4 +1,4 @@
-package io.github.yappy;
+package io.github.yappy.lua;
 
 import java.util.ArrayList;
 import java.util.List;

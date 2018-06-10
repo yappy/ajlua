@@ -12,12 +12,12 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.Timeout;
 
-import io.github.yappy.LuaArg;
-import io.github.yappy.LuaEngine;
-import io.github.yappy.LuaException;
-import io.github.yappy.LuaFunction;
-import io.github.yappy.LuaRuntimeException;
-import io.github.yappy.LuaSyntaxException;
+import io.github.yappy.lua.LuaArg;
+import io.github.yappy.lua.LuaEngine;
+import io.github.yappy.lua.LuaException;
+import io.github.yappy.lua.LuaFunction;
+import io.github.yappy.lua.LuaRuntimeException;
+import io.github.yappy.lua.LuaSyntaxException;
 
 public class LuaEngineTest {
 

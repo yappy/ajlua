@@ -14,9 +14,9 @@ import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
-import io.github.yappy.LuaEngine;
-import io.github.yappy.LuaException;
-import io.github.yappy.LuaPrint;
+import io.github.yappy.lua.LuaEngine;
+import io.github.yappy.lua.LuaException;
+import io.github.yappy.lua.LuaPrint;
 
 public class App extends JFrame {
 

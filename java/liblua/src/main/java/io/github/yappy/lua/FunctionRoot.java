@@ -1,4 +1,4 @@
-package io.github.yappy;
+package io.github.yappy.lua;
 
 /*
  * Lua -> C -> Java function call root interface. (package private)
