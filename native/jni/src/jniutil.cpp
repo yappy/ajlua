@@ -19,17 +19,17 @@ namespace {
 	};
 
 	ClassCacheEntry s_classCache[] = {
-		{ nullptr, "io/github/yappy/DebugHook"		},
-		{ nullptr, "io/github/yappy/LuaPrint"		},
-		{ nullptr, "io/github/yappy/FunctionRoot"	},
-		{ nullptr, "java/lang/String"				},
-		{ nullptr, "java/lang/Number"				},
-		{ nullptr, "java/lang/Boolean"				},
-		{ nullptr, "java/lang/Long"					},
-		{ nullptr, "java/lang/Double"				},
-		{ nullptr, "java/lang/Throwable"			},
-		{ nullptr, "java/lang/RuntimeException"		},
-		{ nullptr, "java/lang/Error"				},
+		{ nullptr, "io/github/yappy/lua/DebugHook"		},
+		{ nullptr, "io/github/yappy/lua/LuaPrint"		},
+		{ nullptr, "io/github/yappy/lua/FunctionRoot"	},
+		{ nullptr, "java/lang/String"					},
+		{ nullptr, "java/lang/Number"					},
+		{ nullptr, "java/lang/Boolean"					},
+		{ nullptr, "java/lang/Long"						},
+		{ nullptr, "java/lang/Double"					},
+		{ nullptr, "java/lang/Throwable"				},
+		{ nullptr, "java/lang/RuntimeException"			},
+		{ nullptr, "java/lang/Error"					},
 	};
 	static_assert(
 		sizeof(s_classCache) / sizeof(s_classCache[0]) ==

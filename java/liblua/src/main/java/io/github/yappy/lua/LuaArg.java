@@ -1,4 +1,4 @@
-package io.github.yappy;
+package io.github.yappy.lua;
 
 /**
  * Type check and conversion rule for Lua -&gt; Java function call arguments.

@@ -1,4 +1,4 @@
-package io.github.yappy;
+package io.github.yappy.lua;
 
 import java.util.Collections;
 import java.util.EnumSet;
