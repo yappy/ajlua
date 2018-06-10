@@ -3,15 +3,14 @@ package io.github.yappy.androidlua;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import io.github.yappy.LuaEngine;
-import io.github.yappy.LuaException;
-import io.github.yappy.LuaPrint;
+import io.github.yappy.lua.LuaEngine;
+import io.github.yappy.lua.LuaException;
+import io.github.yappy.lua.LuaPrint;
 
 public class MainActivity extends AppCompatActivity {
 
