@@ -30,9 +30,8 @@ install(TARGETS ${PROJECT_NAME}
 
 # javah target
 # `make javah` to update JNI header files
-add_custom_target(javah SOURCES "${JNIHEADER}")
-add_custom_command(
-	OUTPUT "${JNIHEADER}"
+add_custom_target(javah
+	SOURCES "${JNIHEADER}"
 	COMMAND "$ENV{JAVA_HOME}/bin/javah"
 			"-d" "${JNIINC}"
 			"-classpath" "${JNICLASSDIR}"
