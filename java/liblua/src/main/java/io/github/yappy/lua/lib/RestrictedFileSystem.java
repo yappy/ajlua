@@ -144,4 +144,27 @@ public class RestrictedFileSystem implements LuaLibrary {
 		}
 	};}
 
+	@LuaLibraryFunction(name = "readline", args = { LuaArg.LONG })
+	public LuaFunction readline() { return new LuaFunction() {
+		@Override
+		public Object[] call(Object[] args) throws LuaException {
+			int fd = ((Long)args[0]).intValue();
+
+			AutoCloseable io = (AutoCloseable)fdMap.get(fd);
+			if (io == null) {
+				throw new LuaRuntimeException("Invalid file");
+			}
+			if (!(io instanceof BufferedReader)) {
+				throw new LuaRuntimeException("Invalid file for read");
+			}
+			BufferedReader reader = (BufferedReader)io;
+			try {
+				// return nil if EOF
+				return new Object[] { reader.readLine() };
+			} catch (Exception e) {
+				throw new LuaRuntimeException("IO error", e);
+			}
+		}
+	};}
+
 }
