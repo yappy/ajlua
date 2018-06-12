@@ -16,6 +16,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.rules.TemporaryFolder;
 
 import io.github.yappy.lua.LuaEngine;
 import io.github.yappy.lua.LuaRuntimeException;
@@ -23,27 +24,22 @@ import io.github.yappy.lua.lib.RestrictedFileSystem;
 
 public class LibRestrictedFileSystemTest {
 
-	private static final File DIR = new File("./testdir");
 	private LuaEngine lua;
+
+	@Rule
+    public TemporaryFolder tmpDir = new TemporaryFolder();
 
 	@Before
 	public void init() throws Exception {
 		lua = new LuaEngine();
-		if (!DIR.mkdir()) {
-			throw new IOException("Cannot create test dir");
-		}
 		lua.openStdLibs();
-		lua.addLibrary(new RestrictedFileSystem(DIR));
+		lua.addLibrary(new RestrictedFileSystem(tmpDir.getRoot()));
 	}
 
 	@After
 	public void term() throws Exception {
 		lua.close();
 		lua = null;
-		for (File file : DIR.listFiles()) {
-			file.delete();
-		}
-		DIR.delete();
 	}
 
 	@Rule
@@ -87,7 +83,7 @@ public class LibRestrictedFileSystemTest {
 
 	@Test
 	public void readline() throws Exception {
-		File testFile = new File(DIR, "readline.txt");
+		File testFile = new File(tmpDir.getRoot(), "readline.txt");
 		prepairFile(testFile, "hello\ntakenoko\n");
 		lua.execString(
 				"local fd = fs.open(\"readline.txt\", \"r\")" +
@@ -103,7 +99,7 @@ public class LibRestrictedFileSystemTest {
 
 	@Test
 	public void writeline() throws Exception {
-		File testFile = new File(DIR, "readline.txt");
+		File testFile = new File(tmpDir.getRoot(), "readline.txt");
 		prepairFile(testFile, "hello\ntakenoko\n");
 		lua.execString(
 				"local fd = fs.open(\"readline.txt\", \"w\")" +

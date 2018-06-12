@@ -1,12 +1,9 @@
 apply plugin: 'com.android.library'
-apply plugin: 'me.tatarka.retrolambda'
 
 def orgRoot = "../../java/liblua"
 
 android {
 	compileSdkVersion 27
-
-
 
 	defaultConfig {
 		minSdkVersion 19
