@@ -118,7 +118,8 @@ public class RestrictedFileSystem implements LuaLibrary {
 					throw new LuaRuntimeException("Invalid mode");
 				}
 			} catch(FileNotFoundException e) {
-				throw new LuaRuntimeException("File not found", e);
+				// Open failed. Return nil.
+				return new Object[] { null };
 			}
 
 			int fd = generateFd();
