@@ -4,6 +4,7 @@ package io.github.yappy.lua;
  * Type check and conversion rule for Lua -&gt; Java function call arguments.
  * @see LuaFunction
  * @see LuaEngine#addGlobalFunction(String, LuaFunction, LuaArg...)
+ * @see LuaEngine#addLibFunction(String, String, LuaFunction, LuaArg...)
  * @author yappy
  */
 public enum LuaArg {

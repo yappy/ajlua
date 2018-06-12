@@ -1,5 +1,10 @@
-	package io.github.yappy.lua;
+package io.github.yappy.lua;
 
+/**
+ * A syntax error has occurred during compilation.
+ * This exception represents LUA_ERRSYNTAX.
+ * @author yappy
+ */
 public class LuaSyntaxException extends LuaException {
 
 	private static final long serialVersionUID = 1L;
