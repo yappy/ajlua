@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
@@ -161,9 +162,34 @@ public class RestrictedFileSystem implements LuaLibrary {
 			try {
 				// return nil if EOF
 				return new Object[] { reader.readLine() };
-			} catch (Exception e) {
+			} catch (IOException e) {
 				throw new LuaRuntimeException("IO error", e);
 			}
+		}
+	};}
+
+	@LuaLibraryFunction(name = "writeline", args = { LuaArg.LONG, LuaArg.STRING_OR_NIL })
+	public LuaFunction writeline() { return new LuaFunction() {
+		@Override
+		public Object[] call(Object[] args) throws LuaException {
+			int fd = ((Long)args[0]).intValue();
+			String str = (args[1] != null) ? args[1].toString() : "";
+
+			AutoCloseable io = (AutoCloseable)fdMap.get(fd);
+			if (io == null) {
+				throw new LuaRuntimeException("Invalid file");
+			}
+			if (!(io instanceof BufferedWriter)) {
+				throw new LuaRuntimeException("Invalid file for write");
+			}
+			BufferedWriter writer = (BufferedWriter)io;
+			try {
+				writer.write(str);
+				writer.write('\n');
+			} catch (IOException e) {
+				throw new LuaRuntimeException("IO error", e);
+			}
+			return null;
 		}
 	};}
 

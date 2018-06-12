@@ -1,7 +1,13 @@
+import static org.junit.Assert.assertThat;
+import static org.hamcrest.CoreMatchers.is;
+
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 
@@ -45,9 +51,22 @@ public class LibRestrictedFileSystemTest {
 
 	private static void prepairFile(File file, String content) throws IOException {
 		try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
-				new FileOutputStream(file), StandardCharsets.UTF_8))){
+				new FileOutputStream(file), StandardCharsets.UTF_8))) {
 			writer.write(content);
 		}
+	}
+
+	private static String readAll(File file) throws IOException {
+		StringBuilder sb = new StringBuilder();
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(
+				new FileInputStream(file), StandardCharsets.UTF_8))) {
+			char[] buf = new char[1024];
+			int len;
+			while ((len = reader.read(buf)) >= 0) {
+				sb.append(buf, 0, len);
+			}
+		}
+		return sb.toString();
 	}
 
 
@@ -75,10 +94,26 @@ public class LibRestrictedFileSystemTest {
 				"local s1 = fs.readline(fd)\n" +
 				"local s2 = fs.readline(fd)\n" +
 				"local s3 = fs.readline(fd)\n" +
+				"fs.close(fd)\n" +
 				"assert(s1 == \"hello\", s1)\n" +
 				"assert(s2 == \"takenoko\", s2)\n" +
 				"assert(s3 == nil, s3)\n",
 				"readline.lua");
+	}
+
+	@Test
+	public void writeline() throws Exception {
+		File testFile = new File(DIR, "readline.txt");
+		prepairFile(testFile, "hello\ntakenoko\n");
+		lua.execString(
+				"local fd = fs.open(\"readline.txt\", \"w\")" +
+				"fs.writeline(fd, \"abc\")\n" +
+				"fs.writeline(fd)\n" +
+				"fs.writeline(fd, \"12345\")\n" +
+				"fs.close(fd)\n",
+				"readline.lua");
+		String str = readAll(testFile);
+		assertThat(str, is("abc\n\n12345\n"));
 	}
 
 }
