@@ -83,17 +83,19 @@ namespace jniutil {
 		if (jstr == nullptr) {
 			return std::unique_ptr<char[]>(nullptr);
 		}
-		jsize len = env->GetStringUTFLength(jstr);
-		char *p = new(std::nothrow) char[len + 1];
+
+		jsize len16 = env->GetStringLength(jstr);
+		jsize len8 = env->GetStringUTFLength(jstr);
+		char *p = new(std::nothrow) char[len8 + 1];
 		if (p == nullptr) {
 			return std::unique_ptr<char[]>(nullptr);
 		}
 		std::unique_ptr<char[]> buf(p);
-		env->GetStringUTFRegion(jstr, 0, len, buf.get());
-		buf[len] = '\0';
+		env->GetStringUTFRegion(jstr, 0, len16, buf.get());
+		buf[len8] = '\0';
 
 		if (outlen != nullptr) {
-			*outlen = len;
+			*outlen = len8;
 		}
 		return buf;
 	}
