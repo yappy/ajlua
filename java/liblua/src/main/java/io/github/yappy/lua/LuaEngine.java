@@ -1,8 +1,16 @@
 package io.github.yappy.lua;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.List;
 import java.util.Set;
+
+import io.github.yappy.lua.lib.LuaLibrary;
+import io.github.yappy.lua.lib.LuaLibraryFunction;
+import io.github.yappy.lua.lib.LuaLibraryTable;
 
 /**
  * Lua language execution engine.
@@ -111,6 +119,7 @@ public class LuaEngine implements AutoCloseable {
 	private LuaPrint printRoot = new LuaPrintImpl();
 	private List<LuaFunction> functionList = new ArrayList<LuaFunction>();
 	private List<LuaArg[]> argsList = new ArrayList<LuaArg[]>();
+	private Deque<AutoCloseable> closeList = new ArrayDeque<>();
 
 	/**
 	 * Initialize LuaEngine with {@link #DEFAULT_MEMORY_LIMIT} and {@link #DEFAULT_INTR_INST_COUNT}.
@@ -150,6 +159,10 @@ public class LuaEngine implements AutoCloseable {
 	 */
 	@Override
 	public void close() {
+		while (!closeList.isEmpty()) {
+			closeList.pop();
+		}
+
 		deletePeer(peer);
 		peer = 0;
 	}
@@ -380,12 +393,12 @@ public class LuaEngine implements AutoCloseable {
 
 	/**
 	 * Create a new empty table, and set it to global variable.
-	 * @param name Global variable name.
+	 * @param table Global variable name.
 	 * @throws LuaException Lua error.
 	 */
-	public void addLibTable(String name) throws LuaException {
+	public void addLibTable(String table) throws LuaException {
 		checkLuaError(pushNewTable(peer, 0, 0));
-		checkLuaError(setGlobal(peer, name));
+		checkLuaError(setGlobal(peer, table));
 	}
 
 	/**
@@ -632,6 +645,26 @@ public class LuaEngine implements AutoCloseable {
 		else {
 			return values[num - 1].toString();
 		}
+	}
+
+	public void addLibrary(LuaLibrary lib) throws LuaException {
+		Class<?> cls = lib.getClass();
+		String table = cls.getAnnotation(LuaLibraryTable.class).value();
+		addLibTable(table);
+		for (Method m : cls.getMethods()) {
+			LuaLibraryFunction funcMeta = m.getAnnotation(LuaLibraryFunction.class);
+			if (funcMeta == null) {
+				continue;
+			}
+			LuaFunction func;
+			try {
+				func = (LuaFunction)(m.invoke(lib));
+			} catch (IllegalAccessException | InvocationTargetException e) {
+				throw new IllegalArgumentException(e);
+			}
+			addLibFunction(table, funcMeta.name(), func, funcMeta.args());
+		}
+		closeList.push(lib);
 	}
 
 }
