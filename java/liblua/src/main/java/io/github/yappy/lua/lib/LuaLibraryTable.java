@@ -15,7 +15,10 @@ import java.lang.annotation.Target;
  */
 public @interface LuaLibraryTable {
 
-	/** Library table name. */
+	/**
+	 * Library table name.
+	 * @return Library table name.
+	 */
 	String value();
 
 }
