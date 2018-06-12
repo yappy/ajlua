@@ -33,3 +33,7 @@ javadoc {
 test {
 	systemProperty 'java.library.path', file('build/natives/')
 }
+
+compileTestJava {
+	options.encoding 'UTF-8'
+}
