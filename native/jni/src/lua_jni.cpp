@@ -221,6 +221,7 @@ namespace {
 		{
 			// get from extraspace
 			Lua *lua = FromExtraSpace(L);
+			JNIEnv *env = lua->m_env;
 			// get from upvalue
 			auto id = static_cast<jint>(
 				lua_tointeger(L, lua_upvalueindex(PROXY_UPVALUE_IND_ID)));
@@ -228,51 +229,51 @@ namespace {
 			// Java interface call
 			jmethodID method = jniutil::GetMethodId(
 				jniutil::MethodId::FunctionRoot_call);
-			int ret = lua->m_env->CallIntMethod(
+			int ret = env->CallIntMethod(
 				lua->m_callback.get(), method, id);
 			// exception check
-			jthrowable ex = lua->m_env->ExceptionOccurred();
+			jthrowable ex = env->ExceptionOccurred();
 			if (ex == nullptr) {
 				// no exception
 				return ret;
 			}
-			else {
-				// call Throwable#getMessage()
-				jmethodID method = jniutil::GetMethodId(
-					jniutil::MethodId::Throwable_getMessage);
-				jstring jmsg = static_cast<jstring>(
-					lua->m_env->CallObjectMethod(ex, method));
 
-				std::unique_ptr<char[]> msg = nullptr;
-				if (jmsg != nullptr) {
-					msg = jniutil::JstrToChars(lua->m_env, jmsg);
-					if (msg == nullptr) {
-						jniutil::ThrowOutOfMemoryError(
-							lua->m_env, "Native heap");
-						// longjmp to pcall point
-						return lua_error(L);
-					}
-				}
-				const char *cmsg = (msg != nullptr) ? msg.get() : "";
+			// exception occured!
+			env->ExceptionClear();
 
-				jclass clsRE = jniutil::FindClass(
-					jniutil::ClassId::RuntimeException);
-				jclass clsError = jniutil::FindClass(jniutil::ClassId::Error);
-				if (lua->m_env->IsInstanceOf(ex, clsRE) ||
-					lua->m_env->IsInstanceOf(ex, clsError)) {
-					// RuntimeException or Error
-					// DO NOT clear exception status
+			// call Throwable#getMessage()
+			jmethodID methodGetMessage = jniutil::GetMethodId(
+				jniutil::MethodId::Throwable_getMessage);
+			jstring jmsg = static_cast<jstring>(
+				env->CallObjectMethod(ex, methodGetMessage));
+
+			std::unique_ptr<char[]> msg = nullptr;
+			if (jmsg != nullptr) {
+				msg = jniutil::JstrToChars(env, jmsg);
+				if (msg == nullptr) {
+					jniutil::ThrowOutOfMemoryError(env, "Native heap");
 					// longjmp to pcall point
 					return lua_error(L);
 				}
-				else {
-					// other Exceptions
-					// clear exception
-					lua->m_env->ExceptionClear();
-					// treat as lua error (msg = ex.getMessage())
-					// longjmp to pcall point
-					return luaL_error(L, "%s", cmsg);
-				}
+			}
+			const char *cmsg = (msg != nullptr) ? msg.get() : "";
+
+			jclass clsRE = jniutil::FindClass(
+				jniutil::ClassId::RuntimeException);
+			jclass clsError = jniutil::FindClass(jniutil::ClassId::Error);
+			if (env->IsInstanceOf(ex, clsRE) ||
+				env->IsInstanceOf(ex, clsError)) {
+				// RuntimeException or Error
+				// Don't catch here (set exception state again)
+				// longjmp to pcall point
+				env->Throw(ex);
+				return lua_error(L);
+			}
+			else {
+				// other Exceptions
+				// treat as lua error (msg = ex.getMessage())
+				// longjmp to pcall point
+				return luaL_error(L, "%s", cmsg);
 			}
 		}
 
