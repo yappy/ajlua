@@ -16,6 +16,7 @@ import io.github.yappy.lua.LuaArg;
 import io.github.yappy.lua.LuaEngine;
 import io.github.yappy.lua.LuaException;
 import io.github.yappy.lua.LuaFunction;
+import io.github.yappy.lua.LuaPrint;
 import io.github.yappy.lua.LuaRuntimeException;
 import io.github.yappy.lua.LuaSyntaxException;
 
@@ -209,6 +210,31 @@ public class LuaEngineTest {
 		lua.execString("lib.func(nil, nil, nil, nil)",
 			"callNullableLibFunction.lua");
 		assertTrue(flag[0]);
+	}
+
+	@Test
+	public void replacePrint() throws Exception {
+		final String keyword = "replace test";
+		boolean[] flag = new boolean[2];
+		lua.openStdLibs();
+		lua.setPrintFunction(new LuaPrint() {
+			@Override
+			public void writeString(String str) {
+				if (keyword.equals(str)) {
+					flag[0] = true;
+				}
+			}
+			@Override
+			public void writeLine() {
+				if (flag[0]) {
+					flag[1] = true;
+				}
+			}
+		});
+		lua.execString(String.format("print(\"%s\")", keyword),
+				"replacePrint.lua");
+		assertTrue(flag[0]);
+		assertTrue(flag[1]);
 	}
 
 }
