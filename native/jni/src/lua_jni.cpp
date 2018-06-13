@@ -341,13 +341,19 @@ namespace {
 
 	inline bool HasFreeStack(lua_State *L, int n)
 	{
-		return LUA_MINSTACK - lua_gettop(L) >= n;
+		return lua_checkstack(L, n);
 	}
 
 	// might longjmp(), throw exception
 	// BUG: lua stack check
 	void pushJavaValue(lua_State *L, JNIEnv *env, jobject jobj)
 	{
+		// for table seti
+		if (!HasFreeStack(L, 2)) {
+			jniutil::ThrowIllegalStateException(env, "Stack overflow");
+			return;
+		}
+
 		jclass clsArray = jniutil::FindClass(jniutil::ClassId::ObjectArray);
 		jclass clsBoolean = jniutil::FindClass(jniutil::ClassId::Boolean);
 		jclass clsNumber = jniutil::FindClass(jniutil::ClassId::Number);

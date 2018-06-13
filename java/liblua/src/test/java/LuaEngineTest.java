@@ -10,7 +10,6 @@ import java.util.Arrays;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -144,16 +143,16 @@ public class LuaEngineTest {
 				"globalArrayVariable.lua");
 	}
 
-	@Ignore
 	@Test
 	public void maxArrayDimension() throws Exception {
 		final String value = "hello";
 
-		// new Object[1][1][1]...[1] (255)
+		// a = new Object[1][1][1]...[1] (255 dims)
 		int[] dims = new int[255];
 		Arrays.fill(dims, 1);
 		Object a = Array.newInstance(Object.class, dims);
 
+		// a[0][0][0]...[0] = value;
 		Object cur = a;
 		while (true) {
 			Object[] array = (Object[])cur;
