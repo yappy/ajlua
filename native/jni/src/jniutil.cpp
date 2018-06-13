@@ -22,6 +22,7 @@ namespace {
 		{ nullptr, "io/github/yappy/lua/DebugHook"		},
 		{ nullptr, "io/github/yappy/lua/LuaPrint"		},
 		{ nullptr, "io/github/yappy/lua/FunctionRoot"	},
+		{ nullptr, "[Ljava/lang/Object;"				},
 		{ nullptr, "java/lang/String"					},
 		{ nullptr, "java/lang/Number"					},
 		{ nullptr, "java/lang/Boolean"					},

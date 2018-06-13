@@ -344,6 +344,43 @@ namespace {
 		return LUA_MINSTACK - lua_gettop(L) >= n;
 	}
 
+	// might longjmp(), throw exception
+	inline void pushJavaValue(lua_State *L, JNIEnv *env, jobject jobj)
+	{
+		jclass clsBoolean = jniutil::FindClass(jniutil::ClassId::Boolean);
+		jclass clsNumber = jniutil::FindClass(jniutil::ClassId::Number);
+		jclass clsString = jniutil::FindClass(jniutil::ClassId::String);
+
+		if (jobj == nullptr) {
+			lua_pushnil(L);
+		}
+		else if (env->IsInstanceOf(jobj, clsBoolean)) {
+			jmethodID method = jniutil::GetMethodId(
+				jniutil::MethodId::Boolean_booleanValue);
+			jboolean b = env->CallBooleanMethod(jobj, method);
+			lua_pushboolean(L, b);
+		}
+		else if (env->IsInstanceOf(jobj, clsNumber)) {
+			jmethodID method = jniutil::GetMethodId(
+				jniutil::MethodId::Number_doubleValue);
+			jdouble d = env->CallDoubleMethod(jobj, method);
+			lua_pushnumber(L, d);
+		}
+		else if (env->IsInstanceOf(jobj, clsString)) {
+			auto cstr = jniutil::JstrToChars(env,
+				static_cast<jstring>(jobj));
+			if (cstr != nullptr) {
+				lua_pushstring(L, cstr.get());
+			}
+			else {
+				lua_pushnil(L);
+			}
+		}
+		else {
+			jniutil::ThrowIllegalArgumentException(env, "Invalid type");
+		}
+	}
+
 }
 
 /*
@@ -590,43 +627,14 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_lua_LuaEngine_pushValues
 		auto length = static_cast<int>(lua_tonumber(L, 3));
 		lua_settop(L, 0);
 
-		jclass clsBoolean = jniutil::FindClass(jniutil::ClassId::Boolean);
-		jclass clsNumber = jniutil::FindClass(jniutil::ClassId::Number);
-		jclass clsString = jniutil::FindClass(jniutil::ClassId::String);
-
 		for (int i = 0; i < length; i++) {
 			jobject jobj = env->GetObjectArrayElement(values, i);
-
-			if (jobj == nullptr) {
-				lua_pushnil(L);
-			}
-			else if (env->IsInstanceOf(jobj, clsBoolean)) {
-				jmethodID method = jniutil::GetMethodId(
-					jniutil::MethodId::Boolean_booleanValue);
-				jboolean b = env->CallBooleanMethod(jobj, method);
-				lua_pushboolean(L, b);
-			}
-			else if (env->IsInstanceOf(jobj, clsNumber)) {
-				jmethodID method = jniutil::GetMethodId(
-					jniutil::MethodId::Number_doubleValue);
-				jdouble d = env->CallDoubleMethod(jobj, method);
-				lua_pushnumber(L, d);
-			}
-			else if (env->IsInstanceOf(jobj, clsString)) {
-				auto cstr = jniutil::JstrToChars(env,
-					static_cast<jstring>(jobj));
-				if (cstr != nullptr) {
-					lua_pushstring(L, cstr.get());
-				}
-				else {
-					lua_pushnil(L);
-				}
-			}
-			else {
-				jniutil::ThrowIllegalArgumentException(env, "Invalid type");
-			}
-
+			pushJavaValue(L, env, jobj);
 			env->DeleteLocalRef(jobj);
+			if (env->ExceptionCheck()) {
+				// longjmp to pcall point
+				lua_error(L);
+			}
 		}
 
 		return length;

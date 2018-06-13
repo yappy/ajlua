@@ -9,6 +9,7 @@ namespace jniutil {
 		DebugHook,
 		LuaPrint,
 		FunctionRoot,
+		ObjectArray,
 		String,
 		Number,
 		Boolean,
