@@ -5,8 +5,12 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
+
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -122,15 +126,15 @@ public class LuaEngineTest {
 
 	@Test
 	public void globalArrayVariable() throws Exception {
-		lua.openStdLibs();
-		Object[] array = new Object[1024];
-		for (int i = 0; i < array.length; i++) {
+		Object[] a = new Object[1024];
+		for (int i = 0; i < a.length; i++) {
 			// Integer
-			array[i] = i + 1;
+			a[i] = i + 1;
 		}
-		lua.addGlobalVariable("a", array);
+		lua.openStdLibs();
+		lua.addGlobalVariable("a", a);
 		lua.execString(
-				String.format("assert(#a == %d)\n", array.length) +
+				String.format("assert(#a == %d)\n", a.length) +
 				"for i = 1, #a do\n" +
 				"  assert(a[i] == i)\n" +
 				"end\n" +
@@ -138,6 +142,36 @@ public class LuaEngineTest {
 				"  assert(value == i)\n" +
 				"end\n",
 				"globalArrayVariable.lua");
+	}
+
+	@Ignore
+	@Test
+	public void maxArrayDimension() throws Exception {
+		final String value = "hello";
+
+		// new Object[1][1][1]...[1] (255)
+		int[] dims = new int[255];
+		Arrays.fill(dims, 1);
+		Object a = Array.newInstance(Object.class, dims);
+
+		Object cur = a;
+		while (true) {
+			Object[] array = (Object[])cur;
+			if (array[0] == null) {
+				array[0] = value;
+				break;
+			}
+			cur = array[0];
+		}
+
+		lua.openStdLibs();
+		lua.addGlobalVariable("a", a);
+		lua.execString(
+				"while type(a) == \"table\" do\n" +
+				"  a = a[1]\n" +
+				"end\n" +
+				String.format("assert(a == \"%s\")\n", value),
+				"maxArrayDimension.lua");
 	}
 
 	@Test
