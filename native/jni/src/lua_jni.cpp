@@ -348,7 +348,7 @@ namespace {
 	{
 		// for table seti
 		if (!HasFreeStack(L, 2)) {
-			jniutil::ThrowIllegalStateException(env, "Stack overflow");
+			jniutil::ThrowIllegalStateException(env, "stack overflow");
 			return;
 		}
 
@@ -530,7 +530,7 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_lua_LuaEngine_replacePrintFunc
 	auto L = lua->L();
 
 	if (!HasFreeStack(L, 1)) {
-		jniutil::ThrowIllegalStateException(env, "Stack overflow");
+		jniutil::ThrowIllegalStateException(env, "stack overflow");
 		return 0;
 	}
 
@@ -605,14 +605,14 @@ JNIEXPORT void JNICALL Java_io_github_yappy_lua_LuaEngine_setTop
 	auto L = reinterpret_cast<Lua *>(peer)->L();
 
 	if (index >= 0) {
-		if (index > LUA_MINSTACK) {
-			jniutil::ThrowIllegalArgumentException(env, "new top too large");
+		if (!lua_checkstack(L, index)) {
+			jniutil::ThrowIllegalArgumentException(env, "stack overflow");
 			return;
 		}
 	}
 	else {
-		if (-lua_gettop(L) > index) {
-			jniutil::ThrowIllegalArgumentException(env, "new top too large");
+		if (index < -lua_gettop(L)) {
+			jniutil::ThrowIllegalArgumentException(env, "new top too small");
 			return;
 		}
 	}
@@ -692,7 +692,7 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_lua_LuaEngine_getValues
 		return 0;
 	}
 	if (!HasFreeStack(L, 2)) {
-		jniutil::ThrowIllegalStateException(env, "Stack overflow");
+		jniutil::ThrowIllegalStateException(env, "stack overflow");
 		return 0;
 	}
 
@@ -819,7 +819,7 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_lua_LuaEngine_getCheckedValues
 		return 0;
 	}
 	if (!HasFreeStack(L, 2)) {
-		jniutil::ThrowIllegalStateException(env, "Stack overflow");
+		jniutil::ThrowIllegalStateException(env, "stack overflow");
 		return 0;
 	}
 
@@ -954,7 +954,7 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_lua_LuaEngine_pushNewTable
 {
 	auto L = reinterpret_cast<Lua *>(peer)->L();
 	if (!HasFreeStack(L, 2)) {
-		jniutil::ThrowIllegalStateException(env, "Stack overflow");
+		jniutil::ThrowIllegalStateException(env, "stack overflow");
 		return 0;
 	}
 
@@ -989,7 +989,7 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_lua_LuaEngine_setTableField
 {
 	auto L = reinterpret_cast<Lua *>(peer)->L();
 	if (!HasFreeStack(L, 2)) {
-		jniutil::ThrowIllegalStateException(env, "Stack overflow");
+		jniutil::ThrowIllegalStateException(env, "stack overflow");
 		return 0;
 	}
 	auto cKey = jniutil::JstrToChars(env, key);
@@ -1061,7 +1061,7 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_lua_LuaEngine_getGlobal
 	auto L = reinterpret_cast<Lua *>(peer)->L();
 
 	if (!HasFreeStack(L, 2)) {
-		jniutil::ThrowIllegalStateException(env, "Stack overflow");
+		jniutil::ThrowIllegalStateException(env, "stack overflow");
 		return 0;
 	}
 
@@ -1156,7 +1156,7 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_lua_LuaEngine_pushProxyFunction
 
 	// cfunction + upvalue
 	if (!HasFreeStack(L, 1 + Lua::PROXY_UPVALUE_COUNT)) {
-		jniutil::ThrowIllegalStateException(env, "Stack overflow");
+		jniutil::ThrowIllegalStateException(env, "stack overflow");
 		return 0;
 	}
 
