@@ -112,4 +112,32 @@ public class LibRestrictedFileSystemTest {
 		assertThat(str, is("abc\n\n12345\n"));
 	}
 
+	@Test
+	public void list() throws Exception {
+		tmpDir.newFile("a.txt");
+		tmpDir.newFile("b.txt");
+		tmpDir.newFile("c.txt");
+		lua.execString(
+				"local list = fs.list()" +
+				"table.sort(list)\n" +
+				"assert(#list == 3)\n" +
+				"assert(list[1] == \"a.txt\")\n" +
+				"assert(list[2] == \"b.txt\")\n" +
+				"assert(list[3] == \"c.txt\")\n",
+				"list.lua");
+	}
+
+	public void delete() throws Exception {
+		File a = tmpDir.newFile("a.txt");
+		File b = tmpDir.newFile("b.txt");
+		File c = tmpDir.newFile("c.txt");
+		lua.execString(
+				"fs.delete(\"a.txt\")" +
+				"fs.delete(\"c.txt\")",
+				"delete.lua");
+		assertThat(a.exists(), is(false));
+		assertThat(b.exists(), is(true));
+		assertThat(c.exists(), is(false));
+	}
+
 }

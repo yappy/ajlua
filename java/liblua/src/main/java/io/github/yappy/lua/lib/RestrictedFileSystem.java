@@ -194,4 +194,32 @@ public class RestrictedFileSystem implements LuaLibrary {
 		}
 	};}
 
+	@LuaLibraryFunction(name = "list", args = {})
+	public LuaFunction list() { return new LuaFunction() {
+		@Override
+		public Object[] call(Object[] args) throws LuaException {
+			String[] result = dir.list();
+			if (result == null) {
+				throw new LuaRuntimeException("IO error");
+			}
+			return new Object[] { result };
+		}
+	};}
+
+	@LuaLibraryFunction(name = "delete", args = { LuaArg.STRING })
+	public LuaFunction delete() { return new LuaFunction() {
+		@Override
+		public Object[] call(Object[] args) throws LuaException {
+			String name = args[0].toString();
+
+			checkFileName(name);
+			File file = new File(dir, name);
+			if (!file.delete()) {
+				throw new LuaRuntimeException("IO error");
+			}
+
+			return null;
+		}
+	};}
+
 }
