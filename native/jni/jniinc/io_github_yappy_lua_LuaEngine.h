@@ -11,8 +11,6 @@ extern "C" {
 #define io_github_yappy_lua_LuaEngine_DEFAULT_MEMORY_LIMIT 16777216LL
 #undef io_github_yappy_lua_LuaEngine_DEFAULT_INTR_INST_COUNT
 #define io_github_yappy_lua_LuaEngine_DEFAULT_INTR_INST_COUNT 1000L
-#undef io_github_yappy_lua_LuaEngine_MAX_STACK
-#define io_github_yappy_lua_LuaEngine_MAX_STACK 20L
 #undef io_github_yappy_lua_LuaEngine_VERSION_ARRAY_SIZE
 #define io_github_yappy_lua_LuaEngine_VERSION_ARRAY_SIZE 4L
 #undef io_github_yappy_lua_LuaEngine_LUA_MULTRET

@@ -9,8 +9,6 @@ static_assert(sizeof(lua_Number) == sizeof(jdouble), "lua_Number");
 static_assert(sizeof(lua_Integer) == sizeof(jlong), "lua_Integer");
 
 /* Lua C define - Java constant assert */
-static_assert(LUA_MINSTACK == io_github_yappy_lua_LuaEngine_MAX_STACK,
-	"MAX_STACK");
 static_assert(LUA_MULTRET == io_github_yappy_lua_LuaEngine_LUA_MULTRET,
 	"LUA_MULTRET");
 
@@ -675,7 +673,6 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_lua_LuaEngine_pushValues
 	return lua_pcall(L, 3, length, 0);
 }
 
-// BUG: lua_tostring() may do longjmp().
 /*
  * Class:     io_github_yappy_lua_LuaEngine
  * Method:    getValues
@@ -686,58 +683,121 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_lua_LuaEngine_getValues
 {
 	auto L = reinterpret_cast<Lua *>(peer)->L();
 
-	int num = std::min(lua_gettop(L), LUA_MINSTACK);
-	jbyte ctypes[LUA_MINSTACK];
-	for (int i = 0; i < num; i++) {
-		int lind = i + 1;
-		ctypes[i] = lua_type(L, lind);
-		switch (ctypes[i]) {
-		case LUA_TNIL:
-			env->SetObjectArrayElement(values, i, nullptr);
-			break;
-		case LUA_TBOOLEAN:
+	if (types == nullptr) {
+		jniutil::ThrowNullPointerException(env, "types");
+		return 0;
+	}
+	if (values == nullptr) {
+		jniutil::ThrowNullPointerException(env, "values");
+		return 0;
+	}
+	if (!HasFreeStack(L, 2)) {
+		jniutil::ThrowIllegalStateException(env, "Stack overflow");
+		return 0;
+	}
+
+	int num = lua_gettop(L);
+	jsize length = env->GetArrayLength(types);
+	if (length > num) {
+		jniutil::ThrowIllegalArgumentException(env, "larger than stack size");
+		return 0;
+	}
+	std::unique_ptr<jbyte[]> ctypes{new(std::nothrow) jbyte[length]};
+
+	using Params = std::tuple<
+		JNIEnv *, jbyteArray, jobjectArray, jbyte *, jsize>;
+	Params params = std::make_tuple(env, types, values, ctypes.get(), length);
+
+	auto f = [](lua_State *L) -> int
+	{
+		// pop param tuple pointer
+		const auto &params = *static_cast<Params *>(lua_touserdata(L, -1));
+		lua_pop(L, 1);
+		JNIEnv *env = std::get<0>(params);
+		jbyteArray types = std::get<1>(params);
+		jobjectArray values = std::get<2>(params);
+		jbyte *ctypes = std::get<3>(params);
+		jsize length = std::get<4>(params);
+
+		// set to Java array elements and return them as is
+		int num = lua_gettop(L);
+
+		for (int i = 0; i < length; i++) {
+			int lind = num - length + i + 1;
+
+			ctypes[i] = lua_type(L, lind);
+			switch (ctypes[i]) {
+			case LUA_TNIL:
+			{
+				env->SetObjectArrayElement(values, i, nullptr);
+				if (env->ExceptionCheck()) goto EXIT;
+				break;
+			}
+			case LUA_TBOOLEAN:
 			{
 				jboolean jb = static_cast<jboolean>(lua_toboolean(L, lind));
 				jobject box = jniutil::BoxingBoolean(env, jb);
+				if (env->ExceptionCheck()) goto EXIT;
 				env->SetObjectArrayElement(values, i, box);
+				if (env->ExceptionCheck()) goto EXIT;
 				env->DeleteLocalRef(box);
+				break;
 			}
-			break;
-		case LUA_TNUMBER:
+			case LUA_TNUMBER:
 			{
 				jdouble jd = lua_tonumber(L, lind);
 				jobject box = jniutil::BoxingDouble(env, jd);
+				if (env->ExceptionCheck()) goto EXIT;
 				env->SetObjectArrayElement(values, i, box);
+				if (env->ExceptionCheck()) goto EXIT;
 				env->DeleteLocalRef(box);
+				break;
 			}
-			break;
-		case LUA_TSTRING:
+			case LUA_TSTRING:
 			{
-				jstring jstr = env->NewStringUTF(lua_tostring(L, lind));
+				// might longjmp()
+				const char *cstr = lua_tostring(L, lind);
+				jstring jstr = env->NewStringUTF(cstr);
+				if (env->ExceptionCheck()) goto EXIT;
 				env->SetObjectArrayElement(values, i, jstr);
+				if (env->ExceptionCheck()) goto EXIT;
 				env->DeleteLocalRef(jstr);
+				break;
 			}
-			break;
-		case LUA_TTABLE:
-		case LUA_TFUNCTION:
-		case LUA_TLIGHTUSERDATA:
-		case LUA_TUSERDATA:
-		case LUA_TTHREAD:
+			case LUA_TTABLE:
+			case LUA_TFUNCTION:
+			case LUA_TLIGHTUSERDATA:
+			case LUA_TUSERDATA:
+			case LUA_TTHREAD:
 			{
 				jlong jl = reinterpret_cast<jlong>(lua_topointer(L, lind));
 				jobject box = jniutil::BoxingLong(env, jl);
+				if (env->ExceptionCheck()) goto EXIT;
 				env->SetObjectArrayElement(values, i, box);
+				if (env->ExceptionCheck()) goto EXIT;
 				env->DeleteLocalRef(box);
+				break;
 			}
-			break;
-		default:
-			jniutil::ThrowInternalError(env, "Unknown type");
-			return 0;
+			default:
+				jniutil::ThrowInternalError(env, "Unknown type");
+				goto EXIT;
+			}
 		}
-	}
-	env->SetByteArrayRegion(types, 0, num, ctypes);
+		env->SetByteArrayRegion(types, 0, length, ctypes);
+		if (env->ExceptionCheck()) {
+			goto EXIT;
+		}
+EXIT:
+		return num;
+	};
 
-	return num;
+	// cfunc into stack bottom
+	lua_pushcfunction(L, f);
+	lua_insert(L, 1);
+	// args: original stack, moreover, params
+	lua_pushlightuserdata(L, &params);
+	// longjmp_safe call (args=num+1(params), ret=num)
+	return lua_pcall(L, num + 1, num, 0);
 }
 
 /*
@@ -762,17 +822,14 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_lua_LuaEngine_getCheckedValues
 		jniutil::ThrowIllegalStateException(env, "Stack overflow");
 		return 0;
 	}
+
 	jsize length = env->GetArrayLength(checks);
-	if (length > LUA_MINSTACK) {
-		jniutil::ThrowIllegalArgumentException(env, "length too much");
-		return 0;
-	}
-	jint cchecks[LUA_MINSTACK];
-	env->GetIntArrayRegion(checks, 0, length, cchecks);
+	std::unique_ptr<jint[]> cchecks{new(std::nothrow) jint[length]};
+	env->GetIntArrayRegion(checks, 0, length, cchecks.get());
 
 	// JNIEnv *env, const jint *cchecks, jobjectArray values, jsize length
 	using Params = std::tuple<JNIEnv *, const jint *, jobjectArray, jsize>;
-	Params params = std::make_tuple(env, cchecks, values, length);
+	Params params = std::make_tuple(env, cchecks.get(), values, length);
 
 	// arg[1..x-1]: original stack
 	// arg[x]: params tuple
@@ -787,6 +844,7 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_lua_LuaEngine_getCheckedValues
 		jobjectArray values = std::get<2>(params);
 		jsize length = std::get<3>(params);
 
+		// set to Java array elements and return them as is
 		for (jsize i = 0; i < length; i++) {
 			int lind = i + 1;
 			// treat "not exist" as nil
@@ -795,6 +853,7 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_lua_LuaEngine_getCheckedValues
 				if (cchecks[i] &
 					io_github_yappy_lua_LuaEngine_CHECK_OPT_ALLOW_NIL) {
 					env->SetObjectArrayElement(values, i, nullptr);
+					if (env->ExceptionCheck()) goto EXIT;
 					continue;
 				}
 				else {
@@ -802,7 +861,7 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_lua_LuaEngine_getCheckedValues
 					luaL_error(L, "bad argument #%d", lind);
 				}
 			}
-			// copy and push
+			// copy and push (the value may be converted)
 			lua_pushvalue(L, lind);
 			switch (cchecks[i] &
 				io_github_yappy_lua_LuaEngine_CHECK_TYPE_MASK) {
@@ -810,7 +869,9 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_lua_LuaEngine_getCheckedValues
 			{
 				int val = lua_toboolean(L, -1);
 				jobject jobj = jniutil::BoxingBoolean(env, val);
+				if (env->ExceptionCheck()) goto EXIT;
 				env->SetObjectArrayElement(values, i, jobj);
+				if (env->ExceptionCheck()) goto EXIT;
 				env->DeleteLocalRef(jobj);
 				break;
 			}
@@ -820,10 +881,12 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_lua_LuaEngine_getCheckedValues
 				lua_Integer val = lua_tointegerx(L, -1, &isnum);
 				if (!isnum) {
 					// longjmp to pcall
-					luaL_error(L, "bad argument #%d", lind);
+					luaL_error(L, "bad argument #%d (integer needed)", lind);
 				}
 				jobject jobj = jniutil::BoxingLong(env, val);
+				if (env->ExceptionCheck()) goto EXIT;
 				env->SetObjectArrayElement(values, i, jobj);
+				if (env->ExceptionCheck()) goto EXIT;
 				env->DeleteLocalRef(jobj);
 				break;
 			}
@@ -833,10 +896,12 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_lua_LuaEngine_getCheckedValues
 				lua_Number val = lua_tonumberx(L, -1, &isnum);
 				if (!isnum) {
 					// longjmp to pcall
-					luaL_error(L, "bad argument #%d", lind);
+					luaL_error(L, "bad argument #%d (number needed)", lind);
 				}
 				jobject jobj = jniutil::BoxingDouble(env, val);
+				if (env->ExceptionCheck()) goto EXIT;
 				env->SetObjectArrayElement(values, i, jobj);
+				if (env->ExceptionCheck()) goto EXIT;
 				env->DeleteLocalRef(jobj);
 				break;
 			}
@@ -845,7 +910,7 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_lua_LuaEngine_getCheckedValues
 				const char *cstr = lua_tostring(L, -1);
 				if (cstr == nullptr) {
 					// longjmp to pcall
-					luaL_error(L, "bad argument #%d", lind);
+					luaL_error(L, "bad argument #%d (string needed)", lind);
 				}
 				jstring jstr = env->NewStringUTF(cstr);
 				// jstr might be nullptr if OOM or invalid utf
@@ -865,7 +930,7 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_lua_LuaEngine_getCheckedValues
 			// pop copy
 			lua_pop(L, 1);
 		}
-
+EXIT:
 		return lua_gettop(L);
 	};
 	// current values count on the stack

@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Deque;
 import java.util.List;
 import java.util.Set;
@@ -27,8 +28,6 @@ public class LuaEngine implements AutoCloseable {
 	public static final long DEFAULT_MEMORY_LIMIT = 16 * 1024 * 1024;
 	/** Default debug hook instruction count for interrupt. */
 	public static final int DEFAULT_INTR_INST_COUNT = 1000;
-	/** Lua max stack size. */
-	public static final int MAX_STACK = 20;
 
 	// getVersion String[] size
 	private static final int VERSION_ARRAY_SIZE	= 4;
@@ -188,29 +187,27 @@ public class LuaEngine implements AutoCloseable {
 		}
 	}
 
-	private Object[] getStackAll() {
-		byte[] types = new byte[MAX_STACK];
-		Object[] values = new Object[MAX_STACK];
-		int count = getValues(peer, types, values);
+	private Object[] getStackAll() throws LuaException {
+		int n = getTop(peer);
+		byte[] types = new byte[n];
+		Object[] values = new Object[n];
+		checkLuaError(getValues(peer, types, values));
 
-		Object[] result = new Object[count];
-		for (int i = 0; i < result.length; i++) {
-			result[i] = covertL2J(types[i], values[i]);
+		for (int i = 0; i < values.length; i++) {
+			values[i] = covertL2J(types[i], values[i]);
 		}
-		return result;
+		return values;
 	}
 
-	private byte[] getStackTypes() {
-		byte[] types = new byte[MAX_STACK];
-		Object[] values = new Object[MAX_STACK];
-		int count = getValues(peer, types, values);
-
-		byte[] result = new byte[count];
-		System.arraycopy(types, 0, result, 0, count);
+	private byte[] getStackTypes() throws LuaException {
+		int n = getTop(peer);
+		byte[] types = new byte[n];
+		Object[] values = new Object[n];
+		checkLuaError(getValues(peer, types, values));
 		return types;
 	}
 
-	private Object[] popStack(int n) {
+	private Object[] popStack(int n) throws LuaException {
 		Object[] all = getStackAll();
 		if (all.length < n) {
 			throw new IllegalArgumentException("Stack underflow");
@@ -221,7 +218,7 @@ public class LuaEngine implements AutoCloseable {
 		return result;
 	}
 
-	private Object[] popStackAll() {
+	private Object[] popStackAll() throws LuaException {
 		Object[] result = getStackAll();
 		setTop(peer, 0);
 		return result;
@@ -612,38 +609,78 @@ public class LuaEngine implements AutoCloseable {
 		checkLuaError(pcallWithHook(hook, 0, 0, 0));
 	}
 
+	public String dumpLuaStack() {
+		StringBuilder sb = new StringBuilder();
+
+		int n = getTop(peer);
+		byte[] types = new byte[n];
+		Object[] values = new Object[n];
+		int ret = getValues(peer, types, values);
+		if (ret == LUA_OK) {
+			sb.append(String.format("Stack: %d%n", n));
+			for (int i = 0; i < types.length; i++) {
+				sb.append(String.format("%d: type=%d, %s%n",
+						i, types[i],
+						(values[i] != null) ? values[i].toString() : "nil"));
+			}
+		}
+		else {
+			sb.append("err: " + ret);
+		}
+
+		return sb.toString();
+	}
+
 	private void checkLuaError(int code) throws LuaException {
-		switch (code) {
-		case LUA_OK:
-			return;
-		case LUA_ERRRUN:
-			throw new LuaRuntimeException("runtime error: " + getLuaErrorMsg());
-		case LUA_ERRSYNTAX:
-			throw new LuaSyntaxException("syntax error: " + getLuaErrorMsg());
-		case LUA_ERRMEM:
-			throw new LuaException("memory error");
-		case LUA_ERRGCMM:
-			throw new LuaException("error in gc");
-		case LUA_ERRERR:
-			throw new LuaException("error in message handler");
-		default:
-			throw new Error("Unknown return code: " + code);
+		try {
+			switch (code) {
+			case LUA_OK:
+				return;
+			case LUA_ERRRUN:
+				throw new LuaRuntimeException("runtime error: " + getLuaErrorMsg());
+			case LUA_ERRSYNTAX:
+				throw new LuaSyntaxException("syntax error: " + getLuaErrorMsg());
+			case LUA_ERRMEM:
+				throw new LuaException("memory error");
+			case LUA_ERRGCMM:
+				throw new LuaException("error in gc");
+			case LUA_ERRERR:
+				throw new LuaException("error in message handler");
+			default:
+				throw new Error("Unknown return code: " + code);
+			}
+		}
+		finally {
+			if (code != LUA_OK) {
+				setTop(peer, 0);
+			}
 		}
 	}
 
 	private String getLuaErrorMsg()
 	{
-		byte[] types = new byte[MAX_STACK];
-		Object[] values = new Object[MAX_STACK];
-		int num = getValues(peer, types, values);
-		if (num <= 0) {
+		int n = getTop(peer);
+		if (n <= 0) {
 			return "(no message)";
 		}
-		else if (values[num - 1] == null) {
-			return "(invalid message type)";
+
+		int[] checks = new int[n];
+		Arrays.fill(checks, CHECK_TYPE_BOOLEAN);
+		checks[n - 1] = CHECK_TYPE_STRING | CHECK_OPT_ALLOW_NIL;
+		Object[] values = new Object[checks.length];
+		int ret = getCheckedValues(peer, checks, values);
+
+		if (ret == 0) {
+			Object value = values[n - 1];
+			if (value != null) {
+				return value.toString();
+			}
+			else {
+				return "(invalid error message)";
+			}
 		}
 		else {
-			return values[num - 1].toString();
+			return "(error message error)";
 		}
 	}
 
