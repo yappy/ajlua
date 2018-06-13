@@ -121,6 +121,26 @@ public class LuaEngineTest {
 	}
 
 	@Test
+	public void globalArrayVariable() throws Exception {
+		lua.openStdLibs();
+		Object[] array = new Object[1024];
+		for (int i = 0; i < array.length; i++) {
+			// Integer
+			array[i] = i + 1;
+		}
+		lua.addGlobalVariable("a", array);
+		lua.execString(
+				String.format("assert(#a == %d)\n", array.length) +
+				"for i = 1, #a do\n" +
+				"  assert(a[i] == i)\n" +
+				"end\n" +
+				"for i, value in ipairs(a) do\n" +
+				"  assert(value == i)\n" +
+				"end\n",
+				"globalArrayVariable.lua");
+	}
+
+	@Test
 	public void libVariable() throws Exception {
 		double x = 10007;
 		lua.addLibTable("lib");

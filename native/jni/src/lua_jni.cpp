@@ -345,14 +345,34 @@ namespace {
 	}
 
 	// might longjmp(), throw exception
-	inline void pushJavaValue(lua_State *L, JNIEnv *env, jobject jobj)
+	// BUG: lua stack check
+	void pushJavaValue(lua_State *L, JNIEnv *env, jobject jobj)
 	{
+		jclass clsArray = jniutil::FindClass(jniutil::ClassId::ObjectArray);
 		jclass clsBoolean = jniutil::FindClass(jniutil::ClassId::Boolean);
 		jclass clsNumber = jniutil::FindClass(jniutil::ClassId::Number);
 		jclass clsString = jniutil::FindClass(jniutil::ClassId::String);
 
 		if (jobj == nullptr) {
 			lua_pushnil(L);
+		}
+		else if (env->IsInstanceOf(jobj, clsArray)) {
+			// get array length and push table (pre-allocated [1..length])
+			jobjectArray jarray = static_cast<jobjectArray>(jobj);
+			int length = env->GetArrayLength(jarray);
+			lua_createtable(L, length, 0);
+			for (int i = 0; i < length; i++) {
+				// push value (Java array dimension <= 255)
+				jobject jelem = env->GetObjectArrayElement(jarray, i);
+				pushJavaValue(L, env, jelem);
+				env->DeleteLocalRef(jelem);
+				if (env->ExceptionCheck()) {
+					break;
+				}
+				// table[i + 1] = value (pop value)
+				// Lua is 1-origin
+				lua_seti(L, -2, i + 1);
+			}
 		}
 		else if (env->IsInstanceOf(jobj, clsBoolean)) {
 			jmethodID method = jniutil::GetMethodId(
@@ -367,8 +387,7 @@ namespace {
 			lua_pushnumber(L, d);
 		}
 		else if (env->IsInstanceOf(jobj, clsString)) {
-			auto cstr = jniutil::JstrToChars(env,
-				static_cast<jstring>(jobj));
+			auto cstr = jniutil::JstrToChars(env, static_cast<jstring>(jobj));
 			if (cstr != nullptr) {
 				lua_pushstring(L, cstr.get());
 			}
@@ -632,8 +651,7 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_lua_LuaEngine_pushValues
 			pushJavaValue(L, env, jobj);
 			env->DeleteLocalRef(jobj);
 			if (env->ExceptionCheck()) {
-				// longjmp to pcall point
-				lua_error(L);
+				break;
 			}
 		}
 
