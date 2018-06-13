@@ -87,6 +87,7 @@ public class App extends JFrame {
 					throw new RuntimeException(cause);
 				} else if (cause instanceof LuaException) {
 					outArea.append("[Error]\n" + cause.getMessage() + "\n");
+					e.printStackTrace();
 				} else {
 					throw new RuntimeException(cause);
 				}
@@ -143,6 +144,11 @@ public class App extends JFrame {
 	}
 
 	public static void main(String[] args) throws Exception {
+		Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
+			System.err.print("Exception in thread \"" + t.getName() + "\" ");
+			e.printStackTrace();
+			System.exit(1);
+		});
 		App app = new App();
 		app.setVisible(true);
 	}

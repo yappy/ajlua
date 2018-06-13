@@ -264,7 +264,8 @@ namespace {
 			if (env->IsInstanceOf(ex, clsRE) ||
 				env->IsInstanceOf(ex, clsError)) {
 				// RuntimeException or Error
-				// Don't catch here (set exception state again)
+				// don't catch here
+				// (set exception state again, preserve stack trace)
 				// longjmp to pcall point
 				env->Throw(ex);
 				return lua_error(L);
