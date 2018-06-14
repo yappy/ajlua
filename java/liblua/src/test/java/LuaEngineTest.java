@@ -281,6 +281,32 @@ public class LuaEngineTest {
 	}
 
 	@Test
+	public void callVerArgsFunction() throws Exception {
+		final boolean[] flag = new boolean[4];
+		LuaFunction func = new LuaFunction() {
+			@Override
+			public Object[] call(Object[] args) throws LuaException {
+				int first = ((Long)args[0]).intValue();
+				assertThat(first, is(args.length - 1));
+				for (int i = 0; i < first; i++) {
+					assertThat(((Long)args[i + 1]).intValue(), is(i));
+				}
+				flag[first] = true;
+				return null;
+			}
+		};
+		lua.addGlobalFunction("func", func,
+			LuaArg.LONG, LuaArg.LONG_VAR_ARGS);
+		lua.execString(
+				"func(0)\n" +
+				"func(1, 0)\n" +
+				"func(2, 0, 1)\n" +
+				"func(3, 0, 1, 2)\n",
+				"callVerArgsFunction.lua");
+		assertThat(flag, is(new boolean[] { true, true, true, true }));
+	}
+
+	@Test
 	public void replacePrint() throws Exception {
 		final String keyword = "replace test";
 		final boolean[] flag = new boolean[2];

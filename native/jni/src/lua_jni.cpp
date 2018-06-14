@@ -858,7 +858,7 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_lua_LuaEngine_getCheckedValues
 				}
 				else {
 					// longjmp to pcall
-					luaL_error(L, "bad argument #%d", lind);
+					luaL_error(L, "bad argument #%d (argument needed)", lind);
 				}
 			}
 			// copy and push (the value may be converted)

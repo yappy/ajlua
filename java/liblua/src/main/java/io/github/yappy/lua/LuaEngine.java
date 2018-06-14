@@ -297,46 +297,69 @@ public class LuaEngine implements AutoCloseable {
 
 			LuaFunction func = functionList.get(id);
 			LuaArg[] argsCheck = argsList.get(id);
+			boolean isAny = argsCheck.length >= 1 && argsCheck[0].isAny();
+			boolean isVarArgs = argsCheck.length >= 1 && argsCheck[argsCheck.length - 1].isVarArgs();
 
 			// Pop all params from the stack
 			Object[] args;
-			if (argsCheck.length >= 1 && argsCheck[0] == LuaArg.ANY) {
+			if (isAny) {
 				args = popStackAll();
 			}
 			else {
-				int[] checks = new int[argsCheck.length];
-				args = new Object[argsCheck.length];
-				for (int i = 0; i < checks.length; i++) {
+				int[] checks;
+				if (isVarArgs) {
+					int n = Math.max(argsCheck.length - 1, getTop(peer));
+					checks = new int[n];
+					args = new Object[n];
+				}
+				else {
+					checks = new int[argsCheck.length];
+					args = new Object[argsCheck.length];
+				}
+				for (int i = 0; i < argsCheck.length; i++) {
+					int checkValue;
+
 					switch (argsCheck[i]) {
 					case BOOLEAN:
-						checks[i] = CHECK_TYPE_BOOLEAN;
-						break;
 					case BOOLEAN_OR_NIL:
-						checks[i] = CHECK_TYPE_BOOLEAN | CHECK_OPT_ALLOW_NIL;
+					case BOOLEAN_VAR_ARGS:
+						checkValue = CHECK_TYPE_BOOLEAN;
 						break;
 					case LONG:
-						checks[i] = CHECK_TYPE_INTEGER;
-						break;
 					case LONG_OR_NIL:
-						checks[i] = CHECK_TYPE_INTEGER | CHECK_OPT_ALLOW_NIL;
+					case LONG_VAR_ARGS:
+						checkValue = CHECK_TYPE_INTEGER;
 						break;
 					case DOUBLE:
-						checks[i] = CHECK_TYPE_NUMBER;
-						break;
 					case DOUBLE_OR_NIL:
-						checks[i] = CHECK_TYPE_NUMBER | CHECK_OPT_ALLOW_NIL;
+					case DOUBLE_VAR_ARGS:
+						checkValue = CHECK_TYPE_NUMBER;
 						break;
 					case STRING:
-						checks[i] = CHECK_TYPE_STRING;
-						break;
 					case STRING_OR_NIL:
-						checks[i] = CHECK_TYPE_STRING | CHECK_OPT_ALLOW_NIL;
+					case STRING_VAR_ARGS:
+						checkValue = CHECK_TYPE_STRING;
 						break;
 					default:
 						throw new IllegalStateException();
 					}
+					if (argsCheck[i].isNullable()) {
+						checkValue |= CHECK_OPT_ALLOW_NIL;
+					}
+
+					if (isVarArgs) {
+						// varArgs part
+						for (int t = i; t < checks.length; t++) {
+							checks[t] = checkValue;
+						}
+					}
+					else {
+						// others
+						checks[i] = checkValue;
+					}
 				}
 				checkLuaError(getCheckedValues(peer, checks, args));
+				setTop(peer, 0);
 			}
 
 			// dispatch
@@ -477,8 +500,11 @@ public class LuaEngine implements AutoCloseable {
 			if (args[i] == null) {
 				throw new NullPointerException("args");
 			}
-			if (i != 0 && args[i] == LuaArg.ANY) {
-				throw new IllegalArgumentException("args[not 0] cannot be ANY");
+			if (i != 0 && args[i].isAny()) {
+				throw new IllegalArgumentException("Any must be first");
+			}
+			if (i != args.length - 1 && args[i].isVarArgs()) {
+				throw new IllegalArgumentException("VarArgs must be last");
 			}
 		}
 
