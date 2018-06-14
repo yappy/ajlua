@@ -1,6 +1,6 @@
 package io.github.yappy.lua.lib;
 
-import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import java.lang.annotation.Documented;
@@ -11,7 +11,7 @@ import io.github.yappy.lua.LuaArg;
 
 @Documented
 @Retention(RUNTIME)
-@Target(METHOD)
+@Target(FIELD)
 /**
  * @author yappy
  */

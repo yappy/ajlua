@@ -1,7 +1,6 @@
 package io.github.yappy.lua;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.lang.reflect.Field;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -714,16 +713,16 @@ public class LuaEngine implements AutoCloseable {
 		Class<?> cls = lib.getClass();
 		String table = cls.getAnnotation(LuaLibraryTable.class).value();
 		addLibTable(table);
-		for (Method m : cls.getMethods()) {
-			LuaLibraryFunction funcMeta = m.getAnnotation(LuaLibraryFunction.class);
+		for (Field f : cls.getFields()) {
+			LuaLibraryFunction funcMeta = f.getAnnotation(LuaLibraryFunction.class);
 			if (funcMeta == null) {
 				continue;
 			}
 			LuaFunction func;
 			try {
-				func = (LuaFunction)(m.invoke(lib));
-			} catch (IllegalAccessException | InvocationTargetException e) {
-				throw new IllegalArgumentException(e);
+				func = (LuaFunction)(f.get(lib));
+			} catch (IllegalAccessException e) {
+				throw new IllegalArgumentException("Invalid library implementation", e);
 			}
 			addLibFunction(table, funcMeta.name(), func, funcMeta.args());
 		}
