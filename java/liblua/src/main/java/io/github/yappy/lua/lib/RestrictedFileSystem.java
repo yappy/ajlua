@@ -10,8 +10,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -67,6 +69,7 @@ public class RestrictedFileSystem implements LuaLibrary {
 		for (AutoCloseable io : fdMap.values()) {
 			io.close();
 		}
+		fdMap.clear();
 	}
 
 	private int generateFd() {
@@ -75,6 +78,28 @@ public class RestrictedFileSystem implements LuaLibrary {
 			fd = fdGen.nextInt();
 		} while (fd < 1 || fdMap.containsKey(fd));
 		return fd;
+	}
+
+	private BufferedReader getReader(int fd) throws LuaRuntimeException {
+		AutoCloseable io = (AutoCloseable)fdMap.get(fd);
+		if (io == null) {
+			throw new LuaRuntimeException("Invalid file");
+		}
+		if (!(io instanceof BufferedReader)) {
+			throw new LuaRuntimeException("Invalid file for read");
+		}
+		return (BufferedReader)io;
+	}
+
+	private BufferedWriter getWriter(int fd) throws LuaRuntimeException {
+		AutoCloseable io = (AutoCloseable)fdMap.get(fd);
+		if (io == null) {
+			throw new LuaRuntimeException("Invalid file");
+		}
+		if (!(io instanceof BufferedWriter)) {
+			throw new LuaRuntimeException("Invalid file for write");
+		}
+		return (BufferedWriter)io;
 	}
 
 	private void checkFileName(String name) throws LuaRuntimeException {
@@ -118,8 +143,8 @@ public class RestrictedFileSystem implements LuaLibrary {
 					throw new LuaRuntimeException("Invalid mode");
 				}
 			} catch(FileNotFoundException e) {
-				// Open failed. Return nil.
-				return new Object[] { null };
+				// Open failed.
+				throw new LuaRuntimeException("Open failed");
 			}
 
 			int fd = generateFd();
@@ -151,15 +176,8 @@ public class RestrictedFileSystem implements LuaLibrary {
 		@Override
 		public Object[] call(Object[] args) throws LuaException {
 			int fd = ((Long)args[0]).intValue();
+			BufferedReader reader = getReader(fd);
 
-			AutoCloseable io = (AutoCloseable)fdMap.get(fd);
-			if (io == null) {
-				throw new LuaRuntimeException("Invalid file");
-			}
-			if (!(io instanceof BufferedReader)) {
-				throw new LuaRuntimeException("Invalid file for read");
-			}
-			BufferedReader reader = (BufferedReader)io;
 			try {
 				// return nil if EOF
 				return new Object[] { reader.readLine() };
@@ -169,21 +187,51 @@ public class RestrictedFileSystem implements LuaLibrary {
 		}
 	};}
 
+	@LuaLibraryFunction(name = "readall", args = { LuaArg.LONG })
+	public LuaFunction readall() { return new LuaFunction() {
+		@Override
+		public Object[] call(Object[] args) throws LuaException {
+			int fd = ((Long)args[0]).intValue();
+			BufferedReader reader = getReader(fd);
+
+			List<String> lines = new ArrayList<>();
+			try {
+				String line;
+				while ((line = reader.readLine()) != null) {
+					lines.add(line);
+				}
+			} catch (IOException e) {
+				throw new LuaRuntimeException("IO error", e);
+			}
+			return new Object[] { lines.toArray() };
+		}
+	};}
+
+	@LuaLibraryFunction(name = "write", args = { LuaArg.LONG, LuaArg.STRING })
+	public LuaFunction write() { return new LuaFunction() {
+		@Override
+		public Object[] call(Object[] args) throws LuaException {
+			int fd = ((Long)args[0]).intValue();
+			String str = args[1].toString();
+			BufferedWriter writer = getWriter(fd);
+
+			try {
+				writer.write(str);
+			} catch (IOException e) {
+				throw new LuaRuntimeException("IO error", e);
+			}
+			return null;
+		}
+	};}
+
 	@LuaLibraryFunction(name = "writeline", args = { LuaArg.LONG, LuaArg.STRING_OR_NIL })
 	public LuaFunction writeline() { return new LuaFunction() {
 		@Override
 		public Object[] call(Object[] args) throws LuaException {
 			int fd = ((Long)args[0]).intValue();
 			String str = (args[1] != null) ? args[1].toString() : "";
+			BufferedWriter writer = getWriter(fd);
 
-			AutoCloseable io = (AutoCloseable)fdMap.get(fd);
-			if (io == null) {
-				throw new LuaRuntimeException("Invalid file");
-			}
-			if (!(io instanceof BufferedWriter)) {
-				throw new LuaRuntimeException("Invalid file for write");
-			}
-			BufferedWriter writer = (BufferedWriter)io;
 			try {
 				writer.write(str);
 				writer.write('\n');

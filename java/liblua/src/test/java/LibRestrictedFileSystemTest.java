@@ -75,10 +75,17 @@ public class LibRestrictedFileSystemTest {
 	}
 
 	@Test
-	public void openError() throws Exception {
+	public void openInvalidName() throws Exception {
 		exception.expect(LuaRuntimeException.class);
 		exception.expectMessage("Invalid file name character");
-		lua.execString("fs.open(\"@badfile\")", "open.lua");
+		lua.execString("fs.open(\"@badfile\")", "openInvalidName.lua");
+	}
+
+	@Test
+	public void openError() throws Exception {
+		exception.expect(LuaRuntimeException.class);
+		exception.expectMessage("Open failed");
+		lua.execString("fs.open(\"notfound.txt\")", "openError.lua");
 	}
 
 	@Test
@@ -95,6 +102,20 @@ public class LibRestrictedFileSystemTest {
 				"assert(s2 == \"takenoko\", s2)\n" +
 				"assert(s3 == nil, s3)\n",
 				"readline.lua");
+	}
+
+	@Test
+	public void readall() throws Exception {
+		File testFile = new File(tmpDir.getRoot(), "readall.txt");
+		prepairFile(testFile, "hello\ntakenoko\n");
+		lua.execString(
+				"local fd = fs.open(\"readall.txt\", \"r\")" +
+				"local lines = fs.readall(fd)\n" +
+				"fs.close(fd)\n" +
+				"assert(lines[1] == \"hello\", lines[1])\n" +
+				"assert(lines[2] == \"takenoko\", lines[2])\n" +
+				"assert(lines[3] == nil, lines[3])\n",
+				"readall.lua");
 	}
 
 	@Test
