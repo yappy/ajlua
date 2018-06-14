@@ -119,18 +119,31 @@ public class LibRestrictedFileSystemTest {
 	}
 
 	@Test
-	public void writeline() throws Exception {
-		File testFile = new File(tmpDir.getRoot(), "readline.txt");
-		prepairFile(testFile, "hello\ntakenoko\n");
+	public void write() throws Exception {
+		File testFile = new File(tmpDir.getRoot(), "write.txt");
 		lua.execString(
-				"local fd = fs.open(\"readline.txt\", \"w\")" +
-				"fs.writeline(fd, \"abc\")\n" +
-				"fs.writeline(fd)\n" +
-				"fs.writeline(fd, \"12345\")\n" +
+				"local fd = fs.open(\"write.txt\", \"w\")" +
+				"fs.write(fd, \"abc\")\n" +
+				"fs.write(fd)\n" +
+				"fs.write(fd, \"12345\")\n" +
 				"fs.close(fd)\n",
-				"readline.lua");
+				"write.lua");
 		String str = readAll(testFile);
-		assertThat(str, is("abc\n\n12345\n"));
+		assertThat(str, is("abc12345"));
+	}
+
+	@Test
+	public void writeline() throws Exception {
+		File testFile = new File(tmpDir.getRoot(), "writeline.txt");
+		lua.execString(
+				"local fd = fs.open(\"writeline.txt\", \"w\")" +
+				"fs.writeline(fd, \"abcde\")\n" +
+				"fs.writeline(fd)\n" +
+				"fs.writeline(fd, \"12345\", \"ABCDE\")\n" +
+				"fs.close(fd)\n",
+				"writeline.lua");
+		String str = readAll(testFile);
+		assertThat(str, is("abcde\n\n12345\nABCDE\n"));
 	}
 
 	@Test

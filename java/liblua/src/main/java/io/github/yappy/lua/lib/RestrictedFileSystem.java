@@ -207,16 +207,17 @@ public class RestrictedFileSystem implements LuaLibrary {
 		}
 	};}
 
-	@LuaLibraryFunction(name = "write", args = { LuaArg.LONG, LuaArg.STRING })
+	@LuaLibraryFunction(name = "write", args = { LuaArg.LONG, LuaArg.STRING_VAR_ARGS })
 	public LuaFunction write() { return new LuaFunction() {
 		@Override
 		public Object[] call(Object[] args) throws LuaException {
 			int fd = ((Long)args[0]).intValue();
-			String str = args[1].toString();
 			BufferedWriter writer = getWriter(fd);
 
 			try {
-				writer.write(str);
+				for (int i = 1; i < args.length; i++) {
+					writer.write(args[i].toString());
+				}
 			} catch (IOException e) {
 				throw new LuaRuntimeException("IO error", e);
 			}
@@ -224,17 +225,22 @@ public class RestrictedFileSystem implements LuaLibrary {
 		}
 	};}
 
-	@LuaLibraryFunction(name = "writeline", args = { LuaArg.LONG, LuaArg.STRING_OR_NIL })
+	@LuaLibraryFunction(name = "writeline", args = { LuaArg.LONG, LuaArg.STRING_VAR_ARGS })
 	public LuaFunction writeline() { return new LuaFunction() {
 		@Override
 		public Object[] call(Object[] args) throws LuaException {
 			int fd = ((Long)args[0]).intValue();
-			String str = (args[1] != null) ? args[1].toString() : "";
 			BufferedWriter writer = getWriter(fd);
 
 			try {
-				writer.write(str);
-				writer.write('\n');
+				for (int i = 1; i < args.length; i++) {
+					writer.write(args[i].toString());
+					writer.write('\n');
+				}
+				// writeline(fd) to new line
+				if (args.length == 1) {
+					writer.write('\n');
+				}
 			} catch (IOException e) {
 				throw new LuaRuntimeException("IO error", e);
 			}
