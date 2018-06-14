@@ -191,10 +191,79 @@
 <!--   -->
 </a>
 <h2 title="Package io.github.yappy.lua Description">Package io.github.yappy.lua Description</h2>
-<div class="block">Lua engine and related classes.</div>
+<div class="block">Lua engine and related classes.
+
+ <h1>Tutorial</h1>
+
+ <h2>Initialize and Finalize Lua Engine</h2>
+ <p>
+ Call <a href="../../../../io/github/yappy/lua/LuaEngine.html#LuaEngine--"><code>LuaEngine.LuaEngine()</code></a> constructor and
+ <a href="../../../../io/github/yappy/lua/LuaEngine.html#close--"><code>LuaEngine.close()</code></a> method.
+ </p>
+ <pre><code>
+ LuaEngine lua = new LuaEngine();
+ lua.close();
+ </code></pre>
+
+ <p>The try-with-resources statement is useful to ensure closing.</p>
+ <pre><code>
+ try (LuaEngine lua = new LuaEngine()) {
+     ...
+ }
+ </code></pre>
+
+ <h2>Open Lua Standard Library</h2>
+ <p>
+ Call <a href="../../../../io/github/yappy/lua/LuaEngine.html#openStdLibs--"><code>LuaEngine.openStdLibs()</code></a>.
+ With this no parameters version, default set will be loaded.
+ You can use <a href="../../../../io/github/yappy/lua/LuaEngine.html#openStdLibs-java.util.Set-"><code>LuaEngine.openStdLibs(java.util.Set)</code></a> 
+ to choose libraries to be loaded.
+ </p>
+ <p>
+ See also for Lua standard library:
+ <a href="https://www.lua.org/manual/5.3/manual.html#6">https://www.lua.org/manual/5.3/manual.html#6</a>
+ </p>
+ <pre><code>
+ try (LuaEngine lua = new LuaEngine()) {
+     lua.openStdLibs();
+     ...
+ }
+ </code></pre>
+
+ <h2>Set print function callback action</h2>
+ <p>
+ Call <a href="../../../../io/github/yappy/lua/LuaEngine.html#setPrintFunction-io.github.yappy.lua.LuaPrint-"><code>LuaEngine.setPrintFunction(LuaPrint)</code></a>.
+ LuaEngine replaces Lua standard <i>print</i> function automatically at
+ <a href="../../../../io/github/yappy/lua/LuaEngine.html#openStdLibs--"><code>LuaEngine.openStdLibs()</code></a>.</p>
+ <pre><code>
+ lua.setPrintFunction(new LuaPrint() {
+     &#064;Override
+     public void writeString(String str) {
+         System.err.println(str);
+     }
+     &#064;Override
+     public void writeLine() {
+         System.err.println();
+     }
+ });
+ </code></pre>
+
+ <h2>Execute a string as Lua source code</h2>
+ <p>
+ Call <a href="../../../../io/github/yappy/lua/LuaEngine.html#execString-java.lang.String-java.lang.String-"><code>LuaEngine.execString(String, String)</code></a>.
+ The first string is source code to be executed.
+ The second string is chunk name. It will be used for error message etc.
+ </p>
+ <pre><code>
+ lua.execString("print(\"hello, world\")", "hello.lua");
+ </code></pre></div>
 <dl>
 <dt><span class="simpleTagLabel">Author:</span></dt>
 <dd>yappy</dd>
+<dt><span class="seeLabel">See Also:</span></dt>
+<dd><a href="../../../../io/github/yappy/lua/LuaEngine.html" title="class in io.github.yappy.lua"><code>LuaEngine</code></a>, 
+<a href="../../../../io/github/yappy/lua/LuaStdLib.html" title="enum in io.github.yappy.lua"><code>LuaStdLib</code></a>, 
+<a href="../../../../io/github/yappy/lua/LuaPrint.html" title="interface in io.github.yappy.lua"><code>LuaPrint</code></a></dd>
 </dl>
 </div>
 <!-- ======= START OF BOTTOM NAVBAR ====== -->
