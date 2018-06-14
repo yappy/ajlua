@@ -127,6 +127,25 @@ public class LibRestrictedFileSystemTest {
 				"list.lua");
 	}
 
+	public void exist() throws Exception {
+		tmpDir.newFile("a.txt");
+		lua.execString(
+				"assert(fs.exist(\"a.txt\"))" +
+				"assert(fs.exist(\"b.txt\"))",
+				"exist.lua");
+	}
+
+	public void rename() throws Exception {
+		File a = tmpDir.newFile("a.txt");
+		File b = tmpDir.newFile("b.txt");
+		assertThat(b.delete(), is(true));
+		lua.execString(
+				"fs.rename(\"a.txt\", \"b.txt\")",
+				"rename.lua");
+		assertThat(a.exists(), is(false));
+		assertThat(b.exists(), is(true));
+	}
+
 	public void delete() throws Exception {
 		File a = tmpDir.newFile("a.txt");
 		File b = tmpDir.newFile("b.txt");

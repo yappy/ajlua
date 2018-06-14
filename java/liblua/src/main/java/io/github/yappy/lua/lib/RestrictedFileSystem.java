@@ -206,6 +206,36 @@ public class RestrictedFileSystem implements LuaLibrary {
 		}
 	};}
 
+	@LuaLibraryFunction(name = "exist", args = { LuaArg.STRING })
+	public LuaFunction exist() { return new LuaFunction() {
+		@Override
+		public Object[] call(Object[] args) throws LuaException {
+			String name = args[0].toString();
+
+			checkFileName(name);
+			File file = new File(dir, name);
+			return new Object[] { file.exists() };
+		}
+	};}
+
+	@LuaLibraryFunction(name = "rename", args = { LuaArg.STRING, LuaArg.STRING })
+	public LuaFunction rename() { return new LuaFunction() {
+		@Override
+		public Object[] call(Object[] args) throws LuaException {
+			String from = args[0].toString();
+			String to = args[1].toString();
+
+			checkFileName(from);
+			checkFileName(to);
+			File fileFrom = new File(dir, from);
+			File fileTo = new File(dir, to);
+			if (!fileFrom.renameTo(fileTo)) {
+				throw new LuaRuntimeException("IO error");
+			}
+			return null;
+		}
+	};}
+
 	@LuaLibraryFunction(name = "delete", args = { LuaArg.STRING })
 	public LuaFunction delete() { return new LuaFunction() {
 		@Override
@@ -217,7 +247,6 @@ public class RestrictedFileSystem implements LuaLibrary {
 			if (!file.delete()) {
 				throw new LuaRuntimeException("IO error");
 			}
-
 			return null;
 		}
 	};}
