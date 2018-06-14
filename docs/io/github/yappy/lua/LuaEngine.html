@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10,"i8":10,"i9":10,"i10":10,"i11":10,"i12":10,"i13":10,"i14":10,"i15":10,"i16":10};
+var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10,"i8":10,"i9":10,"i10":10,"i11":10,"i12":10,"i13":10,"i14":10,"i15":10,"i16":10,"i17":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -115,6 +115,10 @@ var activeTableTab = "activeTableTab";
 extends java.lang.Object
 implements java.lang.AutoCloseable</pre>
 <div class="block">Lua language execution engine.</div>
+<dl>
+<dt><span class="simpleTagLabel">Author:</span></dt>
+<dd>yappy</dd>
+</dl>
 </li>
 </ul>
 </div>
@@ -143,12 +147,6 @@ implements java.lang.AutoCloseable</pre>
 <td class="colFirst"><code>static long</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../io/github/yappy/lua/LuaEngine.html#DEFAULT_MEMORY_LIMIT">DEFAULT_MEMORY_LIMIT</a></span></code>
 <div class="block">Default memory limit.</div>
-</td>
-</tr>
-<tr class="altColor">
-<td class="colFirst"><code>static int</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../io/github/yappy/lua/LuaEngine.html#MAX_STACK">MAX_STACK</a></span></code>
-<div class="block">Lua max stack size.</div>
 </td>
 </tr>
 </table>
@@ -255,6 +253,10 @@ implements java.lang.AutoCloseable</pre>
 </td>
 </tr>
 <tr id="i9" class="rowColor">
+<td class="colFirst"><code>java.lang.String</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../io/github/yappy/lua/LuaEngine.html#dumpLuaStack--">dumpLuaStack</a></span>()</code>&nbsp;</td>
+</tr>
+<tr id="i10" class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../io/github/yappy/lua/LuaEngine.html#execString-io.github.yappy.lua.LuaHook-java.lang.String-java.lang.String-">execString</a></span>(<a href="../../../../io/github/yappy/lua/LuaHook.html" title="interface in io.github.yappy.lua">LuaHook</a>&nbsp;hook,
           java.lang.String&nbsp;buf,
@@ -262,42 +264,42 @@ implements java.lang.AutoCloseable</pre>
 <div class="block">Execute string as Lua program code with debug hook.</div>
 </td>
 </tr>
-<tr id="i10" class="altColor">
+<tr id="i11" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../io/github/yappy/lua/LuaEngine.html#execString-java.lang.String-java.lang.String-">execString</a></span>(java.lang.String&nbsp;buf,
           java.lang.String&nbsp;chunkName)</code>
 <div class="block">Execute string as Lua program code.</div>
 </td>
 </tr>
-<tr id="i11" class="rowColor">
+<tr id="i12" class="altColor">
 <td class="colFirst"><code>java.lang.Object</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../io/github/yappy/lua/LuaEngine.html#getGlobalVariable-java.lang.String-">getGlobalVariable</a></span>(java.lang.String&nbsp;name)</code>
 <div class="block">Get a Lua global variable.</div>
 </td>
 </tr>
-<tr id="i12" class="altColor">
+<tr id="i13" class="rowColor">
 <td class="colFirst"><code>long</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../io/github/yappy/lua/LuaEngine.html#getPeerForDebug--">getPeerForDebug</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i13" class="rowColor">
+<tr id="i14" class="altColor">
 <td class="colFirst"><code><a href="../../../../io/github/yappy/lua/LuaVersion.html" title="class in io.github.yappy.lua">LuaVersion</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../io/github/yappy/lua/LuaEngine.html#getVersion--">getVersion</a></span>()</code>
 <div class="block">Get Lua version info.</div>
 </td>
 </tr>
-<tr id="i14" class="altColor">
+<tr id="i15" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../io/github/yappy/lua/LuaEngine.html#openStdLibs--">openStdLibs</a></span>()</code>
 <div class="block">Open Lua default standard libraries.</div>
 </td>
 </tr>
-<tr id="i15" class="rowColor">
+<tr id="i16" class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../io/github/yappy/lua/LuaEngine.html#openStdLibs-java.util.Set-">openStdLibs</a></span>(java.util.Set&lt;<a href="../../../../io/github/yappy/lua/LuaStdLib.html" title="enum in io.github.yappy.lua">LuaStdLib</a>&gt;&nbsp;libs)</code>
 <div class="block">Open Lua standard libraries.</div>
 </td>
 </tr>
-<tr id="i16" class="altColor">
+<tr id="i17" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../io/github/yappy/lua/LuaEngine.html#setPrintFunction-io.github.yappy.lua.LuaPrint-">setPrintFunction</a></span>(<a href="../../../../io/github/yappy/lua/LuaPrint.html" title="interface in io.github.yappy.lua">LuaPrint</a>&nbsp;print)</code>
 <div class="block">Set Lua standard print() function callback.</div>
@@ -342,7 +344,7 @@ implements java.lang.AutoCloseable</pre>
 <a name="DEFAULT_INTR_INST_COUNT">
 <!--   -->
 </a>
-<ul class="blockList">
+<ul class="blockListLast">
 <li class="blockList">
 <h4>DEFAULT_INTR_INST_COUNT</h4>
 <pre>public static final&nbsp;int DEFAULT_INTR_INST_COUNT</pre>
@@ -350,20 +352,6 @@ implements java.lang.AutoCloseable</pre>
 <dl>
 <dt><span class="seeLabel">See Also:</span></dt>
 <dd><a href="../../../../constant-values.html#io.github.yappy.lua.LuaEngine.DEFAULT_INTR_INST_COUNT">Constant Field Values</a></dd>
-</dl>
-</li>
-</ul>
-<a name="MAX_STACK">
-<!--   -->
-</a>
-<ul class="blockListLast">
-<li class="blockList">
-<h4>MAX_STACK</h4>
-<pre>public static final&nbsp;int MAX_STACK</pre>
-<div class="block">Lua max stack size.</div>
-<dl>
-<dt><span class="seeLabel">See Also:</span></dt>
-<dd><a href="../../../../constant-values.html#io.github.yappy.lua.LuaEngine.MAX_STACK">Constant Field Values</a></dd>
 </dl>
 </li>
 </ul>
@@ -712,6 +700,15 @@ implements java.lang.AutoCloseable</pre>
 <dd><code><a href="../../../../io/github/yappy/lua/LuaException.html" title="class in io.github.yappy.lua">LuaException</a></code> - Syntax or Runtime or other error.</dd>
 <dd><code>java.lang.InterruptedException</code> - Thread is interrupted during execution.</dd>
 </dl>
+</li>
+</ul>
+<a name="dumpLuaStack--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>dumpLuaStack</h4>
+<pre>public&nbsp;java.lang.String&nbsp;dumpLuaStack()</pre>
 </li>
 </ul>
 <a name="addLibrary-io.github.yappy.lua.lib.LuaLibrary-">

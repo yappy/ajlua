@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10};
+var methods = {"i0":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -134,16 +134,56 @@ implements <a href="../../../../../io/github/yappy/lua/lib/LuaLibrary.html" titl
 <th class="colLast" scope="col">Field and Description</th>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code>static java.lang.String</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/github/yappy/lua/lib/RestrictedFileSystem.html#FILE_NAME_CHARS_FIRST">FILE_NAME_CHARS_FIRST</a></span></code>&nbsp;</td>
+<td class="colFirst"><code><a href="../../../../../io/github/yappy/lua/LuaFunction.html" title="interface in io.github.yappy.lua">LuaFunction</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/github/yappy/lua/lib/RestrictedFileSystem.html#Z:Z_close">_close</a></span></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code><a href="../../../../../io/github/yappy/lua/LuaFunction.html" title="interface in io.github.yappy.lua">LuaFunction</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/github/yappy/lua/lib/RestrictedFileSystem.html#delete">delete</a></span></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code><a href="../../../../../io/github/yappy/lua/LuaFunction.html" title="interface in io.github.yappy.lua">LuaFunction</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/github/yappy/lua/lib/RestrictedFileSystem.html#exist">exist</a></span></code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>static java.lang.String</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/github/yappy/lua/lib/RestrictedFileSystem.html#FILE_NAME_CHARS_FOLLOW">FILE_NAME_CHARS_FOLLOW</a></span></code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/github/yappy/lua/lib/RestrictedFileSystem.html#FILE_NAME_CHARS_FIRST">FILE_NAME_CHARS_FIRST</a></span></code>&nbsp;</td>
 </tr>
 <tr class="altColor">
+<td class="colFirst"><code>static java.lang.String</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/github/yappy/lua/lib/RestrictedFileSystem.html#FILE_NAME_CHARS_FOLLOW">FILE_NAME_CHARS_FOLLOW</a></span></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
 <td class="colFirst"><code>static int</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/github/yappy/lua/lib/RestrictedFileSystem.html#FILE_NAME_MAX">FILE_NAME_MAX</a></span></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code><a href="../../../../../io/github/yappy/lua/LuaFunction.html" title="interface in io.github.yappy.lua">LuaFunction</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/github/yappy/lua/lib/RestrictedFileSystem.html#list">list</a></span></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code><a href="../../../../../io/github/yappy/lua/LuaFunction.html" title="interface in io.github.yappy.lua">LuaFunction</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/github/yappy/lua/lib/RestrictedFileSystem.html#open">open</a></span></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code><a href="../../../../../io/github/yappy/lua/LuaFunction.html" title="interface in io.github.yappy.lua">LuaFunction</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/github/yappy/lua/lib/RestrictedFileSystem.html#readall">readall</a></span></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code><a href="../../../../../io/github/yappy/lua/LuaFunction.html" title="interface in io.github.yappy.lua">LuaFunction</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/github/yappy/lua/lib/RestrictedFileSystem.html#readline">readline</a></span></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code><a href="../../../../../io/github/yappy/lua/LuaFunction.html" title="interface in io.github.yappy.lua">LuaFunction</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/github/yappy/lua/lib/RestrictedFileSystem.html#rename">rename</a></span></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code><a href="../../../../../io/github/yappy/lua/LuaFunction.html" title="interface in io.github.yappy.lua">LuaFunction</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/github/yappy/lua/lib/RestrictedFileSystem.html#write">write</a></span></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code><a href="../../../../../io/github/yappy/lua/LuaFunction.html" title="interface in io.github.yappy.lua">LuaFunction</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/github/yappy/lua/lib/RestrictedFileSystem.html#writeline">writeline</a></span></code>&nbsp;</td>
 </tr>
 </table>
 </li>
@@ -178,24 +218,8 @@ implements <a href="../../../../../io/github/yappy/lua/lib/LuaLibrary.html" titl
 <th class="colLast" scope="col">Method and Description</th>
 </tr>
 <tr id="i0" class="altColor">
-<td class="colFirst"><code><a href="../../../../../io/github/yappy/lua/LuaFunction.html" title="interface in io.github.yappy.lua">LuaFunction</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/github/yappy/lua/lib/RestrictedFileSystem.html#Z:Z_close--">_close</a></span>()</code>&nbsp;</td>
-</tr>
-<tr id="i1" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/github/yappy/lua/lib/RestrictedFileSystem.html#close--">close</a></span>()</code>&nbsp;</td>
-</tr>
-<tr id="i2" class="altColor">
-<td class="colFirst"><code><a href="../../../../../io/github/yappy/lua/LuaFunction.html" title="interface in io.github.yappy.lua">LuaFunction</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/github/yappy/lua/lib/RestrictedFileSystem.html#open--">open</a></span>()</code>&nbsp;</td>
-</tr>
-<tr id="i3" class="rowColor">
-<td class="colFirst"><code><a href="../../../../../io/github/yappy/lua/LuaFunction.html" title="interface in io.github.yappy.lua">LuaFunction</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/github/yappy/lua/lib/RestrictedFileSystem.html#readline--">readline</a></span>()</code>&nbsp;</td>
-</tr>
-<tr id="i4" class="altColor">
-<td class="colFirst"><code><a href="../../../../../io/github/yappy/lua/LuaFunction.html" title="interface in io.github.yappy.lua">LuaFunction</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/github/yappy/lua/lib/RestrictedFileSystem.html#writeline--">writeline</a></span>()</code>&nbsp;</td>
 </tr>
 </table>
 <ul class="blockList">
@@ -248,7 +272,7 @@ implements <a href="../../../../../io/github/yappy/lua/lib/LuaLibrary.html" titl
 <a name="FILE_NAME_CHARS_FOLLOW">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>FILE_NAME_CHARS_FOLLOW</h4>
 <pre>public static final&nbsp;java.lang.String FILE_NAME_CHARS_FOLLOW</pre>
@@ -256,6 +280,116 @@ implements <a href="../../../../../io/github/yappy/lua/lib/LuaLibrary.html" titl
 <dt><span class="seeLabel">See Also:</span></dt>
 <dd><a href="../../../../../constant-values.html#io.github.yappy.lua.lib.RestrictedFileSystem.FILE_NAME_CHARS_FOLLOW">Constant Field Values</a></dd>
 </dl>
+</li>
+</ul>
+<a name="open">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>open</h4>
+<pre><a href="../../../../../io/github/yappy/lua/lib/LuaLibraryFunction.html" title="annotation in io.github.yappy.lua.lib">@LuaLibraryFunction</a>(<a href="../../../../../io/github/yappy/lua/lib/LuaLibraryFunction.html#name--">name</a>="open",
+                    <a href="../../../../../io/github/yappy/lua/lib/LuaLibraryFunction.html#args--">args</a>={<a href="../../../../../io/github/yappy/lua/LuaArg.html#STRING">STRING</a>,<a href="../../../../../io/github/yappy/lua/LuaArg.html#STRING_OR_NIL">STRING_OR_NIL</a>})
+public&nbsp;<a href="../../../../../io/github/yappy/lua/LuaFunction.html" title="interface in io.github.yappy.lua">LuaFunction</a> open</pre>
+</li>
+</ul>
+<a name="Z:Z_close">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>_close</h4>
+<pre><a href="../../../../../io/github/yappy/lua/lib/LuaLibraryFunction.html" title="annotation in io.github.yappy.lua.lib">@LuaLibraryFunction</a>(<a href="../../../../../io/github/yappy/lua/lib/LuaLibraryFunction.html#name--">name</a>="close",
+                    <a href="../../../../../io/github/yappy/lua/lib/LuaLibraryFunction.html#args--">args</a>=<a href="../../../../../io/github/yappy/lua/LuaArg.html#LONG">LONG</a>)
+public&nbsp;<a href="../../../../../io/github/yappy/lua/LuaFunction.html" title="interface in io.github.yappy.lua">LuaFunction</a> _close</pre>
+</li>
+</ul>
+<a name="readline">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>readline</h4>
+<pre><a href="../../../../../io/github/yappy/lua/lib/LuaLibraryFunction.html" title="annotation in io.github.yappy.lua.lib">@LuaLibraryFunction</a>(<a href="../../../../../io/github/yappy/lua/lib/LuaLibraryFunction.html#name--">name</a>="readline",
+                    <a href="../../../../../io/github/yappy/lua/lib/LuaLibraryFunction.html#args--">args</a>=<a href="../../../../../io/github/yappy/lua/LuaArg.html#LONG">LONG</a>)
+public&nbsp;<a href="../../../../../io/github/yappy/lua/LuaFunction.html" title="interface in io.github.yappy.lua">LuaFunction</a> readline</pre>
+</li>
+</ul>
+<a name="readall">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>readall</h4>
+<pre><a href="../../../../../io/github/yappy/lua/lib/LuaLibraryFunction.html" title="annotation in io.github.yappy.lua.lib">@LuaLibraryFunction</a>(<a href="../../../../../io/github/yappy/lua/lib/LuaLibraryFunction.html#name--">name</a>="readall",
+                    <a href="../../../../../io/github/yappy/lua/lib/LuaLibraryFunction.html#args--">args</a>=<a href="../../../../../io/github/yappy/lua/LuaArg.html#LONG">LONG</a>)
+public&nbsp;<a href="../../../../../io/github/yappy/lua/LuaFunction.html" title="interface in io.github.yappy.lua">LuaFunction</a> readall</pre>
+</li>
+</ul>
+<a name="write">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>write</h4>
+<pre><a href="../../../../../io/github/yappy/lua/lib/LuaLibraryFunction.html" title="annotation in io.github.yappy.lua.lib">@LuaLibraryFunction</a>(<a href="../../../../../io/github/yappy/lua/lib/LuaLibraryFunction.html#name--">name</a>="write",
+                    <a href="../../../../../io/github/yappy/lua/lib/LuaLibraryFunction.html#args--">args</a>={<a href="../../../../../io/github/yappy/lua/LuaArg.html#LONG">LONG</a>,<a href="../../../../../io/github/yappy/lua/LuaArg.html#STRING_VAR_ARGS">STRING_VAR_ARGS</a>})
+public&nbsp;<a href="../../../../../io/github/yappy/lua/LuaFunction.html" title="interface in io.github.yappy.lua">LuaFunction</a> write</pre>
+</li>
+</ul>
+<a name="writeline">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>writeline</h4>
+<pre><a href="../../../../../io/github/yappy/lua/lib/LuaLibraryFunction.html" title="annotation in io.github.yappy.lua.lib">@LuaLibraryFunction</a>(<a href="../../../../../io/github/yappy/lua/lib/LuaLibraryFunction.html#name--">name</a>="writeline",
+                    <a href="../../../../../io/github/yappy/lua/lib/LuaLibraryFunction.html#args--">args</a>={<a href="../../../../../io/github/yappy/lua/LuaArg.html#LONG">LONG</a>,<a href="../../../../../io/github/yappy/lua/LuaArg.html#STRING_VAR_ARGS">STRING_VAR_ARGS</a>})
+public&nbsp;<a href="../../../../../io/github/yappy/lua/LuaFunction.html" title="interface in io.github.yappy.lua">LuaFunction</a> writeline</pre>
+</li>
+</ul>
+<a name="list">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>list</h4>
+<pre><a href="../../../../../io/github/yappy/lua/lib/LuaLibraryFunction.html" title="annotation in io.github.yappy.lua.lib">@LuaLibraryFunction</a>(<a href="../../../../../io/github/yappy/lua/lib/LuaLibraryFunction.html#name--">name</a>="list",
+                    <a href="../../../../../io/github/yappy/lua/lib/LuaLibraryFunction.html#args--">args</a>={})
+public&nbsp;<a href="../../../../../io/github/yappy/lua/LuaFunction.html" title="interface in io.github.yappy.lua">LuaFunction</a> list</pre>
+</li>
+</ul>
+<a name="exist">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>exist</h4>
+<pre><a href="../../../../../io/github/yappy/lua/lib/LuaLibraryFunction.html" title="annotation in io.github.yappy.lua.lib">@LuaLibraryFunction</a>(<a href="../../../../../io/github/yappy/lua/lib/LuaLibraryFunction.html#name--">name</a>="exist",
+                    <a href="../../../../../io/github/yappy/lua/lib/LuaLibraryFunction.html#args--">args</a>=<a href="../../../../../io/github/yappy/lua/LuaArg.html#STRING">STRING</a>)
+public&nbsp;<a href="../../../../../io/github/yappy/lua/LuaFunction.html" title="interface in io.github.yappy.lua">LuaFunction</a> exist</pre>
+</li>
+</ul>
+<a name="rename">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>rename</h4>
+<pre><a href="../../../../../io/github/yappy/lua/lib/LuaLibraryFunction.html" title="annotation in io.github.yappy.lua.lib">@LuaLibraryFunction</a>(<a href="../../../../../io/github/yappy/lua/lib/LuaLibraryFunction.html#name--">name</a>="rename",
+                    <a href="../../../../../io/github/yappy/lua/lib/LuaLibraryFunction.html#args--">args</a>={<a href="../../../../../io/github/yappy/lua/LuaArg.html#STRING">STRING</a>,<a href="../../../../../io/github/yappy/lua/LuaArg.html#STRING">STRING</a>})
+public&nbsp;<a href="../../../../../io/github/yappy/lua/LuaFunction.html" title="interface in io.github.yappy.lua">LuaFunction</a> rename</pre>
+</li>
+</ul>
+<a name="delete">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>delete</h4>
+<pre><a href="../../../../../io/github/yappy/lua/lib/LuaLibraryFunction.html" title="annotation in io.github.yappy.lua.lib">@LuaLibraryFunction</a>(<a href="../../../../../io/github/yappy/lua/lib/LuaLibraryFunction.html#name--">name</a>="delete",
+                    <a href="../../../../../io/github/yappy/lua/lib/LuaLibraryFunction.html#args--">args</a>=<a href="../../../../../io/github/yappy/lua/LuaArg.html#STRING">STRING</a>)
+public&nbsp;<a href="../../../../../io/github/yappy/lua/LuaFunction.html" title="interface in io.github.yappy.lua">LuaFunction</a> delete</pre>
 </li>
 </ul>
 </li>
@@ -286,7 +420,7 @@ implements <a href="../../../../../io/github/yappy/lua/lib/LuaLibrary.html" titl
 <a name="close--">
 <!--   -->
 </a>
-<ul class="blockList">
+<ul class="blockListLast">
 <li class="blockList">
 <h4>close</h4>
 <pre>public&nbsp;void&nbsp;close()
@@ -297,50 +431,6 @@ implements <a href="../../../../../io/github/yappy/lua/lib/LuaLibrary.html" titl
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code>java.lang.Exception</code></dd>
 </dl>
-</li>
-</ul>
-<a name="open--">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>open</h4>
-<pre><a href="../../../../../io/github/yappy/lua/lib/LuaLibraryFunction.html" title="annotation in io.github.yappy.lua.lib">@LuaLibraryFunction</a>(<a href="../../../../../io/github/yappy/lua/lib/LuaLibraryFunction.html#name--">name</a>="open",
-                    <a href="../../../../../io/github/yappy/lua/lib/LuaLibraryFunction.html#args--">args</a>={<a href="../../../../../io/github/yappy/lua/LuaArg.html#STRING">STRING</a>,<a href="../../../../../io/github/yappy/lua/LuaArg.html#STRING_OR_NIL">STRING_OR_NIL</a>})
-public&nbsp;<a href="../../../../../io/github/yappy/lua/LuaFunction.html" title="interface in io.github.yappy.lua">LuaFunction</a>&nbsp;open()</pre>
-</li>
-</ul>
-<a name="Z:Z_close--">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>_close</h4>
-<pre><a href="../../../../../io/github/yappy/lua/lib/LuaLibraryFunction.html" title="annotation in io.github.yappy.lua.lib">@LuaLibraryFunction</a>(<a href="../../../../../io/github/yappy/lua/lib/LuaLibraryFunction.html#name--">name</a>="close",
-                    <a href="../../../../../io/github/yappy/lua/lib/LuaLibraryFunction.html#args--">args</a>=<a href="../../../../../io/github/yappy/lua/LuaArg.html#LONG">LONG</a>)
-public&nbsp;<a href="../../../../../io/github/yappy/lua/LuaFunction.html" title="interface in io.github.yappy.lua">LuaFunction</a>&nbsp;_close()</pre>
-</li>
-</ul>
-<a name="readline--">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>readline</h4>
-<pre><a href="../../../../../io/github/yappy/lua/lib/LuaLibraryFunction.html" title="annotation in io.github.yappy.lua.lib">@LuaLibraryFunction</a>(<a href="../../../../../io/github/yappy/lua/lib/LuaLibraryFunction.html#name--">name</a>="readline",
-                    <a href="../../../../../io/github/yappy/lua/lib/LuaLibraryFunction.html#args--">args</a>=<a href="../../../../../io/github/yappy/lua/LuaArg.html#LONG">LONG</a>)
-public&nbsp;<a href="../../../../../io/github/yappy/lua/LuaFunction.html" title="interface in io.github.yappy.lua">LuaFunction</a>&nbsp;readline()</pre>
-</li>
-</ul>
-<a name="writeline--">
-<!--   -->
-</a>
-<ul class="blockListLast">
-<li class="blockList">
-<h4>writeline</h4>
-<pre><a href="../../../../../io/github/yappy/lua/lib/LuaLibraryFunction.html" title="annotation in io.github.yappy.lua.lib">@LuaLibraryFunction</a>(<a href="../../../../../io/github/yappy/lua/lib/LuaLibraryFunction.html#name--">name</a>="writeline",
-                    <a href="../../../../../io/github/yappy/lua/lib/LuaLibraryFunction.html#args--">args</a>={<a href="../../../../../io/github/yappy/lua/LuaArg.html#LONG">LONG</a>,<a href="../../../../../io/github/yappy/lua/LuaArg.html#STRING_OR_NIL">STRING_OR_NIL</a>})
-public&nbsp;<a href="../../../../../io/github/yappy/lua/LuaFunction.html" title="interface in io.github.yappy.lua">LuaFunction</a>&nbsp;writeline()</pre>
 </li>
 </ul>
 </li>

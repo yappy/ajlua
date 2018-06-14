@@ -27,6 +27,8 @@ repositories {
 
 javadoc {
 	destinationDir file('../../docs')
+	options.author()
+	options.version()
 	options.addBooleanOption('notimestamp', true)
 }
 
