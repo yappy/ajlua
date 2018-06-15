@@ -31,12 +31,11 @@ public enum LuaStdLib {
 	 * @see #BASE
 	 * @see #COROUTINE
 	 * @see #TABLE
-	 * @see #IO
 	 * @see #STRING
 	 * @see #MATH
 	 * @see #UTF8
 	 */
 	public static final Set<LuaStdLib> DEFAULT_SET =
 		Collections.unmodifiableSet(EnumSet.of(
-			BASE, COROUTINE, TABLE, IO, STRING, MATH, UTF8));
+			BASE, COROUTINE, TABLE, STRING, MATH, UTF8));
 }
