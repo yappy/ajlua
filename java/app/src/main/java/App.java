@@ -31,7 +31,7 @@ public class App extends JFrame {
 	private JButton button;
 
 	public App() {
-		super("Test App");
+		super("Test App: " + LuaEngine.getLibraryVersion());
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		executor = Executors.newSingleThreadExecutor();
 		addWindowListener(new WindowAdapter() {

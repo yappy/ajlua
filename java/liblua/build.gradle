@@ -6,6 +6,10 @@
  * user guide available at https://docs.gradle.org/4.7/userguide/java_library_plugin.html
  */
 
+buildscript {
+	repositories.jcenter()
+}
+
 plugins {
 	// Apply the java-library plugin to add support for Java Library
 	id 'java-library'
@@ -24,6 +28,33 @@ repositories {
 	// You can declare any Maven/Ivy/file repository here.
 	jcenter()
 }
+
+def verFileName = 'version.txt'
+def verFile = file(new File(processResources.destinationDir, verFileName))
+def verTestFile = file(new File(processTestResources.destinationDir, verFileName))
+task genVer {
+	description 'Generate version resource'
+	outputs.files verFile, verTestFile
+	doLast {
+		def text = 'No version info\n'
+		try {
+			def proc = 'git describe --always'.execute()
+			proc.waitFor()
+			if (proc.exitValue() == 0) {
+				text = proc.text.trim() + '\n'
+				println('Version info: git-describe = ' + text.trim())
+			} else {
+				logger.warn('Warning: git describe failed.')
+			}
+		} catch (e) {
+			logger.warn('Warning: git command failed.')
+			logger.warn('Ensure that git command is available.')
+		}
+		verFile.text = text
+		verTestFile.text = text
+	}
+}
+processResources.dependsOn(genVer)
 
 javadoc {
 	destinationDir file('../../docs')

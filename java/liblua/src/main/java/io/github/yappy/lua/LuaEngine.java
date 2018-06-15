@@ -1,6 +1,10 @@
 package io.github.yappy.lua;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.Field;
+import java.net.URL;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,12 +25,28 @@ public class LuaEngine implements AutoCloseable {
 
 	static {
 		System.loadLibrary("jlua");
+
+		String version;
+		try {
+			URL url = LuaEngine.class.getResource("/version.txt");
+			if (url == null) {
+				throw new IOException();
+			}
+			try (BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()))) {
+				version = in.readLine();
+			}
+		} catch(IOException e) {
+			version = "Version info not found";
+		}
+		VERSION_STRING = version;
 	}
 
 	/** Default memory limit. */
 	public static final long DEFAULT_MEMORY_LIMIT = 16 * 1024 * 1024;
 	/** Default debug hook instruction count for interrupt. */
 	public static final int DEFAULT_INTR_INST_COUNT = 1000;
+
+	private static final String VERSION_STRING;
 
 	// getVersion String[] size
 	private static final int VERSION_ARRAY_SIZE	= 4;
@@ -166,10 +186,19 @@ public class LuaEngine implements AutoCloseable {
 	}
 
 	/**
+	 * Get this library (jar) version.
+	 * It will be git tag and hash.
+	 * @return Library version info.
+	 */
+	public static String getLibraryVersion() {
+		return VERSION_STRING;
+	}
+
+	/**
 	 * Get Lua version info.
 	 * @return Lua version info.
 	 */
-	public LuaVersion getVersion() {
+	public LuaVersion getLuaVersion() {
 		return version;
 	}
 

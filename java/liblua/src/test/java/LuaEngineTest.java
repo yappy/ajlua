@@ -45,6 +45,12 @@ public class LuaEngineTest {
 
 
 	@Test
+	public void getVersion() {
+		System.out.print("Library Version: ");
+		System.out.println(LuaEngine.getLibraryVersion());
+	}
+
+	@Test
 	public void simpleExecute() throws Exception {
 		lua.execString("x = 1", "simpleExecute.lua");
 	}
