@@ -38,7 +38,7 @@ task genVer {
 	doLast {
 		def text = 'No version info\n'
 		try {
-			def proc = 'git describe --always'.execute()
+			def proc = 'git describe --always --dirty'.execute()
 			proc.waitFor()
 			if (proc.exitValue() == 0) {
 				text = proc.text.trim() + '\n'

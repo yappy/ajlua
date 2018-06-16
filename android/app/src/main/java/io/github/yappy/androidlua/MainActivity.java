@@ -23,6 +23,8 @@ public class MainActivity extends AppCompatActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
+		setTitle(getTitle() + ": " + LuaEngine.getLibraryVersion());
+
 		Button button = findViewById(R.id.button3);
 		button.setOnClickListener(new View.OnClickListener() {
 			@Override

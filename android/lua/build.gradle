@@ -2,6 +2,24 @@ apply plugin: 'com.android.library'
 
 def orgRoot = "../../java/liblua"
 
+def versionDesc() {
+	def text = 'No version info\n'
+	try {
+		def proc = 'git describe --always --dirty'.execute()
+		proc.waitFor()
+		if (proc.exitValue() == 0) {
+			text = proc.text.trim() + '\n'
+			println('Version info: git-describe = ' + text.trim())
+		} else {
+			logger.warn('Warning: git describe failed.')
+		}
+	} catch (e) {
+		logger.warn('Warning: git command failed.')
+		logger.warn('Warning: Ensure that git command is available.')
+	}
+	text
+}
+
 android {
 	compileSdkVersion 27
 
@@ -13,6 +31,7 @@ android {
 
 		testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
+		buildConfigField 'String', 'VERSION_DESC', "\"${versionDesc().trim()}\""
 	}
 
 	buildTypes {
