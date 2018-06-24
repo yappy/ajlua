@@ -32,6 +32,6 @@ public interface LuaFunction {
 	 * @throws LuaException Causes lua error.
 	 * Its message will be converted to lua error message.
 	 */
-	Object[] call(Object[] args) throws LuaException;
+	Object[] call(Object[] args) throws LuaException, InterruptedException;
 
 }
