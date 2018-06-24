@@ -9,6 +9,16 @@ public interface LuaFunction {
 	/**
 	 * Invoked when called from Lua.
 	 *
+	 * If LuaRuntimeException is thrown, the engine will catch and convert it to Lua error.
+	 * It can be caught in Lua code with Lua standard pcall().
+	 * If it was not caught in Lua code, the engine handles the Lua error and
+	 * throws a new LuaRuntimeException instance.
+	 *
+	 * Other throwables (including RuntimeException and Error)
+	 * will not be caught by the engine.
+	 * Lua execution will be aborted by Lua error mechanism,
+	 * but the exception will be thrown to Java caller as is.
+	 *
 	 * <table border="1">
 	 * <caption>Lua to Java parameters</caption>
 	 * <tr><th>Lua</th><th>Java</th></tr>
@@ -29,9 +39,11 @@ public interface LuaFunction {
 	 *
 	 * @param args Function args.
 	 * @return Function results. null means 0-length results.
-	 * @throws LuaException Causes lua error.
-	 * Its message will be converted to lua error message.
+	 * @throws LuaRuntimeException Raise Lua error. It can be handled by Lua code.
+	 * Its message will be converted to Lua error message.
+	 * @throws LuaException Raise Lua error. It cannot be handled by Lua code.
+	 * @throws InterruptedException Thread interrupted. It cannot be handled by Lua code.
 	 */
-	Object[] call(Object[] args) throws LuaException, InterruptedException;
+	Object[] call(Object[] args) throws LuaRuntimeException, LuaException, InterruptedException;
 
 }

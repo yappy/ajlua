@@ -18,7 +18,6 @@ import java.util.Map;
 import java.util.Random;
 
 import io.github.yappy.lua.LuaArg;
-import io.github.yappy.lua.LuaException;
 import io.github.yappy.lua.LuaFunction;
 import io.github.yappy.lua.LuaRuntimeException;
 
@@ -119,7 +118,7 @@ public class RestrictedFileSystem implements LuaLibrary {
 	@LuaLibraryFunction(name = "open", args = { LuaArg.STRING, LuaArg.STRING_OR_NIL })
 	public LuaFunction open = new LuaFunction() {
 		@Override
-		public Object[] call(Object[] args) throws LuaException {
+		public Object[] call(Object[] args) throws LuaRuntimeException {
 			String name = args[0].toString();
 			String mode = (args[1] != null) ? args[1].toString() : "r";
 
@@ -156,7 +155,7 @@ public class RestrictedFileSystem implements LuaLibrary {
 	@LuaLibraryFunction(name = "close", args = { LuaArg.LONG })
 	public LuaFunction _close = new LuaFunction() {
 		@Override
-		public Object[] call(Object[] args) throws LuaException {
+		public Object[] call(Object[] args) throws LuaRuntimeException {
 			int fd = ((Long)args[0]).intValue();
 			AutoCloseable io = fdMap.remove(fd);
 			if (io == null) {
@@ -174,7 +173,7 @@ public class RestrictedFileSystem implements LuaLibrary {
 	@LuaLibraryFunction(name = "readline", args = { LuaArg.LONG })
 	public LuaFunction readline = new LuaFunction() {
 		@Override
-		public Object[] call(Object[] args) throws LuaException {
+		public Object[] call(Object[] args) throws LuaRuntimeException {
 			int fd = ((Long)args[0]).intValue();
 			BufferedReader reader = getReader(fd);
 
@@ -190,7 +189,7 @@ public class RestrictedFileSystem implements LuaLibrary {
 	@LuaLibraryFunction(name = "readall", args = { LuaArg.LONG })
 	public LuaFunction readall = new LuaFunction() {
 		@Override
-		public Object[] call(Object[] args) throws LuaException {
+		public Object[] call(Object[] args) throws LuaRuntimeException {
 			int fd = ((Long)args[0]).intValue();
 			BufferedReader reader = getReader(fd);
 
@@ -210,7 +209,7 @@ public class RestrictedFileSystem implements LuaLibrary {
 	@LuaLibraryFunction(name = "write", args = { LuaArg.LONG, LuaArg.STRING_VAR_ARGS })
 	public LuaFunction write = new LuaFunction() {
 		@Override
-		public Object[] call(Object[] args) throws LuaException {
+		public Object[] call(Object[] args) throws LuaRuntimeException {
 			int fd = ((Long)args[0]).intValue();
 			BufferedWriter writer = getWriter(fd);
 
@@ -228,7 +227,7 @@ public class RestrictedFileSystem implements LuaLibrary {
 	@LuaLibraryFunction(name = "writeline", args = { LuaArg.LONG, LuaArg.STRING_VAR_ARGS })
 	public LuaFunction writeline = new LuaFunction() {
 		@Override
-		public Object[] call(Object[] args) throws LuaException {
+		public Object[] call(Object[] args) throws LuaRuntimeException {
 			int fd = ((Long)args[0]).intValue();
 			BufferedWriter writer = getWriter(fd);
 
@@ -251,7 +250,7 @@ public class RestrictedFileSystem implements LuaLibrary {
 	@LuaLibraryFunction(name = "list", args = {})
 	public LuaFunction list = new LuaFunction() {
 		@Override
-		public Object[] call(Object[] args) throws LuaException {
+		public Object[] call(Object[] args) throws LuaRuntimeException {
 			String[] result = dir.list();
 			if (result == null) {
 				throw new LuaRuntimeException("IO error");
@@ -263,7 +262,7 @@ public class RestrictedFileSystem implements LuaLibrary {
 	@LuaLibraryFunction(name = "exist", args = { LuaArg.STRING })
 	public LuaFunction exist = new LuaFunction() {
 		@Override
-		public Object[] call(Object[] args) throws LuaException {
+		public Object[] call(Object[] args) throws LuaRuntimeException {
 			String name = args[0].toString();
 
 			checkFileName(name);
@@ -275,7 +274,7 @@ public class RestrictedFileSystem implements LuaLibrary {
 	@LuaLibraryFunction(name = "rename", args = { LuaArg.STRING, LuaArg.STRING })
 	public LuaFunction rename = new LuaFunction() {
 		@Override
-		public Object[] call(Object[] args) throws LuaException {
+		public Object[] call(Object[] args) throws LuaRuntimeException {
 			String from = args[0].toString();
 			String to = args[1].toString();
 
@@ -293,7 +292,7 @@ public class RestrictedFileSystem implements LuaLibrary {
 	@LuaLibraryFunction(name = "delete", args = { LuaArg.STRING })
 	public LuaFunction delete = new LuaFunction() {
 		@Override
-		public Object[] call(Object[] args) throws LuaException {
+		public Object[] call(Object[] args) throws LuaRuntimeException {
 			String name = args[0].toString();
 
 			checkFileName(name);

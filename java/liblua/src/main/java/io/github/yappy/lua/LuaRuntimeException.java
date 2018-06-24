@@ -2,10 +2,10 @@ package io.github.yappy.lua;
 
 /**
  * A runtime error has occurred during execution.
- * This exception represents LUA_ERRRUN.
- * This error can be caused by bad arithmetic operation,
- * function call for not function value,
- * error() or assert() standard lua functions, etc.
+ *
+ * This exception can be thrown from {@link LuaFunction#call(Object[])}.
+ *
+ * @see LuaFunction
  * @author yappy
  */
 public class LuaRuntimeException extends LuaException {

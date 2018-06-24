@@ -16,8 +16,10 @@ namespace jniutil {
 		Long,
 		Double,
 		Throwable,
-		RuntimeException,
 		Error,
+		RuntimeException,
+		InterruptedException,
+
 		ClassCacheNum,
 	};
 	enum class MethodId {

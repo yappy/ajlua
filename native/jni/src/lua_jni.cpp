@@ -224,7 +224,7 @@ namespace {
 			auto id = static_cast<jint>(
 				lua_tointeger(L, lua_upvalueindex(PROXY_UPVALUE_IND_ID)));
 
-			// Java interface call
+			// Java interface call: FunctionRoot#call()
 			jmethodID method = jniutil::GetMethodId(
 				jniutil::MethodId::FunctionRoot_call);
 			int ret = env->CallIntMethod(

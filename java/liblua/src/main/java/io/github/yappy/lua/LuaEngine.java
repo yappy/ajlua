@@ -328,7 +328,7 @@ public class LuaEngine implements AutoCloseable {
 	// Function call root
 	private class FunctionRootImpl implements FunctionRoot {
 		@Override
-		public int call(int id) throws Exception {
+		public int call(int id) throws LuaRuntimeException, LuaException, InterruptedException {
 			if (id < 0 || id >= functionList.size()) {
 				throw new Error("Invalid function root call ID");
 			}

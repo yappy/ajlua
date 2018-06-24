@@ -29,8 +29,9 @@ namespace {
 		{ nullptr, "java/lang/Long"						},
 		{ nullptr, "java/lang/Double"					},
 		{ nullptr, "java/lang/Throwable"				},
-		{ nullptr, "java/lang/RuntimeException"			},
 		{ nullptr, "java/lang/Error"					},
+		{ nullptr, "java/lang/RuntimeException"			},
+		{ nullptr, "java/lang/InterruptedException"		},
 	};
 	static_assert(
 		sizeof(s_classCache) / sizeof(s_classCache[0]) ==
