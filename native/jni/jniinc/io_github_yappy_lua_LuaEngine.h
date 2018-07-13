@@ -259,14 +259,6 @@ JNIEXPORT void JNICALL Java_io_github_yappy_lua_LuaEngine_setProxyCallback
 JNIEXPORT jint JNICALL Java_io_github_yappy_lua_LuaEngine_pushProxyFunction
   (JNIEnv *, jclass, jlong, jint);
 
-/*
- * Class:     io_github_yappy_lua_LuaEngine
- * Method:    testDestructor
- * Signature: ()I
- */
-JNIEXPORT jint JNICALL Java_io_github_yappy_lua_LuaEngine_testDestructor
-  (JNIEnv *, jclass);
-
 #ifdef __cplusplus
 }
 #endif
