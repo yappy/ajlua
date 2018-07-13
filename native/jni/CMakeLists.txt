@@ -14,6 +14,31 @@ set(JNICLASSFILE "${JNICLASSDIR}/${JNICLASS_SLASH}.class")
 string(REPLACE "." "_" JNICLASS_BAR "${JNICLASS}")
 set(JNIHEADER "${JNIINC}/${JNICLASS_BAR}.h")
 
+# javah target
+# `make javah` to update JNI header files
+add_custom_target(javah
+	SOURCES "${JNIHEADER}"
+	COMMAND "$ENV{JAVA_HOME}/bin/javah"
+			"-d" "${JNIINC}"
+			"-classpath" "${JNICLASSDIR}"
+			"${JNICLASS}"
+	DEPENDS "${JNICLASSFILE}")
+
+# ------------------------------------------------------------------------------
+
+include("../cmake/gtest.cmake")
+
+set(TESTBIN "${PROJECT_NAME}_test")
+file(GLOB TESTSRCS "test/*.cpp")
+
+add_executable(${TESTBIN} ${TESTSRCS})
+target_link_libraries(${TESTBIN} "lua")
+target_link_libraries(${TESTBIN} "gtest_main")
+
+add_test(NAME "NativeTest" COMMAND ${TESTBIN})
+
+# ------------------------------------------------------------------------------
+
 # source files
 file(GLOB SRCS "src/*.cpp")
 
@@ -27,13 +52,3 @@ install(TARGETS ${PROJECT_NAME}
 	DESTINATION "${PROJECT_SOURCE_DIR}/../../java/app/build/natives")
 install(TARGETS ${PROJECT_NAME}
 	DESTINATION "${PROJECT_SOURCE_DIR}/../../java/liblua/build/natives")
-
-# javah target
-# `make javah` to update JNI header files
-add_custom_target(javah
-	SOURCES "${JNIHEADER}"
-	COMMAND "$ENV{JAVA_HOME}/bin/javah"
-			"-d" "${JNIINC}"
-			"-classpath" "${JNICLASSDIR}"
-			"${JNICLASS}"
-	DEPENDS "${JNICLASSFILE}")

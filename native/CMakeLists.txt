@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 2.6)
 
 # Linux and Windows build root
+enable_testing()
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_CXX_STANDARD 14)

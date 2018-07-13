@@ -20,14 +20,20 @@ Unofficial Japanese: http://milkpot.sakura.ne.jp/lua/lua53_manual_ja.html
    e.g. `$ cmake ../native`
 1. `$ make install` (`$ make -j install` to speed up)
 
+(Native part test)
+1. `$ ctest` after make.
+1. `$ ctest -V` for more datailed results.
+
 (Java part)
 1. Install JDK 8 or later.
 1. Build tool is `Gradle` but it will be automatically downloaded by
    `gradlew` command. Of course you can use your own Gradle installed.
 1. cd to `/java` dir in this repository.
+1. `$ ./gradlew app` to start a sample application. (GUI needed)
+
+(Java part test)
 1. `$ ./gradlew test` to test the native and java library.
    If failed, check the native build and install results.
-1. `$ ./gradlew app` to start a sample application. (GUI needed)
 
 ### Android project
 1. Install Android Studio.

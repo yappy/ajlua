@@ -10,6 +10,7 @@ list(REMOVE_ITEM SRCS "${SRCDIR}/lua.c" "${SRCDIR}/luac.c")
 # force C++
 set_source_files_properties(${SRCS} PROPERTIES LANGUAGE CXX)
 
+# static library target
 add_library(${PROJECT_NAME} STATIC ${SRCS})
 target_include_directories(${PROJECT_NAME} PUBLIC "${SRCDIR}")
 
