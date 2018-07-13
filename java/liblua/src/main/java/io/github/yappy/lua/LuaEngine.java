@@ -138,6 +138,8 @@ public class LuaEngine implements AutoCloseable {
 	private static native void setProxyCallback(
 			long peer, FunctionRoot callback);
 	private static native int pushProxyFunction(long peer, int id);
+	// Native test
+	private static native int testDestructor();
 
 	// private variables
 	private long peer = 0;
