@@ -15,6 +15,4 @@ add_library(${PROJECT_NAME} STATIC ${SRCS})
 target_include_directories(${PROJECT_NAME} PUBLIC "${SRCDIR}")
 
 # Lua compile define
-if(UNIX)
-	target_compile_definitions(${PROJECT_NAME} PRIVATE "LUA_USE_POSIX")
-endif()
+# target_compile_definitions(${PROJECT_NAME} PRIVATE "")

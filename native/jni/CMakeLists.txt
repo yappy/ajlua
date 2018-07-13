@@ -26,16 +26,21 @@ add_custom_target(javah
 
 # ------------------------------------------------------------------------------
 
-include("../cmake/gtest.cmake")
+# gtest
+if(ANDROID)
+	message("Skip test binary on Android")
+else()
+	include("../cmake/gtest.cmake")
 
-set(TESTBIN "${PROJECT_NAME}_test")
-file(GLOB TESTSRCS "test/*.cpp")
+	set(TESTBIN "${PROJECT_NAME}_test")
+	file(GLOB TESTSRCS "test/*.cpp")
 
-add_executable(${TESTBIN} ${TESTSRCS})
-target_link_libraries(${TESTBIN} "lua")
-target_link_libraries(${TESTBIN} "gtest_main")
+	add_executable(${TESTBIN} ${TESTSRCS})
+	target_link_libraries(${TESTBIN} "lua")
+	target_link_libraries(${TESTBIN} "gtest_main")
 
-add_test(NAME "NativeTest" COMMAND ${TESTBIN})
+	add_test(NAME "NativeTest" COMMAND ${TESTBIN})
+endif()
 
 # ------------------------------------------------------------------------------
 
