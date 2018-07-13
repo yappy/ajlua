@@ -1,5 +1,7 @@
 #include <io_github_yappy_lua_LuaEngine.h>
-#include <lua.hpp>
+#include <lua.h>
+#include <lualib.h>
+#include <lauxlib.h>
 #include <array>
 #include <memory>
 #include "jniutil.h"
