@@ -41,9 +41,8 @@ public interface LuaFunction {
 	 * @return Function results. null means 0-length results.
 	 * @throws LuaRuntimeException Raise Lua error. It can be handled by Lua code.
 	 * Its message will be converted to Lua error message.
-	 * @throws LuaException Raise Lua error. It cannot be handled by Lua code.
-	 * @throws InterruptedException Thread interrupted. It cannot be handled by Lua code.
+	 * @throws LuaAbortException Raise Lua error. It cannot be handled by Lua code.
 	 */
-	Object[] call(Object[] args) throws LuaRuntimeException, LuaException, InterruptedException;
+	Object[] call(Object[] args) throws LuaRuntimeException, LuaAbortException;
 
 }

@@ -195,7 +195,7 @@ public class LuaEngineTest {
 		final boolean[] flag = new boolean[1];
 		LuaFunction func = new LuaFunction() {
 			@Override
-			public Object[] call(Object[] args) throws LuaException {
+			public Object[] call(Object[] args) throws LuaRuntimeException {
 				assertThat(args[0], instanceOf(Boolean.class));
 				assertThat(((Boolean)args[0]).booleanValue(), is(true));
 				assertThat(args[1], instanceOf(Long.class));
@@ -220,7 +220,7 @@ public class LuaEngineTest {
 		final boolean[] flag = new boolean[1];
 		LuaFunction func = new LuaFunction() {
 			@Override
-			public Object[] call(Object[] args) throws LuaException {
+			public Object[] call(Object[] args) throws LuaRuntimeException {
 				assertThat(args[0], instanceOf(Boolean.class));
 				assertThat(((Boolean) args[0]).booleanValue(), is(true));
 				assertThat(args[1], instanceOf(Long.class));
@@ -246,7 +246,7 @@ public class LuaEngineTest {
 		final boolean[] flag = new boolean[1];
 		LuaFunction func = new LuaFunction() {
 			@Override
-			public Object[] call(Object[] args) throws LuaException {
+			public Object[] call(Object[] args) throws LuaRuntimeException {
 				assertThat(args[0], is(nullValue()));
 				assertThat(args[1], is(nullValue()));
 				assertThat(args[2], is(nullValue()));
@@ -268,7 +268,7 @@ public class LuaEngineTest {
 		final boolean[] flag = new boolean[1];
 		LuaFunction func = new LuaFunction() {
 			@Override
-			public Object[] call(Object[] args) throws LuaException {
+			public Object[] call(Object[] args) throws LuaRuntimeException {
 				assertThat(args[0], is(nullValue()));
 				assertThat(args[1], is(nullValue()));
 				assertThat(args[2], is(nullValue()));
@@ -291,7 +291,7 @@ public class LuaEngineTest {
 		final boolean[] flag = new boolean[4];
 		LuaFunction func = new LuaFunction() {
 			@Override
-			public Object[] call(Object[] args) throws LuaException {
+			public Object[] call(Object[] args) throws LuaRuntimeException {
 				int first = ((Long)args[0]).intValue();
 				assertThat(first, is(args.length - 1));
 				for (int i = 0; i < first; i++) {

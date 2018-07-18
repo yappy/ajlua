@@ -11,6 +11,6 @@ interface FunctionRoot {
 	// @throws Other_throwable(including Error and RuntimeException)
 	// Lua execution will be aborted by lua error,
 	// but Java exception is still active at pcall() return.
-	int call(int id) throws LuaRuntimeException, LuaException, InterruptedException;
+	int call(int id) throws LuaRuntimeException, LuaException;
 
 }

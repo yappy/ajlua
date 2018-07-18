@@ -1,5 +1,6 @@
 package io.github.yappy.lua.lib;
 
+import io.github.yappy.lua.LuaAbortException;
 import io.github.yappy.lua.LuaArg;
 import io.github.yappy.lua.LuaFunction;
 import io.github.yappy.lua.LuaRuntimeException;
@@ -23,9 +24,13 @@ public class SystemFunctions implements LuaLibrary {
 	@LuaLibraryFunction(name = "sleep", args = { LuaArg.LONG })
 	public LuaFunction sleep = new LuaFunction() {
 		@Override
-		public Object[] call(Object[] args) throws LuaRuntimeException, InterruptedException {
+		public Object[] call(Object[] args) throws LuaRuntimeException, LuaAbortException {
 			long millis = ((Long)args[0]).longValue();
-			Thread.sleep(millis);
+			try {
+				Thread.sleep(millis);
+			} catch(InterruptedException e) {
+				throw new LuaAbortException(e);
+			}
 			return null;
 		}
 	};
