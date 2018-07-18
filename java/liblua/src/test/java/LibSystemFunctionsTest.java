@@ -57,7 +57,7 @@ public class LibSystemFunctionsTest {
 
 		long time1 = System.currentTimeMillis();
 		lua.execString(
-				String.format("t = sys.sleep(%s)\n", SLEEP),
+				String.format("sys.sleep(%s)\n", SLEEP),
 				"sleep.lua");
 		long time2 = System.currentTimeMillis();
 		assertTrue(Math.abs((time2 - time1) - SLEEP) < EPS);
@@ -80,17 +80,66 @@ public class LibSystemFunctionsTest {
 			}
 		});
 
+		boolean exFlag = false;
 		sub.start();
 		long time1 = System.currentTimeMillis();
 		try {
 			lua.execString(
-					String.format("t = sys.sleep(%s)\n", SLEEP),
-					"sleep.lua");
+					String.format("sys.sleep(%s)\n", SLEEP),
+					"sleepInterrupt.lua");
 		} catch (LuaAbortException e) {
 			assertTrue(e.getCause() instanceof InterruptedException);
+			exFlag = true;
+		} finally {
+			sub.join();
+			// clear interrupt
+			Thread.interrupted();
 		}
+		assertTrue(exFlag);
 		long time2 = System.currentTimeMillis();
-		sub.join();
+
+		assertTrue(Math.abs((time2 - time1) - INT) < EPS);
+	}
+
+	@Test
+	public void sleepInterruptInPcall() throws Exception {
+		// 1000ms, 100ms
+		final long SLEEP = 1000;
+		final long INT = 100;
+		// 10ms
+		final long EPS = 10;
+
+		final Thread main = Thread.currentThread();
+		Thread sub = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				try { Thread.sleep(INT); } catch (Exception e) {}
+				main.interrupt();
+			}
+		});
+
+		boolean exFlag = false;
+		sub.start();
+		long time1 = System.currentTimeMillis();
+		try {
+			lua.execString(
+					"function f()\n" +
+					String.format("  sys.sleep(%s)\n", SLEEP) +
+					"end\n" +
+					"suc = pcall(f)\n" +
+					"assert(suc)\n" +
+					"while true do end\n",
+					"sleepInterruptInPcall.lua");
+		} catch (LuaAbortException e) {
+			assertTrue(e.getCause() instanceof InterruptedException);
+			exFlag = true;
+		} finally {
+			sub.join();
+			// clear interrupt
+			Thread.interrupted();
+		}
+		assertTrue(exFlag);
+		long time2 = System.currentTimeMillis();
 
 		assertTrue(Math.abs((time2 - time1) - INT) < EPS);
 	}

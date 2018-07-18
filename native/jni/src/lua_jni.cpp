@@ -276,6 +276,25 @@ namespace {
 			}
 		}
 
+		void SetOriginalPcall(lua_CFunction pcall)
+		{
+			m_pcall = pcall;
+		}
+
+		static int Pcall(lua_State *L)
+		{
+			Lua *lua = FromExtraSpace(L);
+			JNIEnv *env = lua->m_env;
+
+			int result = lua->m_pcall(L);
+
+			if (env->ExceptionCheck()) {
+				return lua_error(L);
+			}
+
+			return result;
+		}
+
 		static Lua *FromExtraSpace(lua_State *L)
 		{
 			return *static_cast<Lua **>(lua_getextraspace(L));
@@ -292,6 +311,7 @@ namespace {
 
 		JNIEnv *m_env;
 		size_t m_memoryLimit;
+		lua_CFunction m_pcall;
 		jniutil::GlobalRef m_hook;
 		jniutil::GlobalRef m_print;
 		jniutil::GlobalRef m_callback;
@@ -507,6 +527,16 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_lua_LuaEngine_openLibs
 				luaL_requiref(L, LoadLibs[id].name, LoadLibs[id].func, 1);
 				lua_pop(L, 1);  /* remove lib */
 			}
+		}
+		// replace pcall
+		lua_getglobal(L, "pcall");
+		lua_CFunction org = lua_tocfunction(L, -1);
+		lua_pop(L, 1);
+		if (org != nullptr) {
+			auto lua = Lua::FromExtraSpace(L);
+			lua->SetOriginalPcall(org);
+			lua_pushcfunction(L, Lua::Pcall);
+			lua_setglobal(L, "pcall");
 		}
 		return 0;
 	};
