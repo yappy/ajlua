@@ -258,23 +258,21 @@ namespace {
 			}
 			const char *cmsg = (msg != nullptr) ? msg.get() : "";
 
-			jclass clsRE = jniutil::FindClass(
-				jniutil::ClassId::RuntimeException);
-			jclass clsError = jniutil::FindClass(jniutil::ClassId::Error);
-			if (env->IsInstanceOf(ex, clsRE) ||
-				env->IsInstanceOf(ex, clsError)) {
-				// RuntimeException or Error
+			jclass clsLRE = jniutil::FindClass(
+				jniutil::ClassId::LuaRuntimeException);
+			if (env->IsInstanceOf(ex, clsLRE)) {
+				// LuaRuntimeException
+				// treat as lua error (msg = ex.getMessage())
+				// longjmp to pcall point
+				return luaL_error(L, "%s", cmsg);
+			}
+			else {
+				// other Exceptions (including RuntimeException or Error)
 				// don't catch here
 				// (set exception state again, preserve stack trace)
 				// longjmp to pcall point
 				env->Throw(ex);
 				return lua_error(L);
-			}
-			else {
-				// other Exceptions
-				// treat as lua error (msg = ex.getMessage())
-				// longjmp to pcall point
-				return luaL_error(L, "%s", cmsg);
 			}
 		}
 

@@ -19,19 +19,17 @@ namespace {
 	};
 
 	ClassCacheEntry s_classCache[] = {
-		{ nullptr, "io/github/yappy/lua/DebugHook"		},
-		{ nullptr, "io/github/yappy/lua/LuaPrint"		},
-		{ nullptr, "io/github/yappy/lua/FunctionRoot"	},
-		{ nullptr, "[Ljava/lang/Object;"				},
-		{ nullptr, "java/lang/String"					},
-		{ nullptr, "java/lang/Number"					},
-		{ nullptr, "java/lang/Boolean"					},
-		{ nullptr, "java/lang/Long"						},
-		{ nullptr, "java/lang/Double"					},
-		{ nullptr, "java/lang/Throwable"				},
-		{ nullptr, "java/lang/Error"					},
-		{ nullptr, "java/lang/RuntimeException"			},
-		{ nullptr, "java/lang/InterruptedException"		},
+		{ nullptr, "io/github/yappy/lua/DebugHook"				},
+		{ nullptr, "io/github/yappy/lua/LuaPrint"				},
+		{ nullptr, "io/github/yappy/lua/FunctionRoot"			},
+		{ nullptr, "io/github/yappy/lua/LuaRuntimeException"	},
+		{ nullptr, "[Ljava/lang/Object;"						},
+		{ nullptr, "java/lang/String"							},
+		{ nullptr, "java/lang/Number"							},
+		{ nullptr, "java/lang/Boolean"							},
+		{ nullptr, "java/lang/Long"								},
+		{ nullptr, "java/lang/Double"							},
+		{ nullptr, "java/lang/Throwable"						},
 	};
 	static_assert(
 		sizeof(s_classCache) / sizeof(s_classCache[0]) ==

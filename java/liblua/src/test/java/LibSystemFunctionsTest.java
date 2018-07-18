@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
 
+import io.github.yappy.lua.LuaAbortException;
 import io.github.yappy.lua.LuaEngine;
 import io.github.yappy.lua.lib.SystemFunctions;
 
@@ -70,7 +71,6 @@ public class LibSystemFunctionsTest {
 		// 10ms
 		final long EPS = 10;
 
-		exception.expect(InterruptedException.class);
 		final Thread main = Thread.currentThread();
 		Thread sub = new Thread(new Runnable() {
 			@Override
@@ -82,9 +82,13 @@ public class LibSystemFunctionsTest {
 
 		sub.start();
 		long time1 = System.currentTimeMillis();
-		lua.execString(
-				String.format("t = sys.sleep(%s)\n", SLEEP),
-				"sleep.lua");
+		try {
+			lua.execString(
+					String.format("t = sys.sleep(%s)\n", SLEEP),
+					"sleep.lua");
+		} catch (LuaAbortException e) {
+			assertTrue(e.getCause() instanceof InterruptedException);
+		}
 		long time2 = System.currentTimeMillis();
 		sub.join();
 
