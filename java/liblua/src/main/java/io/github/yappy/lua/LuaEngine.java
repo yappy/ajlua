@@ -132,7 +132,7 @@ public class LuaEngine implements AutoCloseable {
 	private static native int setTableField(long peer, String key);
 	private static native int pcall(
 			long peer, int nargs, int nresults, int msgh)
-			throws InterruptedException;
+			throws LuaAbortException;
 	private static native int getGlobal(long peer, String name);
 	private static native int setGlobal(long peer, String name);
 	private static native void setProxyCallback(
@@ -263,7 +263,7 @@ public class LuaEngine implements AutoCloseable {
 	}
 
 	private int pcallWithHook(LuaHook hook, int nargs, int nresults, int msgh)
-			throws InterruptedException {
+			throws LuaAbortException {
 		this.hook = hook;
 		try {
 			return pcall(peer, nargs, nresults, msgh);
@@ -275,8 +275,7 @@ public class LuaEngine implements AutoCloseable {
 
 	private class DebugHookImpl implements DebugHook {
 		@Override
-		public void hook(int event, int currentline)
-				throws InterruptedException {
+		public void hook(int event, int currentline) throws LuaAbortException {
 			// dispatch
 			if (hook != null) {
 				switch (event) {
@@ -297,7 +296,7 @@ public class LuaEngine implements AutoCloseable {
 			// LUA_HOOKCOUNT will be called periodically
 			// Checks interrupt here and throws to native code
 			if (Thread.currentThread().isInterrupted()) {
-				throw new InterruptedException();
+				throw new LuaAbortException(new InterruptedException());
 			}
 		}
 	}
@@ -598,11 +597,9 @@ public class LuaEngine implements AutoCloseable {
 	 * @param params Parameters.
 	 * @return Return values.
 	 * @throws LuaException Lua error.
-	 * @throws InterruptedException Thread is interrupted during execution.
 	 */
 	public Object[] callGlobalFunction(
-			String name, Object... params)
-			throws LuaException, InterruptedException {
+			String name, Object... params) throws LuaException {
 		return callGlobalFunction(null, name, params);
 	}
 
@@ -613,11 +610,9 @@ public class LuaEngine implements AutoCloseable {
 	 * @param params Parameters.
 	 * @return Return values.
 	 * @throws LuaException Lua error.
-	 * @throws InterruptedException Thread is interrupted during execution.
 	 */
 	public Object[] callGlobalFunction(
-			LuaHook hook, String name, Object... params)
-			throws LuaException, InterruptedException {
+			LuaHook hook, String name, Object... params) throws LuaException {
 		if (name == null) {
 			throw new NullPointerException("name");
 		}
@@ -650,10 +645,8 @@ public class LuaEngine implements AutoCloseable {
 	 * @param buf Lua source code.
 	 * @param chunkName It will be used at error message.
 	 * @throws LuaException Syntax or Runtime or other error.
-	 * @throws InterruptedException Thread is interrupted during execution.
 	 */
-	public void execString(String buf, String chunkName)
-			throws LuaException, InterruptedException {
+	public void execString(String buf, String chunkName) throws LuaException {
 		execString(null, buf, chunkName);
 	}
 
@@ -663,10 +656,9 @@ public class LuaEngine implements AutoCloseable {
 	 * @param buf Lua source code.
 	 * @param chunkName It will be used at error message.
 	 * @throws LuaException Syntax or Runtime or other error.
-	 * @throws InterruptedException Thread is interrupted during execution.
 	 */
 	public void execString(LuaHook hook, String buf, String chunkName)
-			throws LuaException, InterruptedException {
+			throws LuaException {
 		// push chunk function
 		checkLuaError(loadString(peer, buf, chunkName));
 		// pcall nargs=0, nresults=0

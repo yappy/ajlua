@@ -15,6 +15,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.Timeout;
 
+import io.github.yappy.lua.LuaAbortException;
 import io.github.yappy.lua.LuaArg;
 import io.github.yappy.lua.LuaEngine;
 import io.github.yappy.lua.LuaException;
@@ -84,7 +85,7 @@ public class LuaEngineTest {
 
 	@Test
 	public void timeoutError() throws Exception {
-		exception.expect(InterruptedException.class);
+		exception.expect(LuaAbortException.class);
 		final Thread main = Thread.currentThread();
 		Thread sub = new Thread(new Runnable() {
 			@Override

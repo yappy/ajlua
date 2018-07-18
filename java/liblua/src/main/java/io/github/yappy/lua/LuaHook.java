@@ -28,6 +28,6 @@ public interface LuaHook {
 	 * @param type Hook type.
 	 * @param line Line number. (valid only if type == {@link Type#LINE})
 	 */
-	void hook(Type type, int line);
+	void hook(Type type, int line) throws LuaAbortException;
 
 }

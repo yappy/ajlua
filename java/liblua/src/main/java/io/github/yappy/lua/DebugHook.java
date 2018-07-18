@@ -5,6 +5,6 @@ package io.github.yappy.lua;
  */
 interface DebugHook {
 
-	void hook(int event, int currentline) throws InterruptedException;
+	void hook(int event, int currentline) throws LuaAbortException;
 
 }
