@@ -1,5 +1,7 @@
 #include <io_github_yappy_lua_LuaEngine.h>
-#include <lua.hpp>
+#include <lua.h>
+#include <lualib.h>
+#include <lauxlib.h>
 #include <array>
 #include <memory>
 #include "jniutil.h"
@@ -39,18 +41,17 @@ namespace {
 		"LIB_ID_COUNT");
 
 	/*
-	 * Lua panic means that longjmp is not caught by pcall.
-	 * It is not expected from this module,
-	 * and C++, JNI, Java stack might have been vanished.
-	 * (destructor, cleanup local ref would not work in that case)
-	 * It is dangerous situation and unrecoverable.
+	 * Lua panic means that longjmp/throw destination does not exist.
+	 * It is not expected by this module.
 	 * So shutdown the JVM with FatalError.
 	 */
 	JNIEnv *env_for_panic = nullptr;
 	int panic_handler(lua_State *) {
 		if (env_for_panic != nullptr) {
+			// never return
 			env_for_panic->FatalError("unprotected error in lua");
 		}
+		// call abort()
 		return 0;
 	}
 
@@ -114,9 +115,10 @@ namespace {
 				jniutil::MethodId::DebugHook_hook);
 			lua->m_env->CallVoidMethod(
 				lua->m_hook.get(), method, ar->event, ar->currentline);
-			// including InterruptedException
+
+			// LuaAbortException, RuntimeException, Error
 			if (lua->m_env->ExceptionCheck()) {
-				// longjmp to pcall point
+				// jump to pcall point
 				lua_error(L);
 			}
 		}
@@ -145,12 +147,12 @@ namespace {
 				jniutil::MethodId::LuaPrint_writeLine);
 
 			auto writeString = [lua, L, env, idWriteString]
-					(const char *str, size_t) {
+					(const char *str, size_t) -> void {
 				jstring jstr = env->NewStringUTF(str);
 				if (jstr == nullptr) {
 					if (env->ExceptionCheck()) {
 						// OutOfMemoryError
-						// longjmp to pcall point
+						// jump to pcall point
 						lua_error(L);
 					}
 					// Invalid UTF-8 string: ignore
@@ -160,15 +162,15 @@ namespace {
 				env->DeleteLocalRef(jstr);
 				// RuntimeException or Error
 				if (lua->m_env->ExceptionCheck()) {
-					// longjmp to pcall point
+					// jump to pcall point
 					lua_error(L);
 				}
 			};
-			auto writeLine = [lua, L, env, idWriteLine]() {
+			auto writeLine = [lua, L, env, idWriteLine]() -> void {
 				env->CallVoidMethod(lua->m_print.get(), idWriteLine);
 				// RuntimeException or Error
 				if (env->ExceptionCheck()) {
-					// longjmp to pcall point
+					// jump to pcall point
 					lua_error(L);
 				}
 			};
@@ -224,7 +226,7 @@ namespace {
 			auto id = static_cast<jint>(
 				lua_tointeger(L, lua_upvalueindex(PROXY_UPVALUE_IND_ID)));
 
-			// Java interface call
+			// Java interface call: FunctionRoot#call()
 			jmethodID method = jniutil::GetMethodId(
 				jniutil::MethodId::FunctionRoot_call);
 			int ret = env->CallIntMethod(
@@ -250,30 +252,47 @@ namespace {
 				msg = jniutil::JstrToChars(env, jmsg);
 				if (msg == nullptr) {
 					jniutil::ThrowOutOfMemoryError(env, "Native heap");
-					// longjmp to pcall point
+					// jump to pcall point
 					return lua_error(L);
 				}
 			}
 			const char *cmsg = (msg != nullptr) ? msg.get() : "";
 
-			jclass clsRE = jniutil::FindClass(
-				jniutil::ClassId::RuntimeException);
-			jclass clsError = jniutil::FindClass(jniutil::ClassId::Error);
-			if (env->IsInstanceOf(ex, clsRE) ||
-				env->IsInstanceOf(ex, clsError)) {
-				// RuntimeException or Error
+			jclass clsLRE = jniutil::FindClass(
+				jniutil::ClassId::LuaRuntimeException);
+			if (env->IsInstanceOf(ex, clsLRE)) {
+				// LuaRuntimeException
+				// treat as lua error (msg = ex.getMessage())
+				// jump to pcall point
+				return luaL_error(L, "%s", cmsg);
+			}
+			else {
+				// other Exceptions (including RuntimeException or Error)
 				// don't catch here
 				// (set exception state again, preserve stack trace)
-				// longjmp to pcall point
+				// jump to pcall point
 				env->Throw(ex);
 				return lua_error(L);
 			}
-			else {
-				// other Exceptions
-				// treat as lua error (msg = ex.getMessage())
-				// longjmp to pcall point
-				return luaL_error(L, "%s", cmsg);
+		}
+
+		void SetOriginalPcall(lua_CFunction pcall)
+		{
+			m_pcall = pcall;
+		}
+
+		static int Pcall(lua_State *L)
+		{
+			Lua *lua = FromExtraSpace(L);
+			JNIEnv *env = lua->m_env;
+
+			int result = lua->m_pcall(L);
+
+			if (env->ExceptionCheck()) {
+				return lua_error(L);
 			}
+
+			return result;
 		}
 
 		static Lua *FromExtraSpace(lua_State *L)
@@ -292,6 +311,7 @@ namespace {
 
 		JNIEnv *m_env;
 		size_t m_memoryLimit;
+		lua_CFunction m_pcall;
 		jniutil::GlobalRef m_hook;
 		jniutil::GlobalRef m_print;
 		jniutil::GlobalRef m_callback;
@@ -342,7 +362,7 @@ namespace {
 		return lua_checkstack(L, n);
 	}
 
-	// might longjmp(), throw exception
+	// might longjmp() or throw C++ exception
 	// BUG: lua stack check
 	void pushJavaValue(lua_State *L, JNIEnv *env, jobject jobj)
 	{
@@ -508,13 +528,23 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_lua_LuaEngine_openLibs
 				lua_pop(L, 1);  /* remove lib */
 			}
 		}
+		// replace pcall
+		lua_getglobal(L, "pcall");
+		lua_CFunction org = lua_tocfunction(L, -1);
+		lua_pop(L, 1);
+		if (org != nullptr) {
+			auto lua = Lua::FromExtraSpace(L);
+			lua->SetOriginalPcall(org);
+			lua_pushcfunction(L, Lua::Pcall);
+			lua_setglobal(L, "pcall");
+		}
 		return 0;
 	};
 	// cfunc
 	lua_pushcfunction(L, f);
 	// arg1:
 	lua_pushinteger(L, bits);
-	// longjmp_safe call (args=1, ret=0)
+	// lua error safe call (args=1, ret=0)
 	return lua_pcall(L, 1, 0, 0);
 }
 
@@ -545,7 +575,7 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_lua_LuaEngine_replacePrintFunc
 	};
 	// cfunc
 	lua_pushcfunction(L, f);
-	// longjmp_safe call (args=0, ret=0)
+	// lua error safe call (args=0, ret=0)
 	return lua_pcall(L, 0, 0, 0);
 }
 
@@ -669,7 +699,7 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_lua_LuaEngine_pushValues
 	lua_pushlightuserdata(L, values);
 	// arg3: length
 	lua_pushinteger(L, length);
-	// longjmp_safe call (args=3, ret=length)
+	// lua error safe call (args=3, ret=length)
 	return lua_pcall(L, 3, length, 0);
 }
 
@@ -755,7 +785,7 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_lua_LuaEngine_getValues
 			}
 			case LUA_TSTRING:
 			{
-				// might longjmp()
+				// might cause lua error
 				const char *cstr = lua_tostring(L, lind);
 				jstring jstr = env->NewStringUTF(cstr);
 				if (env->ExceptionCheck()) goto EXIT;
@@ -796,7 +826,7 @@ EXIT:
 	lua_insert(L, 1);
 	// args: original stack, moreover, params
 	lua_pushlightuserdata(L, &params);
-	// longjmp_safe call (args=num+1(params), ret=num)
+	// lua error safe call (args=num+1(params), ret=num)
 	return lua_pcall(L, num + 1, num, 0);
 }
 
@@ -857,7 +887,7 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_lua_LuaEngine_getCheckedValues
 					continue;
 				}
 				else {
-					// longjmp to pcall
+					// jump to pcall point
 					luaL_error(L, "bad argument #%d (argument needed)", lind);
 				}
 			}
@@ -880,7 +910,7 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_lua_LuaEngine_getCheckedValues
 				int isnum = 0;
 				lua_Integer val = lua_tointegerx(L, -1, &isnum);
 				if (!isnum) {
-					// longjmp to pcall
+					// jump to pcall point
 					luaL_error(L, "bad argument #%d (integer needed)", lind);
 				}
 				jobject jobj = jniutil::BoxingLong(env, val);
@@ -895,7 +925,7 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_lua_LuaEngine_getCheckedValues
 				int isnum = 0;
 				lua_Number val = lua_tonumberx(L, -1, &isnum);
 				if (!isnum) {
-					// longjmp to pcall
+					// jump to pcall point
 					luaL_error(L, "bad argument #%d (number needed)", lind);
 				}
 				jobject jobj = jniutil::BoxingDouble(env, val);
@@ -909,7 +939,7 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_lua_LuaEngine_getCheckedValues
 			{
 				const char *cstr = lua_tostring(L, -1);
 				if (cstr == nullptr) {
-					// longjmp to pcall
+					// jump to pcall point
 					luaL_error(L, "bad argument #%d (string needed)", lind);
 				}
 				jstring jstr = env->NewStringUTF(cstr);
@@ -940,7 +970,7 @@ EXIT:
 	lua_insert(L, 1);
 	// arg_last: param tuple
 	lua_pushlightuserdata(L, &params);
-	// longjmp_safe call (args=orgSize+tuple, ret=orgSize)
+	// lua error safe call (args=orgSize+tuple, ret=orgSize)
 	return lua_pcall(L, orgSize + 1, orgSize, 0);
 }
 
@@ -975,7 +1005,7 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_lua_LuaEngine_pushNewTable
 	};
 	lua_pushcfunction(L, f);
 	lua_pushlightuserdata(L, &params);
-	// longjmp_safe call (args=1, ret=1)
+	// lua error safe call (args=1, ret=1)
 	return lua_pcall(L, 1, 1, 0);
 }
 
@@ -1020,7 +1050,7 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_lua_LuaEngine_setTableField
 	lua_pushlightuserdata(L, &params);
 	lua_insert(L, -3);
 	// f, params, table, value
-	// longjmp_safe call (args=3, ret=1(table))
+	// lua error safe call (args=3, ret=1(table))
 	return lua_pcall(L, 3, 1, 0);
 }
 
@@ -1035,18 +1065,28 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_lua_LuaEngine_pcall
 	auto L = reinterpret_cast<Lua *>(peer)->L();
 
 	/*
-	 * setjmp() and call lua function
+	 * (setjmp() or try) and call lua function
 	 * pcall could call Lua::ProxyFunc or Lua::Hook.
-	 * They could
-	 * - set Java exception status and longjmp() (with lua_error())
-	 * -- RuntimeException
-	 * -- Error
-	 * -- InterrupedException
+	 *
+	 * They could:
+	 * - set Java exception status and (longjmp() or C++ throw) with lua_error()
+	 * -- LuaAbortException (checked: declared explicitly in Java code)
+	 * -- RuntimeException (unchecked)
+	 * -- Error (unchecked)
 	 * - longjmp() (with luaL_error() = push string + lua_error())
-	 * lua_pcall() would return LUA_ERRRUN in both cases,
-	 * but if exception status is set, an exception would be thrown and
-	 * LUA_ERRRUN would be invisible from Java code.
+	 * -- It is caused by LuaRuntimeException but exception status is cleared.
+	 *
+	 * lua_pcall() will return LUA_ERRRUN in both cases,
+	 * but if exception status is set, a Java exception will be thrown and
+	 * LUA_ERRRUN return code will be invisible from Java code.
+	 *
+	 * If exception status is set, almost all JNI functions must never be used.
+	 * (Android VM will crash)
+	 * I should return to Java code as soon as possible
+	 * if a Java exception is active.
 	 */
+	// return to Java code without calling JNI functions
+	// even if (longjmp() or throw-catch) is taken.
 	return lua_pcall(L, nargs, nresults, msgh);
 }
 
@@ -1086,7 +1126,7 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_lua_LuaEngine_getGlobal
 	lua_pushcfunction(L, f);
 	// arg1: const char *name
 	lua_pushlightuserdata(L, cName.get());
-	// longjmp_safe call (args=1, ret=1)
+	// lua error safe call (args=1, ret=1)
 	return lua_pcall(L, 1, 1, 0);
 }
 
@@ -1127,7 +1167,7 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_lua_LuaEngine_setGlobal
 	lua_pushlightuserdata(L, cName.get());
 	// arg2: value (original top)
 	lua_rotate(L, lua_absindex(L, -3), -1);
-	// longjmp_safe call (args=2, ret=0)
+	// lua error safe call (args=2, ret=0)
 	return lua_pcall(L, 2, 0, 0);
 }
 
@@ -1171,7 +1211,7 @@ JNIEXPORT jint JNICALL Java_io_github_yappy_lua_LuaEngine_pushProxyFunction
 	lua_pushcfunction(L, f);
 	// arg1: id
 	lua_pushinteger(L, id);
-	// longjmp_safe call (args=1, ret=1)
+	// lua error safe call (args=1, ret=1)
 	return lua_pcall(L, 1, 1, 0);
 }
 

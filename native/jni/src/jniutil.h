@@ -9,6 +9,7 @@ namespace jniutil {
 		DebugHook,
 		LuaPrint,
 		FunctionRoot,
+		LuaRuntimeException,
 		ObjectArray,
 		String,
 		Number,
@@ -16,8 +17,6 @@ namespace jniutil {
 		Long,
 		Double,
 		Throwable,
-		RuntimeException,
-		Error,
 		ClassCacheNum,
 	};
 	enum class MethodId {

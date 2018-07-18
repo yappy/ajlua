@@ -3,6 +3,7 @@ package io.github.yappy.lua;
 /**
  * A syntax error has occurred during compilation.
  * This exception represents LUA_ERRSYNTAX.
+ *
  * @author yappy
  */
 public class LuaSyntaxException extends LuaException {
