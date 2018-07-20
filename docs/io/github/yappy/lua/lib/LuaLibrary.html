@@ -97,15 +97,27 @@
 </dl>
 <dl>
 <dt>All Known Implementing Classes:</dt>
-<dd><a href="../../../../../io/github/yappy/lua/lib/RestrictedFileSystem.html" title="class in io.github.yappy.lua.lib">RestrictedFileSystem</a></dd>
+<dd><a href="../../../../../io/github/yappy/lua/lib/RestrictedFileSystem.html" title="class in io.github.yappy.lua.lib">RestrictedFileSystem</a>, <a href="../../../../../io/github/yappy/lua/lib/SystemFunctions.html" title="class in io.github.yappy.lua.lib">SystemFunctions</a></dd>
 </dl>
 <hr>
 <br>
 <pre>public interface <span class="typeNameLabel">LuaLibrary</span>
 extends java.lang.AutoCloseable</pre>
+<div class="block">Lua library table and functions.
+ Its object can be loaded by <a href="../../../../../io/github/yappy/lua/LuaEngine.html#openLibrary-io.github.yappy.lua.lib.LuaLibrary-"><code>LuaEngine.openLibrary(LuaLibrary)</code></a>.
+ <ul>
+ <li>Library class must implement this interface.</li>
+ <li>Library class must be annotated with <a href="../../../../../io/github/yappy/lua/lib/LuaLibraryTable.html" title="annotation in io.github.yappy.lua.lib"><code>LuaLibraryTable</code></a>.</li>
+ <li>Each field for library function must be <a href="../../../../../io/github/yappy/lua/LuaFunction.html" title="interface in io.github.yappy.lua"><code>LuaFunction</code></a> type and
+ must be annotated with <a href="../../../../../io/github/yappy/lua/lib/LuaLibraryFunction.html" title="annotation in io.github.yappy.lua.lib"><code>LuaLibraryFunction</code></a>.</li>
+ </ul>
+ The library is <code>AutoCloseable</code>; its <code>AutoCloseable.close()</code> will be called when
+ <a href="../../../../../io/github/yappy/lua/LuaEngine.html" title="class in io.github.yappy.lua"><code>LuaEngine</code></a> is closing.</div>
 <dl>
 <dt><span class="simpleTagLabel">Author:</span></dt>
 <dd>yappy</dd>
+<dt><span class="seeLabel">See Also:</span></dt>
+<dd><a href="../../../../../io/github/yappy/lua/LuaEngine.html#openLibrary-io.github.yappy.lua.lib.LuaLibrary-"><code>LuaEngine.openLibrary(LuaLibrary)</code></a></dd>
 </dl>
 </li>
 </ul>

@@ -151,8 +151,19 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <h4>call</h4>
 <pre>java.lang.Object[]&nbsp;call(java.lang.Object[]&nbsp;args)
-                 throws <a href="../../../../io/github/yappy/lua/LuaException.html" title="class in io.github.yappy.lua">LuaException</a></pre>
+                 throws <a href="../../../../io/github/yappy/lua/LuaRuntimeException.html" title="class in io.github.yappy.lua">LuaRuntimeException</a>,
+                        <a href="../../../../io/github/yappy/lua/LuaAbortException.html" title="class in io.github.yappy.lua">LuaAbortException</a></pre>
 <div class="block">Invoked when called from Lua.
+
+ If LuaRuntimeException is thrown, the engine will catch and convert it to Lua error.
+ It can be caught in Lua code with Lua standard pcall().
+ If it was not caught in Lua code, the engine handles the Lua error and
+ throws a new LuaRuntimeException instance.
+
+ Other throwables (including RuntimeException and Error)
+ will not be caught by the engine.
+ Lua execution will be aborted by Lua error mechanism,
+ but the exception will be thrown to Java caller as is.
 
  <table border="1">
  <caption>Lua to Java parameters</caption>
@@ -177,8 +188,9 @@ var activeTableTab = "activeTableTab";
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>Function results. null means 0-length results.</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="../../../../io/github/yappy/lua/LuaException.html" title="class in io.github.yappy.lua">LuaException</a></code> - Causes lua error.
- Its message will be converted to lua error message.</dd>
+<dd><code><a href="../../../../io/github/yappy/lua/LuaRuntimeException.html" title="class in io.github.yappy.lua">LuaRuntimeException</a></code> - Raise Lua error. It can be handled by Lua code.
+ Its message will be converted to Lua error message.</dd>
+<dd><code><a href="../../../../io/github/yappy/lua/LuaAbortException.html" title="class in io.github.yappy.lua">LuaAbortException</a></code> - Raise Lua error. It cannot be handled by Lua code.</dd>
 </dl>
 </li>
 </ul>

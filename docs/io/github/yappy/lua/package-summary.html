@@ -166,18 +166,24 @@
 </tr>
 <tbody>
 <tr class="altColor">
+<td class="colFirst"><a href="../../../../io/github/yappy/lua/LuaAbortException.html" title="class in io.github.yappy.lua">LuaAbortException</a></td>
+<td class="colLast">
+<div class="block">This exception can be thrown from <a href="../../../../io/github/yappy/lua/LuaFunction.html#call-java.lang.Object:A-"><code>LuaFunction.call(Object[])</code></a>.</div>
+</td>
+</tr>
+<tr class="rowColor">
 <td class="colFirst"><a href="../../../../io/github/yappy/lua/LuaException.html" title="class in io.github.yappy.lua">LuaException</a></td>
 <td class="colLast">
 <div class="block">An error occurred at Lua compilation time or runtime.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><a href="../../../../io/github/yappy/lua/LuaRuntimeException.html" title="class in io.github.yappy.lua">LuaRuntimeException</a></td>
 <td class="colLast">
 <div class="block">A runtime error has occurred during execution.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><a href="../../../../io/github/yappy/lua/LuaSyntaxException.html" title="class in io.github.yappy.lua">LuaSyntaxException</a></td>
 <td class="colLast">
 <div class="block">A syntax error has occurred during compilation.</div>
@@ -252,7 +258,7 @@
  <p>
  Call <a href="../../../../io/github/yappy/lua/LuaEngine.html#execString-java.lang.String-java.lang.String-"><code>LuaEngine.execString(String, String)</code></a>.
  The first string is source code to be executed.
- The second string is chunk name. It will be used for error message etc.
+ The second string is chunk name. It will be used for error message, etc.
  </p>
  <pre><code>
  lua.execString("print(\"hello, world\")", "hello.lua");

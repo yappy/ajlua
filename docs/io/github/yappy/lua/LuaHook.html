@@ -173,12 +173,15 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <h4>hook</h4>
 <pre>void&nbsp;hook(<a href="../../../../io/github/yappy/lua/LuaHook.Type.html" title="enum in io.github.yappy.lua">LuaHook.Type</a>&nbsp;type,
-          int&nbsp;line)</pre>
+          int&nbsp;line)
+   throws <a href="../../../../io/github/yappy/lua/LuaAbortException.html" title="class in io.github.yappy.lua">LuaAbortException</a></pre>
 <div class="block">Hook callback.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>type</code> - Hook type.</dd>
 <dd><code>line</code> - Line number. (valid only if type == <a href="../../../../io/github/yappy/lua/LuaHook.Type.html#LINE"><code>LuaHook.Type.LINE</code></a>)</dd>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code><a href="../../../../io/github/yappy/lua/LuaAbortException.html" title="class in io.github.yappy.lua">LuaAbortException</a></code> - Execution can be aborted by this exception.</dd>
 </dl>
 </li>
 </ul>

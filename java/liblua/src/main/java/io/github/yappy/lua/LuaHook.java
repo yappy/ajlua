@@ -27,6 +27,7 @@ public interface LuaHook {
 	 * Hook callback.
 	 * @param type Hook type.
 	 * @param line Line number. (valid only if type == {@link Type#LINE})
+	 * @throws LuaAbortException Execution can be aborted by this exception.
 	 */
 	void hook(Type type, int line) throws LuaAbortException;
 

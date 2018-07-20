@@ -791,6 +791,14 @@ public class LuaEngine implements AutoCloseable {
 		}
 	}
 
+	/**
+	 * Register a Lua library table and functions automatically.
+	 * Library class and fields must be annotated with appropriate annotations.
+	 * (see {@link LuaLibrary})
+	 * @param lib LuaLibrary instance.
+	 * @throws LuaException Lua error.
+	 * @see LuaLibrary
+	 */
 	public void openLibrary(LuaLibrary lib) throws LuaException {
 		Class<?> cls = lib.getClass();
 		String table = cls.getAnnotation(LuaLibraryTable.class).value();

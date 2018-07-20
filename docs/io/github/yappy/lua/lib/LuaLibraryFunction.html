@@ -95,6 +95,18 @@
  @Retention(value=RUNTIME)
  @Target(value=FIELD)
 public @interface <span class="memberNameLabel">LuaLibraryFunction</span></pre>
+<div class="block">Annotated field is library function.
+ <a href="../../../../../io/github/yappy/lua/lib/LuaLibraryFunction.html#name--"><code>name()</code></a> is function name.
+ <a href="../../../../../io/github/yappy/lua/lib/LuaLibraryFunction.html#args--"><code>args()</code></a> declares arguments specification.
+ Arguments will be automatically checked and converted following it.</div>
+<dl>
+<dt><span class="simpleTagLabel">Author:</span></dt>
+<dd>yappy</dd>
+<dt><span class="seeLabel">See Also:</span></dt>
+<dd><a href="../../../../../io/github/yappy/lua/LuaEngine.html#openLibrary-io.github.yappy.lua.lib.LuaLibrary-"><code>LuaEngine.openLibrary(LuaLibrary)</code></a>, 
+<a href="../../../../../io/github/yappy/lua/lib/LuaLibraryTable.html" title="annotation in io.github.yappy.lua.lib"><code>LuaLibraryTable</code></a>, 
+<a href="../../../../../io/github/yappy/lua/LuaArg.html" title="enum in io.github.yappy.lua"><code>LuaArg</code></a></dd>
+</dl>
 </li>
 </ul>
 </div>
@@ -115,11 +127,15 @@ public @interface <span class="memberNameLabel">LuaLibraryFunction</span></pre>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code><a href="../../../../../io/github/yappy/lua/LuaArg.html" title="enum in io.github.yappy.lua">LuaArg</a>[]</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/github/yappy/lua/lib/LuaLibraryFunction.html#args--">args</a></span></code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/github/yappy/lua/lib/LuaLibraryFunction.html#args--">args</a></span></code>
+<div class="block">Arguments spec.</div>
+</td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>java.lang.String</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/github/yappy/lua/lib/LuaLibraryFunction.html#name--">name</a></span></code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/github/yappy/lua/lib/LuaLibraryFunction.html#name--">name</a></span></code>
+<div class="block">Function name.</div>
+</td>
 </tr>
 </table>
 </li>
@@ -143,6 +159,11 @@ public @interface <span class="memberNameLabel">LuaLibraryFunction</span></pre>
 <li class="blockList">
 <h4>name</h4>
 <pre>public abstract&nbsp;java.lang.String&nbsp;name</pre>
+<div class="block">Function name.</div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>Function name.</dd>
+</dl>
 </li>
 </ul>
 </li>
@@ -155,6 +176,11 @@ public @interface <span class="memberNameLabel">LuaLibraryFunction</span></pre>
 <li class="blockList">
 <h4>args</h4>
 <pre>public abstract&nbsp;<a href="../../../../../io/github/yappy/lua/LuaArg.html" title="enum in io.github.yappy.lua">LuaArg</a>[]&nbsp;args</pre>
+<div class="block">Arguments spec.</div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>Arguments restriction.</dd>
+</dl>
 </li>
 </ul>
 </li>
