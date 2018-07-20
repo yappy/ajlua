@@ -1,7 +1,12 @@
 package io.github.yappy.lua.lib;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -25,6 +30,42 @@ public class SystemFunctions implements LuaLibrary {
 			return new Object[] { System.currentTimeMillis() };
 		}
 	};
+
+	// C89 strftime() compatible (do the best)
+	// aAbBcdHIjmMpSUwWxXyYZ
+	private static final List<DateFormat> CONVERTER;
+	static {
+		List<DateFormat> tmp = new ArrayList<>(128);
+		for (int i = 0; i < 128; i++) {
+			tmp.add(null);
+		}
+
+		// day of week
+		tmp.set('a', new SimpleDateFormat("E"));
+		tmp.set('A', new SimpleDateFormat("EEEE"));
+		// month
+		tmp.set('b', new SimpleDateFormat("MMM"));
+		tmp.set('B', new SimpleDateFormat("MMMM"));
+		// date + time
+		tmp.set('c', DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.FULL));
+		// 01-31
+		tmp.set('d', new SimpleDateFormat("DD"));
+		// TODO
+
+		CONVERTER = Collections.unmodifiableList(tmp);
+	}
+
+	private static String convertTime(char c, Calendar cal) throws LuaRuntimeException {
+		DateFormat conv = null;
+		if (c < CONVERTER.size()) {
+			conv = CONVERTER.get(c);
+		}
+		if (conv == null) {
+			throw new LuaRuntimeException("invalid conversion specifier '%" + c + "'");
+		}
+		conv.setCalendar(cal);
+		return conv.format(cal.getTime());
+	}
 
 	// see: loslib.c - os_date()
 	@LuaLibraryFunction(name = "date", args = { LuaArg.STRING, LuaArg.LONG_OR_NIL })
@@ -65,8 +106,23 @@ public class SystemFunctions implements LuaLibrary {
 				return new Object[] { table };
 			}
 			else {
-				// TODO
-				return null;
+				// strftime
+				StringBuilder result = new StringBuilder();
+				for (int i = 0; i < format.length(); i++) {
+					char c = format.charAt(i);
+					if (c == '%') {
+						i++;
+						if (i >= format.length()) {
+							throw new LuaRuntimeException("invalid conversion specifier '%'");
+						}
+						char convSpec = format.charAt(i);
+						result.append(convertTime(convSpec, cal));
+					}
+					else {
+						result.append(c);
+					}
+				}
+				return new Object[] { result.toString() };
 			}
 		}
 	};
