@@ -7,17 +7,25 @@ import java.util.Set;
 /**
  * Lua standard library enum.
  * This enum will be used with EnumSet.
+ *
  * @see LuaEngine#openStdLibs(Set)
  * @author yappy
  */
 public enum LuaStdLib {
 	BASE(0), PACKAGE(1), COROUTINE(2), TABLE(3), IO(4),
-	OS(5), STRING(6), MATH(7), UTF8(8), DEBUG(9);
+	OS(5), STRING(6), MATH(7), UTF8(8), DEBUG(9),
+	EXT_SYS(-1, true);
 
 	private int id;
+	private boolean ext;
 
 	private LuaStdLib(int id) {
+		this(id, false);
+	}
+
+	private LuaStdLib(int id, boolean ext) {
 		this.id = id;
+		this.ext = ext;
 	}
 
 	// package private
@@ -25,17 +33,24 @@ public enum LuaStdLib {
 		return id;
 	}
 
+	boolean isExtension() {
+		return ext;
+	}
+
 	/**
 	 * Default library set.
 	 * This is unmodifiable set of EnumSet.
+	 *
 	 * @see #BASE
 	 * @see #COROUTINE
 	 * @see #TABLE
 	 * @see #STRING
 	 * @see #MATH
 	 * @see #UTF8
+	 * @see #EXT_SYS
 	 */
 	public static final Set<LuaStdLib> DEFAULT_SET =
 		Collections.unmodifiableSet(EnumSet.of(
-			BASE, COROUTINE, TABLE, STRING, MATH, UTF8));
+			BASE, COROUTINE, TABLE, STRING, MATH, UTF8,
+			EXT_SYS));
 }

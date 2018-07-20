@@ -16,6 +16,7 @@ import java.util.Set;
 import io.github.yappy.lua.lib.LuaLibrary;
 import io.github.yappy.lua.lib.LuaLibraryFunction;
 import io.github.yappy.lua.lib.LuaLibraryTable;
+import io.github.yappy.lua.lib.SystemFunctions;
 
 /**
  * Lua language execution engine.
@@ -472,13 +473,20 @@ public class LuaEngine implements AutoCloseable {
 	public void openStdLibs(Set<LuaStdLib> libs) throws LuaException {
 		int bits = 0;
 		for (LuaStdLib e : libs) {
-			bits |= (1 << e.getId());
+			if (!e.isExtension()) {
+				bits |= (1 << e.getId());
+			}
 		}
 		checkLuaError(openLibs(peer, bits));
 
 		// replace "print" function if base library is loaded
 		if (libs.contains(LuaStdLib.BASE)) {
 			replacePrintFunc(peer, printRoot);
+		}
+
+		// ext libraries
+		if (libs.contains(LuaStdLib.EXT_SYS)) {
+			openLibrary(new SystemFunctions());
 		}
 	}
 
@@ -783,7 +791,7 @@ public class LuaEngine implements AutoCloseable {
 		}
 	}
 
-	public void addLibrary(LuaLibrary lib) throws LuaException {
+	public void openLibrary(LuaLibrary lib) throws LuaException {
 		Class<?> cls = lib.getClass();
 		String table = cls.getAnnotation(LuaLibraryTable.class).value();
 		addLibTable(table);

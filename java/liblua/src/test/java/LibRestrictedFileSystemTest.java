@@ -33,7 +33,7 @@ public class LibRestrictedFileSystemTest {
 	public void init() throws Exception {
 		lua = new LuaEngine();
 		lua.openStdLibs();
-		lua.addLibrary(new RestrictedFileSystem(tmpDir.getRoot()));
+		lua.openLibrary(new RestrictedFileSystem(tmpDir.getRoot()));
 	}
 
 	@After

@@ -9,7 +9,6 @@ import org.junit.rules.TemporaryFolder;
 
 import io.github.yappy.lua.LuaAbortException;
 import io.github.yappy.lua.LuaEngine;
-import io.github.yappy.lua.lib.SystemFunctions;
 
 public class LibSystemFunctionsTest {
 
@@ -22,7 +21,6 @@ public class LibSystemFunctionsTest {
 	public void init() throws Exception {
 		lua = new LuaEngine();
 		lua.openStdLibs();
-		lua.addLibrary(new SystemFunctions());
 	}
 
 	@After
