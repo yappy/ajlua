@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Deque;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import io.github.yappy.lua.lib.LuaLibrary;
@@ -225,6 +226,37 @@ public class LuaEngine implements AutoCloseable {
 		}
 	}
 
+	private static Object convertJ2L(Object javaValue) {
+		if (javaValue == null) {
+			return null;
+		}
+		else if (javaValue instanceof Object[]) {
+			Object[] elem = (Object[])javaValue;
+			Object[] array = new Object[elem.length + 1];
+			// array[0] is null and array[1..n] is body
+			for (int i = 0; i < elem.length; i++) {
+				array[i + 1] = convertJ2L(elem[i]);
+			}
+			return array;
+		}
+		else if (javaValue instanceof Map) {
+			Map<?, ?> elem = (Map<?, ?>)javaValue;
+			Object[] array = new Object[elem.size() * 2];
+			int ind = 0;
+			for (Map.Entry<?, ?> ent : elem.entrySet()) {
+				if (ent.getKey() == null) {
+					throw new NullPointerException("Key must not be null");
+				}
+				array[ind++] = ent.getKey();
+				array[ind++] = ent.getValue();
+			}
+			return array;
+		}
+		else {
+			return javaValue;
+		}
+	}
+
 	private Object[] getStackAll() throws LuaException {
 		int n = getTop(peer);
 		byte[] types = new byte[n];
@@ -260,6 +292,15 @@ public class LuaEngine implements AutoCloseable {
 		Object[] result = getStackAll();
 		setTop(peer, 0);
 		return result;
+	}
+
+	// convert to native I/F form
+	private void pushStackAll(Object[] values) throws LuaException {
+		Object[] conv = new Object[values.length];
+		for (int i = 0; i < conv.length; i++) {
+			conv[i] = convertJ2L(values[i]);
+		}
+		checkLuaError(pushValues(peer, conv));
 	}
 
 	private int pcallWithHook(LuaHook hook, int nargs, int nresults, int msgh)
@@ -406,7 +447,7 @@ public class LuaEngine implements AutoCloseable {
 			if (results == null || results.length == 0) {
 				return 0;
 			}
-			checkLuaError(pushValues(peer, results));
+			pushStackAll(results);
 			return results.length;
 		}
 	}
@@ -485,7 +526,7 @@ public class LuaEngine implements AutoCloseable {
 			throw new NullPointerException("name");
 		}
 
-		checkLuaError(pushValues(peer, new Object[] { value }));
+		pushStackAll(new Object[] { value });
 		checkLuaError(setGlobal(peer, name));
 	}
 
@@ -508,7 +549,7 @@ public class LuaEngine implements AutoCloseable {
 		// push _G["table"]
 		checkLuaError(getGlobal(peer, table));
 		// push value
-		checkLuaError(pushValues(peer, new Object[] { value }));
+		pushStackAll(new Object[] { value });
 		// table[name] = value (pop value)
 		checkLuaError(setTableField(peer, name));
 		// pop table
@@ -626,7 +667,7 @@ public class LuaEngine implements AutoCloseable {
 		// push global
 		checkLuaError(getGlobal(peer, name));
 		// push parameters
-		checkLuaError(pushValues(peer, params));
+		pushStackAll(params);
 		// pcall
 		checkLuaError(pcallWithHook(hook, params.length, LUA_MULTRET, 0));
 		// pop results

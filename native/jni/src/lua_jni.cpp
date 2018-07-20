@@ -363,11 +363,10 @@ namespace {
 	}
 
 	// might longjmp() or throw C++ exception
-	// BUG: lua stack check
 	void pushJavaValue(lua_State *L, JNIEnv *env, jobject jobj)
 	{
-		// for table seti
-		if (!HasFreeStack(L, 2)) {
+		// for settable
+		if (!HasFreeStack(L, 3)) {
 			jniutil::ThrowIllegalStateException(env, "stack overflow");
 			return;
 		}
@@ -382,20 +381,50 @@ namespace {
 		}
 		else if (env->IsInstanceOf(jobj, clsArray)) {
 			// get array length and push table (pre-allocated [1..length])
-			jobjectArray jarray = static_cast<jobjectArray>(jobj);
+			auto jarray = static_cast<jobjectArray>(jobj);
 			int length = env->GetArrayLength(jarray);
-			lua_createtable(L, length, 0);
-			for (int i = 0; i < length; i++) {
-				// push value (Java array dimension <= 255)
-				jobject jelem = env->GetObjectArrayElement(jarray, i);
-				pushJavaValue(L, env, jelem);
+			bool isArray = false;
+			if (length > 0) {
+				jobject jelem = env->GetObjectArrayElement(jarray, 0);
+				isArray = (jelem == nullptr);
 				env->DeleteLocalRef(jelem);
-				if (env->ExceptionCheck()) {
-					break;
+			}
+
+			// push new table
+			lua_createtable(L, length, 0);
+			if (isArray) {
+				for (int i = 1; i < length; i++) {
+					// push value (Java array dimension <= 255)
+					jobject jelem = env->GetObjectArrayElement(jarray, i);
+					pushJavaValue(L, env, jelem);
+					env->DeleteLocalRef(jelem);
+					if (env->ExceptionCheck()) {
+						break;
+					}
+					// table[i] = value (pop value)
+					// Lua is 1-origin
+					lua_seti(L, -2, i);
 				}
-				// table[i + 1] = value (pop value)
-				// Lua is 1-origin
-				lua_seti(L, -2, i + 1);
+			}
+			else {
+				for (int i = 0; i < length; i += 2) {
+					// push key
+					jobject jkey = env->GetObjectArrayElement(jarray, i);
+					pushJavaValue(L, env, jkey);
+					env->DeleteLocalRef(jkey);
+					if (env->ExceptionCheck()) {
+						break;
+					}
+					// push value
+					jobject jval = env->GetObjectArrayElement(jarray, i + 1);
+					pushJavaValue(L, env, jval);
+					if (env->ExceptionCheck()) {
+						break;
+					}
+					env->DeleteLocalRef(jval);
+					// table[key] = value (pop value and key)
+					lua_settable(L, -3);
+				}
 			}
 		}
 		else if (env->IsInstanceOf(jobj, clsBoolean)) {
