@@ -56,6 +56,8 @@ public class LuaEngine implements AutoCloseable {
 	public static final long DEFAULT_MEMORY_LIMIT = 16 * 1024 * 1024;
 	/** Default debug hook instruction count for interrupt. */
 	public static final int DEFAULT_INTR_INST_COUNT = 1000;
+	/** Table depth limit. */
+	public static final int MAX_TABLE_DEPTH = 5;
 
 	private static final String VERSION_STRING;
 

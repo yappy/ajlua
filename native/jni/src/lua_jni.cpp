@@ -16,6 +16,10 @@ static_assert(LUA_MULTRET == io_github_yappy_lua_LuaEngine_LUA_MULTRET,
 
 namespace {
 
+	const int TableDepthMax = 5;
+	static_assert(TableDepthMax ==
+		io_github_yappy_lua_LuaEngine_MAX_TABLE_DEPTH, "TableDepthMax");
+
 	const std::array<const char *, 4> VersionStrList = {
 		LUA_VERSION,
 		LUA_RELEASE,
@@ -363,8 +367,13 @@ namespace {
 	}
 
 	// might longjmp() or throw C++ exception
-	void pushJavaValue(lua_State *L, JNIEnv *env, jobject jobj)
+	// might cause Java Exception
+	void pushJavaValue(lua_State *L, JNIEnv *env, jobject jobj, int depth = 0)
 	{
+		if (depth > TableDepthMax) {
+			jniutil::ThrowIllegalStateException(env, "table depth limit over");
+			return;
+		}
 		// for settable
 		if (!HasFreeStack(L, 3)) {
 			jniutil::ThrowIllegalStateException(env, "stack overflow");
@@ -396,7 +405,7 @@ namespace {
 				for (int i = 1; i < length; i++) {
 					// push value (Java array dimension <= 255)
 					jobject jelem = env->GetObjectArrayElement(jarray, i);
-					pushJavaValue(L, env, jelem);
+					pushJavaValue(L, env, jelem, depth + 1);
 					env->DeleteLocalRef(jelem);
 					if (env->ExceptionCheck()) {
 						break;
@@ -410,14 +419,14 @@ namespace {
 				for (int i = 0; i < length; i += 2) {
 					// push key
 					jobject jkey = env->GetObjectArrayElement(jarray, i);
-					pushJavaValue(L, env, jkey);
+					pushJavaValue(L, env, jkey, depth + 1);
 					env->DeleteLocalRef(jkey);
 					if (env->ExceptionCheck()) {
 						break;
 					}
 					// push value
 					jobject jval = env->GetObjectArrayElement(jarray, i + 1);
-					pushJavaValue(L, env, jval);
+					pushJavaValue(L, env, jval, depth + 1);
 					if (env->ExceptionCheck()) {
 						break;
 					}

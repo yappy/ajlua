@@ -5,8 +5,6 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-import java.lang.reflect.Array;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -170,21 +168,7 @@ public class LuaEngineTest {
 	public void maxArrayDimension() throws Exception {
 		final String value = "hello";
 
-		// a = new Object[1][1][1]...[1] (255 dims)
-		int[] dims = new int[255];
-		Arrays.fill(dims, 1);
-		Object a = Array.newInstance(Object.class, dims);
-
-		// a[0][0][0]...[0] = value;
-		Object cur = a;
-		while (true) {
-			Object[] array = (Object[])cur;
-			if (array[0] == null) {
-				array[0] = value;
-				break;
-			}
-			cur = array[0];
-		}
+		Object a = new String[][][][][] {{{{{value}}}}};
 
 		lua.openStdLibs();
 		lua.addGlobalVariable("a", a);
