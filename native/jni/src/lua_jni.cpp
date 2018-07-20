@@ -380,10 +380,12 @@ namespace {
 			return;
 		}
 
-		jclass clsArray = jniutil::FindClass(jniutil::ClassId::ObjectArray);
-		jclass clsBoolean = jniutil::FindClass(jniutil::ClassId::Boolean);
-		jclass clsNumber = jniutil::FindClass(jniutil::ClassId::Number);
-		jclass clsString = jniutil::FindClass(jniutil::ClassId::String);
+		jclass clsArray		= jniutil::FindClass(jniutil::ClassId::ObjectArray);
+		jclass clsBoolean	= jniutil::FindClass(jniutil::ClassId::Boolean);
+		jclass clsNumber	= jniutil::FindClass(jniutil::ClassId::Number);
+		jclass clsFloat		= jniutil::FindClass(jniutil::ClassId::Float);
+		jclass clsDouble	= jniutil::FindClass(jniutil::ClassId::Double);
+		jclass clsString	= jniutil::FindClass(jniutil::ClassId::String);
 
 		if (jobj == nullptr) {
 			lua_pushnil(L);
@@ -443,10 +445,22 @@ namespace {
 			lua_pushboolean(L, b);
 		}
 		else if (env->IsInstanceOf(jobj, clsNumber)) {
-			jmethodID method = jniutil::GetMethodId(
-				jniutil::MethodId::Number_doubleValue);
-			jdouble d = env->CallDoubleMethod(jobj, method);
-			lua_pushnumber(L, d);
+			// Number
+			if (env->IsInstanceOf(jobj, clsFloat) ||
+				env->IsInstanceOf(jobj, clsDouble)) {
+				// Float or Double => double
+				jmethodID method = jniutil::GetMethodId(
+					jniutil::MethodId::Number_doubleValue);
+				jdouble d = env->CallDoubleMethod(jobj, method);
+				lua_pushnumber(L, d);
+			}
+			else {
+				// others => long
+				jmethodID method = jniutil::GetMethodId(
+					jniutil::MethodId::Number_longValue);
+				jlong n = env->CallLongMethod(jobj, method);
+				lua_pushinteger(L, n);
+			}
 		}
 		else if (env->IsInstanceOf(jobj, clsString)) {
 			auto cstr = jniutil::JstrToChars(env, static_cast<jstring>(jobj));

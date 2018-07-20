@@ -28,6 +28,7 @@ namespace {
 		{ nullptr, "java/lang/Number"							},
 		{ nullptr, "java/lang/Boolean"							},
 		{ nullptr, "java/lang/Long"								},
+		{ nullptr, "java/lang/Float"							},
 		{ nullptr, "java/lang/Double"							},
 		{ nullptr, "java/lang/Throwable"						},
 	};
@@ -45,6 +46,8 @@ namespace {
 			"writeLine",	"()V"					},
 		{ nullptr, false,	ClassId::FunctionRoot,
 			"call",			"(I)I"					},
+		{ nullptr, false,	ClassId::Number,
+			"longValue",	"()J"					},
 		{ nullptr, false,	ClassId::Number,
 			"doubleValue",	"()D"					},
 		{ nullptr, true,	ClassId::Boolean,
