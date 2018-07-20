@@ -7,6 +7,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.After;
 import org.junit.Before;
@@ -148,6 +150,20 @@ public class LuaEngineTest {
 				"  assert(value == i)\n" +
 				"end\n",
 				"globalArrayVariable.lua");
+	}
+
+	@Test
+	public void globalTableVariable() throws Exception {
+		Map<String, String> t = new HashMap<>();
+		t.put("abc", "XYZ");
+		t.put("xyz", "ABC");
+
+		lua.openStdLibs();
+		lua.addGlobalVariable("t", t);
+		lua.execString(
+				"assert(t['abc'] == 'XYZ')\n" +
+				"assert(t['xyz'] == 'ABC')\n",
+				"globalTableVariable.lua");
 	}
 
 	@Test
