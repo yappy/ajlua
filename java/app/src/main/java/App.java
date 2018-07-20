@@ -1,4 +1,6 @@
 import java.awt.BorderLayout;
+import java.awt.Font;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.concurrent.Callable;
@@ -44,8 +46,16 @@ public class App extends JFrame {
 		setLocationByPlatform(true);
 		setSize(640, 480);
 
-		srcArea = new JTextArea("print(\"hello!\")\n");
+		Font font = (new Font(Font.MONOSPACED, Font.PLAIN, 12));
+		srcArea = new JTextArea(
+				"for k, v in pairs(sys.date('*t')) do\n" +
+				"	print(k .. ': ' .. tostring(v))\n" +
+				"end\n");
+		srcArea.setFont(font);
+		srcArea.setTabSize(4);
 		outArea = new JTextArea();
+		outArea.setFont(font);
+		srcArea.setTabSize(4);
 		split = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true,
 				new JScrollPane(srcArea, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER),
 				new JScrollPane(outArea, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
@@ -54,6 +64,7 @@ public class App extends JFrame {
 		add(split, BorderLayout.CENTER);
 
 		button = new JButton("Run");
+		button.setMnemonic(KeyEvent.VK_R);
 		button.addActionListener((event) -> {
 			onClick();
 		});
