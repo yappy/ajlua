@@ -10,6 +10,7 @@ import android.widget.Toast;
 
 import io.github.yappy.lua.LuaEngine;
 import io.github.yappy.lua.LuaException;
+import io.github.yappy.lua.LuaRuntimeException;
 import io.github.yappy.lua.LuaPrint;
 
 public class MainActivity extends AppCompatActivity {
@@ -57,10 +58,10 @@ public class MainActivity extends AppCompatActivity {
 
 			lua.execString(src, "test.lua");
 		}
-		catch (LuaException e) {
+		catch (LuaRuntimeException e) {
 			Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
 		}
-		catch(InterruptedException e){
+		catch(LuaException e){
 			Toast.makeText(this, "Error!", Toast.LENGTH_LONG).show();
 		}
 	}
