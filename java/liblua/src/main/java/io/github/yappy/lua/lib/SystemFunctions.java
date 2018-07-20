@@ -43,14 +43,43 @@ public class SystemFunctions implements LuaLibrary {
 		// day of week
 		tmp.set('a', new SimpleDateFormat("E"));
 		tmp.set('A', new SimpleDateFormat("EEEE"));
-		// month
+		// month name
 		tmp.set('b', new SimpleDateFormat("MMM"));
 		tmp.set('B', new SimpleDateFormat("MMMM"));
 		// date + time
-		tmp.set('c', DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.FULL));
-		// 01-31
-		tmp.set('d', new SimpleDateFormat("DD"));
-		// TODO
+		tmp.set('c', DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.MEDIUM));
+		// day: 01-31
+		tmp.set('d', new SimpleDateFormat("dd"));
+		// hour: 00-23
+		tmp.set('H', new SimpleDateFormat("HH"));
+		// hour: 01-12
+		tmp.set('I', new SimpleDateFormat("hh"));
+		// day: 001-366
+		tmp.set('j', new SimpleDateFormat("DDD"));
+		// month: 01-12
+		tmp.set('m', new SimpleDateFormat("MM"));
+		// minute: 00-59
+		tmp.set('M', new SimpleDateFormat("mm"));
+		// AM/PM
+		tmp.set('p', new SimpleDateFormat("a"));
+		// second: 00-60
+		tmp.set('S', new SimpleDateFormat("ss"));
+		// week of year: 00-53 (the 1st Sunday is the beginning of the 1st week)
+		// tmp.set('U');
+		// day of week: 0-6 (Sunday=0)
+		// tmp.set('w');
+		// week of year: 00-53 (the 1st Monday is the beginning of the 1st week)
+		// tmp.set('W');
+		// date
+		tmp.set('x', DateFormat.getDateInstance(DateFormat.SHORT));
+		// time
+		tmp.set('X', DateFormat.getTimeInstance(DateFormat.SHORT));
+		// year: 00-99
+		tmp.set('y', new SimpleDateFormat("yy"));
+		// year: 0000-9999
+		tmp.set('Y', new SimpleDateFormat("yyyy"));
+		// time zone name
+		tmp.set('Z', new SimpleDateFormat("z"));
 
 		CONVERTER = Collections.unmodifiableList(tmp);
 	}
