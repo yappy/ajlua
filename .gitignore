@@ -7,3 +7,6 @@ bin/
 .classpath
 .project
 .settings/
+
+# Visual Studio
+.vs/
